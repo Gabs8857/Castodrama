@@ -6,6 +6,7 @@ public static class TopDownBootstrap
 {
     private const string PlayerName = "Player";
     private const string GroundName = "Ground";
+    private static readonly Color PlayerBrown = new Color(0.45f, 0.25f, 0.1f, 1f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
@@ -15,11 +16,6 @@ public static class TopDownBootstrap
         {
             playerObject = new GameObject(PlayerName);
             playerObject.transform.position = Vector3.zero;
-
-            SpriteRenderer spriteRenderer = playerObject.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = CreateWhiteSprite();
-            spriteRenderer.color = new Color(0.23f, 0.68f, 1f, 1f);
-            spriteRenderer.sortingOrder = 10;
 
             CircleCollider2D collider2D = playerObject.AddComponent<CircleCollider2D>();
             collider2D.radius = 0.35f;
@@ -31,6 +27,18 @@ public static class TopDownBootstrap
         {
             playerObject.AddComponent<TopDownPlayerController>();
         }
+
+        playerObject.transform.localScale = new Vector3(0.5f, 0.75f, 1f);
+
+        SpriteRenderer spriteRenderer = playerObject.GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = playerObject.AddComponent<SpriteRenderer>();
+        }
+
+        spriteRenderer.sprite = CreateWhiteSprite();
+        spriteRenderer.color = PlayerBrown;
+        spriteRenderer.sortingOrder = 10;
 
         TopDownHunger hunger = playerObject.GetComponent<TopDownHunger>();
         if (hunger == null)
