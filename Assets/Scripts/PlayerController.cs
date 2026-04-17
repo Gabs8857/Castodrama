@@ -5,8 +5,8 @@ using UnityEngine.Rendering.Universal;
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5f;
-    public float playerLightIntensity = 1.35f;
-    public float playerLightOuterRadius = 6f;
+    public float playerLightIntensity = 0.7f;
+    public float playerLightOuterRadius = 3.2f;
 
     private Rigidbody2D rb;
     private Vector2 movement;
