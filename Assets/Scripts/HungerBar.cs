@@ -53,15 +53,50 @@ public class Hunger : MonoBehaviour
         {
             if (runtimeWhiteSprite == null)
             {
-                runtimeWhiteSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
+                runtimeWhiteSprite = CreateRingSprite();
             }
             hungerBar.sprite = runtimeWhiteSprite;
         }
 
         hungerBar.type = Image.Type.Filled;
-        hungerBar.fillMethod = Image.FillMethod.Horizontal;
-        hungerBar.fillOrigin = (int)Image.OriginHorizontal.Left;
+        hungerBar.fillMethod = Image.FillMethod.Radial360;
+        hungerBar.fillOrigin = (int)Image.Origin360.Top;
         hungerBar.color = new Color(0.32f, 0.85f, 0.35f, 1f);
+    }
+
+    Sprite CreateRingSprite()
+    {
+        int size = 256;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color[] pixels = new Color[size * size];
+
+        float centerX = size / 2f;
+        float centerY = size / 2f;
+        float outerRadius = size / 2f - 2f;
+        float innerRadius = outerRadius * 0.6f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - centerX;
+                float dy = y - centerY;
+                float distance = Mathf.Sqrt(dx * dx + dy * dy);
+
+                if (distance <= outerRadius && distance >= innerRadius)
+                {
+                    pixels[y * size + x] = Color.white;
+                }
+                else
+                {
+                    pixels[y * size + x] = Color.clear;
+                }
+            }
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
 
     void EnsureBarIsOnScreen()
@@ -71,17 +106,17 @@ public class Hunger : MonoBehaviour
             return;
         }
 
-        if (barRect.sizeDelta.x < 100f || barRect.sizeDelta.y < 8f)
+        if (barRect.sizeDelta.x < 100f || barRect.sizeDelta.y < 100f)
         {
-            barRect.sizeDelta = new Vector2(220f, 18f);
+            barRect.sizeDelta = new Vector2(100f, 100f);
         }
 
         if (barRect.anchoredPosition.x < 0f || barRect.anchoredPosition.y < 0f)
         {
             barRect.anchorMin = new Vector2(0f, 0f);
             barRect.anchorMax = new Vector2(0f, 0f);
-            barRect.pivot = new Vector2(0f, 0f);
-            barRect.anchoredPosition = new Vector2(24f, 24f);
+            barRect.pivot = new Vector2(0.5f, 0.5f);
+            barRect.anchoredPosition = new Vector2(253f, 218f);
         }
     }
 
