@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#Author: gabs
-#Castodrama.exe
-#Rating=1-5
-export PW_WINE_USE="PROTON_LG"
-export PW_PREFIX_NAME="DEFAULT"
-export PORTPROTON_NAME="Castodrama"
-export FILE_DESCRIPTION=""
-export FILE_SHA256SUM="5bfb02293c482170c4d5035081245e45d69fe0f617fcc92a81e98adee13b945f"

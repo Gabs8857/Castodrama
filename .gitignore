@@ -14,6 +14,9 @@ castodrama/
 castodrama_Data/
 castodrama.x86_64
 *_BurstDebugInformation_DoNotShip/
+*.zip
+UnityPlayer.so
+libdecor-cairo.so
 
 # IDE and editor files
 .vs/
