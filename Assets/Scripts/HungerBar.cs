@@ -46,11 +46,12 @@ public class Hunger : MonoBehaviour
             maxHunger = 100f;
         }
 
-        if (followTarget == null && !string.IsNullOrWhiteSpace(autoTargetName))
+        if (!string.IsNullOrWhiteSpace(autoTargetName))
         {
             GameObject candidate = GameObject.Find(autoTargetName);
             if (candidate != null)
             {
+                // Always prioritize the named target so serialized scene refs cannot drift across machines.
                 followTarget = candidate.transform;
             }
         }
