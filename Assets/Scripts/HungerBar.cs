@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public class Hunger : MonoBehaviour
 {
+    private const string PrimaryTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
+    private const string FallbackTargetName = "Map_V2_0";
+
     public float maxHunger = 100f;
     public float currentHunger;
 
@@ -47,16 +50,27 @@ public class Hunger : MonoBehaviour
             maxHunger = 100f;
         }
 
-        if (!string.IsNullOrWhiteSpace(autoTargetName))
+        // Resolve target deterministically across machines.
+        // 1) ATH (intended HUD target), 2) user-provided target name, 3) map fallback.
+        Transform resolvedTarget = FindTargetByName(PrimaryTargetName);
+        if (resolvedTarget == null && !string.IsNullOrWhiteSpace(autoTargetName) && autoTargetName != PrimaryTargetName)
         {
-            GameObject candidate = GameObject.Find(autoTargetName);
-            Debug.Log($"[HungerBar] Looking for target '{autoTargetName}': {(candidate != null ? "FOUND" : "NOT FOUND")}");
-            if (candidate != null)
-            {
-                // Always prioritize the named target so serialized scene refs cannot drift across machines.
-                followTarget = candidate.transform;
-                Debug.Log($"[HungerBar] Target set to {candidate.name}");
-            }
+            resolvedTarget = FindTargetByName(autoTargetName);
+        }
+        if (resolvedTarget == null)
+        {
+            resolvedTarget = FindTargetByName(FallbackTargetName);
+        }
+
+        if (resolvedTarget != null)
+        {
+            followTarget = resolvedTarget;
+            autoTargetName = resolvedTarget.name;
+            Debug.Log($"[HungerBar] Target set to {resolvedTarget.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"[HungerBar] No target found. Tried '{PrimaryTargetName}', '{autoTargetName}', '{FallbackTargetName}'.");
         }
 
         if (followTarget != null)
@@ -71,6 +85,18 @@ public class Hunger : MonoBehaviour
 
         currentHunger = maxHunger;
         UpdateBarVisuals();
+    }
+
+    Transform FindTargetByName(string targetName)
+    {
+        if (string.IsNullOrWhiteSpace(targetName))
+        {
+            return null;
+        }
+
+        GameObject candidate = GameObject.Find(targetName);
+        Debug.Log($"[HungerBar] Looking for target '{targetName}': {(candidate != null ? "FOUND" : "NOT FOUND")}");
+        return candidate != null ? candidate.transform : null;
     }
 
     void Update()
