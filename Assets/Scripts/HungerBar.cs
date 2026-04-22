@@ -160,7 +160,9 @@ public class Hunger : MonoBehaviour
 
         if (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
         {
-            barRectTransform.position = screenPoint + (Vector3)screenOffset;
+            // Account for canvas scale when positioning in ScreenSpaceOverlay
+            Vector3 adjustedScreenPoint = screenPoint / combinedCanvasScale;
+            barRectTransform.position = adjustedScreenPoint + (Vector3)screenOffset;
             return;
         }
 
