@@ -96,17 +96,7 @@ public class Hunger : MonoBehaviour
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(followTarget.position);
         Vector2 screenOffset = followOffset;
 
-        // Get combined canvas scale: scaleFactor + localScale
-        float combinedCanvasScale = 1f;
-        if (parentCanvas != null)
-        {
-            combinedCanvasScale = Mathf.Max(0.0001f, parentCanvas.scaleFactor);
-            if (canvasRectTransform != null)
-            {
-                // Account for Canvas localScale (0.35, 1.3, etc.)
-                combinedCanvasScale *= canvasRectTransform.localScale.x;
-            }
-        }
+        float canvasScale = parentCanvas != null ? Mathf.Max(0.0001f, parentCanvas.scaleFactor) : 1f;
 
         if (autoPlaceAroundImage)
         {
@@ -139,7 +129,7 @@ public class Hunger : MonoBehaviour
                     ? spriteDiameterPixels * Mathf.Max(0.25f, ringScaleMultiplier)
                     : Mathf.Max(minRingDiameterPixels, (spriteRadiusPixels + imagePaddingPixels) * Mathf.Max(0.25f, ringScaleMultiplier) * 2f);
 
-                float uiDiameter = targetRingDiameter / combinedCanvasScale;
+                float uiDiameter = targetRingDiameter / canvasScale;
                 barRectTransform.sizeDelta = new Vector2(uiDiameter, uiDiameter);
 
                 if (wrapAroundImage)
@@ -158,8 +148,14 @@ public class Hunger : MonoBehaviour
             }
         }
 
+        if (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
+        {
+            barRectTransform.position = screenPoint + (Vector3)screenOffset;
+            return;
+        }
+
         Camera uiCamera = null;
-        if (parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        if (parentCanvas != null)
         {
             uiCamera = parentCanvas.worldCamera;
         }
