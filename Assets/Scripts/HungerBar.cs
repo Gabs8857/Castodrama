@@ -49,16 +49,23 @@ public class Hunger : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(autoTargetName))
         {
             GameObject candidate = GameObject.Find(autoTargetName);
+            Debug.Log($"[HungerBar] Looking for target '{autoTargetName}': {(candidate != null ? "FOUND" : "NOT FOUND")}");
             if (candidate != null)
             {
                 // Always prioritize the named target so serialized scene refs cannot drift across machines.
                 followTarget = candidate.transform;
+                Debug.Log($"[HungerBar] Target set to {candidate.name}");
             }
         }
 
         if (followTarget != null)
         {
             followSpriteRenderer = followTarget.GetComponent<SpriteRenderer>();
+            Debug.Log($"[HungerBar] SpriteRenderer found: {(followSpriteRenderer != null)}");
+        }
+        else
+        {
+            Debug.LogWarning("[HungerBar] No followTarget set! Hunger bar may not display correctly.");
         }
 
         currentHunger = maxHunger;
