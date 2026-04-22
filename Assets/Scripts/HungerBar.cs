@@ -18,6 +18,7 @@ public class Hunger : MonoBehaviour
     public float imagePaddingPixels = 14f;
     public float ringScaleMultiplier = 1.1f;
     public float minRingDiameterPixels = 56f;
+    public float maxRingDiameterPixels = 180f;
     public string autoTargetName = "Map_V2_0";
 
     private static Sprite runtimeWhiteSprite;
@@ -128,6 +129,8 @@ public class Hunger : MonoBehaviour
                 float targetRingDiameter = matchTargetImageSize
                     ? spriteDiameterPixels * Mathf.Max(0.25f, ringScaleMultiplier)
                     : Mathf.Max(minRingDiameterPixels, (spriteRadiusPixels + imagePaddingPixels) * Mathf.Max(0.25f, ringScaleMultiplier) * 2f);
+
+                targetRingDiameter = Mathf.Clamp(targetRingDiameter, minRingDiameterPixels, Mathf.Max(minRingDiameterPixels, maxRingDiameterPixels));
 
                 float uiDiameter = targetRingDiameter / canvasScale;
                 barRectTransform.sizeDelta = new Vector2(uiDiameter, uiDiameter);
