@@ -36,6 +36,17 @@ public class FoodItem : MonoBehaviour
 
         Collider2D pickupCollider = GetComponent<Collider2D>();
         pickupCollider.isTrigger = true;
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody2D>();
+        }
+
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rb.simulated = true;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

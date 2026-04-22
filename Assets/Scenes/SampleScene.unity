@@ -285,16 +285,16 @@ RectTransform:
   m_GameObject: {fileID: 159262498}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 509976790}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -4, y: -17}
-  m_SizeDelta: {x: 20, y: 2}
-  m_Pivot: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 24, y: -24}
+  m_SizeDelta: {x: 96, y: 96}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &159262500
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,6 +348,18 @@ MonoBehaviour:
   maxHunger: 100
   currentHunger: 0
   hungerBar: {fileID: 159262500}
+  followTarget: {fileID: 1958984750}
+  followOffset: {x: 0, y: 0}
+  autoPlaceAroundImage: 1
+  wrapAroundImage: 1
+  matchTargetImageSize: 1
+  usePointOnTargetSprite: 1
+  targetPointNormalized: {x: 0.56, y: 0.9}
+  orbitAngleDegrees: 130
+  imagePaddingPixels: 1
+  ringScaleMultiplier: 1.1
+  minRingDiameterPixels: 56
+  autoTargetName: ATH_SANSFOND_SANSREPONDRE_0
 --- !u!1 &394322998
 GameObject:
   m_ObjectHideFlags: 0
@@ -566,7 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -786,6 +798,7 @@ GameObject:
   - component: {fileID: 605258804}
   - component: {fileID: 605258806}
   - component: {fileID: 605258807}
+  - component: {fileID: 605258808}
   m_Layer: 0
   m_Name: Fooditem
   m_TagString: Untagged
@@ -850,7 +863,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!4 &605258805
 Transform:
@@ -906,7 +919,7 @@ CircleCollider2D:
 --- !u!114 &605258807
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 605258803}
@@ -916,6 +929,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hungerAmount: 20
+  pickupSprite: {fileID: 0}
+--- !u!50 &605258808
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605258803}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1560,9 +1601,9 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1655741531}
   - {fileID: 519420032}
   - {fileID: 605258805}
-  - {fileID: 1655741531}
   - {fileID: 619394802}
   - {fileID: 405844806}
   - {fileID: 36948806}
