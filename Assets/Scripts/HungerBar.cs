@@ -158,15 +158,12 @@ public class Hunger : MonoBehaviour
             }
         }
 
-        if (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
+        Camera uiCamera = null;
+        if (parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
-            // Account for canvas scale when positioning in ScreenSpaceOverlay
-            Vector3 adjustedScreenPoint = screenPoint / combinedCanvasScale;
-            barRectTransform.position = adjustedScreenPoint + (Vector3)screenOffset;
-            return;
+            uiCamera = parentCanvas.worldCamera;
         }
 
-        Camera uiCamera = parentCanvas != null ? parentCanvas.worldCamera : null;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPoint, uiCamera, out Vector2 localPoint))
         {
             barRectTransform.anchoredPosition = localPoint + screenOffset;
