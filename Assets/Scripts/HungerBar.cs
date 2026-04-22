@@ -96,6 +96,18 @@ public class Hunger : MonoBehaviour
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(followTarget.position);
         Vector2 screenOffset = followOffset;
 
+        // Get combined canvas scale: scaleFactor + localScale
+        float combinedCanvasScale = 1f;
+        if (parentCanvas != null)
+        {
+            combinedCanvasScale = Mathf.Max(0.0001f, parentCanvas.scaleFactor);
+            if (canvasRectTransform != null)
+            {
+                // Account for Canvas localScale (0.35, 1.3, etc.)
+                combinedCanvasScale *= canvasRectTransform.localScale.x;
+            }
+        }
+
         if (autoPlaceAroundImage)
         {
             if (followSpriteRenderer == null)
@@ -127,8 +139,7 @@ public class Hunger : MonoBehaviour
                     ? spriteDiameterPixels * Mathf.Max(0.25f, ringScaleMultiplier)
                     : Mathf.Max(minRingDiameterPixels, (spriteRadiusPixels + imagePaddingPixels) * Mathf.Max(0.25f, ringScaleMultiplier) * 2f);
 
-                float canvasScale = parentCanvas != null ? Mathf.Max(0.0001f, parentCanvas.scaleFactor) : 1f;
-                float uiDiameter = targetRingDiameter / canvasScale;
+                float uiDiameter = targetRingDiameter / combinedCanvasScale;
                 barRectTransform.sizeDelta = new Vector2(uiDiameter, uiDiameter);
 
                 if (wrapAroundImage)
