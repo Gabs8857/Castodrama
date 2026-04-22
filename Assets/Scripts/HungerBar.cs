@@ -13,13 +13,13 @@ public class Hunger : MonoBehaviour
     public bool wrapAroundImage = true;
     public bool matchTargetImageSize = true;
     public bool usePointOnTargetSprite = true;
-    public Vector2 targetPointNormalized = new Vector2(0.62f, 0.59f);
+    public Vector2 targetPointNormalized = new Vector2(0.5f, 0.5f);
     public float orbitAngleDegrees = 130f;
     public float imagePaddingPixels = 14f;
     public float ringScaleMultiplier = 1.1f;
     public float minRingDiameterPixels = 56f;
     public float maxRingDiameterPixels = 180f;
-    public string autoTargetName = "Map_V2_0";
+    public string autoTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
 
     private static Sprite runtimeWhiteSprite;
     private RectTransform barRectTransform;

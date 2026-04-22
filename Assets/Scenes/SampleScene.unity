@@ -348,18 +348,18 @@ MonoBehaviour:
   maxHunger: 100
   currentHunger: 0
   hungerBar: {fileID: 159262500}
-  followTarget: {fileID: 622534072}
+  followTarget: {fileID: 1958984750}
   followOffset: {x: 0, y: 0}
   autoPlaceAroundImage: 1
   wrapAroundImage: 1
   matchTargetImageSize: 1
   usePointOnTargetSprite: 1
-  targetPointNormalized: {x: 0.62, y: 0.59}
+  targetPointNormalized: {x: 0.5, y: 0.5}
   orbitAngleDegrees: 130
   imagePaddingPixels: 1
   ringScaleMultiplier: 1.1
   minRingDiameterPixels: 56
-  autoTargetName: Map_V2_0
+  autoTargetName: ATH_SANSFOND_SANSREPONDRE_0
 --- !u!1 &394322998
 GameObject:
   m_ObjectHideFlags: 0
