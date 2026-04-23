@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Hunger : MonoBehaviour
+/// <summary>
+/// Displays a circular hunger bar UI element positioned orbitally around a target sprite.
+/// Uses TopDownHunger as the data source.
+/// </summary>
+public class HungerBar : MonoBehaviour
 {
     private const string PrimaryTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
     private const string FallbackTargetName = "Map_V2_0";
-
-    public float maxHunger = 100f;
-    public float currentHunger;
 
     public Image hungerBar;
     public Transform followTarget;
@@ -30,6 +31,7 @@ public class Hunger : MonoBehaviour
     private Canvas parentCanvas;
     private SpriteRenderer followSpriteRenderer;
     private AdaptiveHUDWidth adaptiveHudWidth;
+    private TopDownHunger hungerSystem;
 
     void Awake()
     {
@@ -46,13 +48,14 @@ public class Hunger : MonoBehaviour
 
     void Start()
     {
-        if (maxHunger <= 0f)
+        // Find the TopDownHunger system
+        GameObject playerObject = GameObject.Find("Player");
+        if (playerObject != null)
         {
-            maxHunger = 100f;
+            hungerSystem = playerObject.GetComponent<TopDownHunger>();
         }
 
         // Resolve target deterministically across machines.
-        // 1) ATH (intended HUD target), 2) user-provided target name, 3) map fallback.
         Transform resolvedTarget = FindTargetByName(PrimaryTargetName);
         if (resolvedTarget == null && !string.IsNullOrWhiteSpace(autoTargetName) && autoTargetName != PrimaryTargetName)
         {
@@ -67,27 +70,13 @@ public class Hunger : MonoBehaviour
         {
             followTarget = resolvedTarget;
             autoTargetName = resolvedTarget.name;
-            Debug.Log($"[HungerBar] Target set to {resolvedTarget.name}");
-        }
-        else
-        {
-            Debug.LogWarning($"[HungerBar] No target found. Tried '{PrimaryTargetName}', '{autoTargetName}', '{FallbackTargetName}'.");
         }
 
         if (followTarget != null)
         {
             followSpriteRenderer = followTarget.GetComponent<SpriteRenderer>();
             adaptiveHudWidth = followTarget.GetComponent<AdaptiveHUDWidth>();
-            Debug.Log($"[HungerBar] SpriteRenderer found: {(followSpriteRenderer != null)}");
-            Debug.Log($"[HungerBar] AdaptiveHUDWidth found: {(adaptiveHudWidth != null)}");
         }
-        else
-        {
-            Debug.LogWarning("[HungerBar] No followTarget set! Hunger bar may not display correctly.");
-        }
-
-        currentHunger = maxHunger;
-        UpdateBarVisuals();
     }
 
     Transform FindTargetByName(string targetName)
@@ -97,17 +86,16 @@ public class Hunger : MonoBehaviour
             return null;
         }
 
-        GameObject candidate = GameObject.Find(targetName);
-        Debug.Log($"[HungerBar] Looking for target '{targetName}': {(candidate != null ? "FOUND" : "NOT FOUND")}");
-        return candidate != null ? candidate.transform : null;
+        return GameObject.Find(targetName)?.transform;
     }
 
     void Update()
     {
-        currentHunger -= Time.deltaTime * 2f;
-
-        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
-        UpdateBarVisuals();
+        // Update visuals based on TopDownHunger
+        if (hungerSystem != null)
+        {
+            UpdateBarVisuals();
+        }
     }
 
     void LateUpdate()
@@ -248,25 +236,33 @@ public class Hunger : MonoBehaviour
             {
                 float dx = x - centerX;
                 float dy = y - centerY;
-                float distance = Mathf.Sqrt(dx * dx + dy * dy);
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
 
-                pixels[y * width + x] = distance <= outerRadius && distance >= innerRadius ? Color.white : Color.clear;
+                if (dist >= innerRadius && dist <= outerRadius)
+                {
+                    pixels[y * width + x] = Color.white;
+                }
+                else
+                {
+                    pixels[y * width + x] = new Color(1f, 1f, 1f, 0f);
+                }
             }
         }
 
         texture.SetPixels(pixels);
         texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 100f);
+
+        return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
     }
 
     void UpdateBarVisuals()
     {
-        if (hungerBar == null)
+        if (hungerBar == null || hungerSystem == null)
         {
             return;
         }
 
-        float normalized = maxHunger > 0f ? currentHunger / maxHunger : 0f;
+        float normalized = hungerSystem.NormalizedHunger;
         hungerBar.fillAmount = normalized;
         hungerBar.color = Color.Lerp(new Color(0.9f, 0.2f, 0.2f, 1f), new Color(0.32f, 0.85f, 0.35f, 1f), normalized);
     }

@@ -1,104 +1,108 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D), typeof(SpriteRenderer))]
+/// <summary>
+/// Represents a food item that restores hunger when picked up by the player.
+/// Automatically configures required components (Collider2D, SpriteRenderer, Rigidbody2D).
+/// </summary>
+[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class FoodItem : MonoBehaviour
 {
-    private static Sprite fallbackSprite;
     private const int MinVisibleSortingOrder = 200;
+    private static Sprite defaultVisualSprite;
 
     [SerializeField]
-    private float hungerAmount = 20f;
+    private float hungerRestoreAmount = 20f;
 
     [SerializeField]
-    private Sprite pickupSprite;
-
-    private SpriteRenderer spriteRenderer;
+    private Sprite foodSprite;
 
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null)
-        {
-            Sprite spriteToUse = pickupSprite;
-            if (!IsValidProjectSprite(spriteToUse))
-            {
-                spriteToUse = GetFallbackSprite();
-            }
-
-            spriteRenderer.sprite = spriteToUse;
-            spriteRenderer.enabled = true;
-            spriteRenderer.color = Color.white;
-            if (spriteRenderer.sortingOrder < MinVisibleSortingOrder)
-            {
-                spriteRenderer.sortingOrder = MinVisibleSortingOrder;
-            }
-        }
-
-        Collider2D pickupCollider = GetComponent<Collider2D>();
-        pickupCollider.isTrigger = true;
-
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        if (rb == null)
-        {
-            rb = gameObject.AddComponent<Rigidbody2D>();
-        }
-
-        rb.bodyType = RigidbodyType2D.Kinematic;
-        rb.gravityScale = 0f;
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        rb.simulated = true;
+        SetupVisuals();
+        SetupPhysics();
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void SetupVisuals()
     {
-        TopDownHunger topDownHunger = other.GetComponentInParent<TopDownHunger>();
-        if (topDownHunger != null)
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        // Use provided sprite, or create a default yellow square
+        Sprite spriteToDisplay = foodSprite ?? GetDefaultVisualSprite();
+        
+        spriteRenderer.sprite = spriteToDisplay;
+        spriteRenderer.color = Color.white;
+        
+        // Ensure visibility (high sorting order)
+        if (spriteRenderer.sortingOrder < MinVisibleSortingOrder)
         {
-            topDownHunger.AddHunger(hungerAmount);
+            spriteRenderer.sortingOrder = MinVisibleSortingOrder;
         }
+    }
 
-        // Also update legacy Hunger system if it exists
-        Hunger legacyHunger = Object.FindFirstObjectByType<Hunger>();
-        if (legacyHunger != null)
-        {
-            legacyHunger.currentHunger = Mathf.Clamp(legacyHunger.currentHunger + hungerAmount, 0f, legacyHunger.maxHunger);
-        }
+    private void SetupPhysics()
+    {
+        // Configure collider as trigger
+        Collider2D collider = GetComponent<Collider2D>();
+        collider.isTrigger = true;
 
-        if (topDownHunger != null || legacyHunger != null)
+        // Configure rigidbody for trigger interactions
+        Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
+        rigidbody.bodyType = RigidbodyType2D.Kinematic;
+        rigidbody.gravityScale = 0f;
+        rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rigidbody.simulated = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Try to feed the player
+        if (TryFeedPlayer(collision))
         {
             Destroy(gameObject);
         }
     }
 
-    private static Sprite GetFallbackSprite()
+    private bool TryFeedPlayer(Collider2D collision)
     {
-        if (fallbackSprite != null)
+        // Feed the player using TopDownHunger system
+        TopDownHunger hungerSystem = collision.GetComponentInParent<TopDownHunger>();
+        if (hungerSystem != null)
         {
-            return fallbackSprite;
+            hungerSystem.AddHunger(hungerRestoreAmount);
+            return true;
         }
 
-        // Create a visible fallback sprite (32x32 yellow square)
-        Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
-        Color[] colors = new Color[32 * 32];
-        for (int i = 0; i < colors.Length; i++)
-        {
-            colors[i] = Color.yellow;
-        }
-        texture.SetPixels(colors);
-        texture.Apply();
-        
-        fallbackSprite = Sprite.Create(texture, new Rect(0f, 0f, 32f, 32f), new Vector2(0.5f, 0.5f), 32f);
-        return fallbackSprite;
+        return false;
     }
 
-    private static bool IsValidProjectSprite(Sprite sprite)
+    private static Sprite GetDefaultVisualSprite()
     {
-        if (sprite == null)
+        if (defaultVisualSprite != null)
         {
-            return false;
+            return defaultVisualSprite;
         }
 
-        string path = sprite.texture != null ? sprite.texture.name : string.Empty;
-        return !string.IsNullOrEmpty(path);
+        // Create a visible 32x32 yellow square as placeholder
+        Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+        Color[] pixels = new Color[32 * 32];
+        
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = Color.yellow;
+        }
+        
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        defaultVisualSprite = Sprite.Create(
+            texture,
+            new Rect(0f, 0f, 32f, 32f),
+            new Vector2(0.5f, 0.5f),
+            32f
+        );
+
+        return defaultVisualSprite;
     }
 }
