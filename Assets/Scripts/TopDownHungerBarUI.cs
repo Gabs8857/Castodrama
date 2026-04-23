@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Renders a circular hunger ring around a HUD target using TopDownHunger.
@@ -8,12 +11,49 @@ public class TopDownHungerBarUI : MonoBehaviour
 {
     private const string PrimaryTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
     private const string FallbackTargetName = "Map_V2_0";
+    private const string FoodCircleAssetPath = "Assets/ATH/Foodcircle.png";
 
     [SerializeField]
     private TopDownHunger hungerSystem;
 
     [SerializeField]
     private Image hungerBarFill;
+
+    [SerializeField]
+    private Image hungerBarBackground;
+
+    [SerializeField]
+    private Sprite defaultBackgroundSprite;
+
+    [SerializeField]
+    private Image centerForkIcon;
+
+    [SerializeField]
+    private bool fixedOnScreen = true;
+
+    [SerializeField]
+    private RectTransform fixedCanvasPoint;
+
+    [SerializeField]
+    private bool useCameraViewportPointWhenFixed = true;
+
+    [SerializeField]
+    private Vector2 fixedViewportPoint = new Vector2(0.5f, 0.12f);
+
+    [SerializeField]
+    private Vector2 fixedPointOffset = Vector2.zero;
+
+    [SerializeField]
+    private Vector2 fixedAnchor = new Vector2(0.5f, 0f);
+
+    [SerializeField]
+    private Vector2 fixedAnchoredPosition = new Vector2(0f, 84f);
+
+    [SerializeField]
+    private bool alignExtraElementsWithBar = true;
+
+    [SerializeField]
+    private float backgroundScaleMultiplier = 1.25f;
 
     [SerializeField]
     private Transform followTarget;
@@ -56,6 +96,8 @@ public class TopDownHungerBarUI : MonoBehaviour
 
     private static Sprite runtimeWhiteRingSprite;
     private RectTransform barRectTransform;
+    private RectTransform backgroundRectTransform;
+    private RectTransform forkRectTransform;
     private RectTransform canvasRectTransform;
     private Canvas parentCanvas;
     private SpriteRenderer followSpriteRenderer;
@@ -87,14 +129,20 @@ public class TopDownHungerBarUI : MonoBehaviour
         }
 
         barRectTransform = hungerBarFill != null ? hungerBarFill.rectTransform : GetComponent<RectTransform>();
-        parentCanvas = GetComponentInParent<Canvas>();
-        canvasRectTransform = parentCanvas != null ? parentCanvas.transform as RectTransform : null;
+        backgroundRectTransform = hungerBarBackground != null ? hungerBarBackground.rectTransform : null;
+        forkRectTransform = centerForkIcon != null ? centerForkIcon.rectTransform : null;
+        EnsureCanvasReferences();
         EnsureRingRenderable();
+        EnsureBackgroundImageExists();
+        EnsureBackgroundRenderable();
+        EnsureAnchoredToScreen();
     }
 
     private void Start()
     {
+        EnsureCanvasReferences();
         AutoAssignReferences();
+        EnsureAnchoredToScreen();
     }
 
     private void AutoAssignReferences()
@@ -149,6 +197,18 @@ public class TopDownHungerBarUI : MonoBehaviour
         }
 
         UpdateHungerBar();
+
+        if (parentCanvas == null || canvasRectTransform == null)
+        {
+            EnsureCanvasReferences();
+        }
+
+        if (fixedOnScreen)
+        {
+            UpdateFixedHudLayout();
+            return;
+        }
+
         UpdateHudPosition();
     }
 
@@ -293,6 +353,287 @@ public class TopDownHungerBarUI : MonoBehaviour
         hungerBarFill.fillOrigin = (int)Image.Origin360.Top;
         hungerBarFill.fillClockwise = true;
         hungerBarFill.preserveAspect = true;
+    }
+
+    private void EnsureBackgroundRenderable()
+    {
+        if (hungerBarBackground == null)
+        {
+            return;
+        }
+
+        if (hungerBarBackground.sprite == null)
+        {
+            if (defaultBackgroundSprite == null)
+            {
+                defaultBackgroundSprite = TryLoadFoodCircleSprite();
+            }
+
+            if (defaultBackgroundSprite != null)
+            {
+                hungerBarBackground.sprite = defaultBackgroundSprite;
+            }
+        }
+
+        hungerBarBackground.preserveAspect = true;
+    }
+    private void EnsureBackgroundImageExists()
+    {
+        if (hungerBarBackground != null)
+        {
+            return;
+        }
+
+        Transform existingBg = transform.Find("HungerBarBackground");
+        if (existingBg != null)
+        {
+            hungerBarBackground = existingBg.GetComponent<Image>();
+            if (hungerBarBackground != null)
+            {
+                backgroundRectTransform = hungerBarBackground.rectTransform;
+                return;
+            }
+        }
+
+        GameObject bgObject = new GameObject("HungerBarBackground");
+        bgObject.transform.SetParent(transform, false);
+        bgObject.transform.SetAsFirstSibling();
+
+        RectTransform bgRect = bgObject.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+
+        hungerBarBackground = bgObject.AddComponent<Image>();
+        hungerBarBackground.raycastTarget = false;
+        backgroundRectTransform = bgRect;
+    }
+    private static Sprite TryLoadFoodCircleSprite()
+    {
+#if UNITY_EDITOR
+        return AssetDatabase.LoadAssetAtPath<Sprite>(FoodCircleAssetPath);
+#else
+        return null;
+#endif
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (defaultBackgroundSprite == null)
+        {
+            defaultBackgroundSprite = TryLoadFoodCircleSprite();
+        }
+
+        if (hungerBarBackground != null && hungerBarBackground.sprite == null && defaultBackgroundSprite != null)
+        {
+            hungerBarBackground.sprite = defaultBackgroundSprite;
+            EditorUtility.SetDirty(hungerBarBackground);
+        }
+    }
+#endif
+
+    private void EnsureAnchoredToScreen()
+    {
+        if (!fixedOnScreen || barRectTransform == null)
+        {
+            return;
+        }
+
+        SetAnchoring(barRectTransform, fixedAnchor);
+    }
+
+    private void UpdateFixedHudLayout()
+    {
+        if (barRectTransform == null)
+        {
+            return;
+        }
+
+        if (TryApplyFixedCanvasPoint())
+        {
+            return;
+        }
+
+        if (TryApplyCameraViewportPoint())
+        {
+            return;
+        }
+
+        SetAnchoring(barRectTransform, fixedAnchor);
+        barRectTransform.anchoredPosition = fixedAnchoredPosition;
+
+        if (!alignExtraElementsWithBar)
+        {
+            return;
+        }
+
+        if (hungerBarBackground != null)
+        {
+            if (backgroundRectTransform == null)
+            {
+                backgroundRectTransform = hungerBarBackground.rectTransform;
+            }
+
+            SetAnchoring(backgroundRectTransform, fixedAnchor);
+            backgroundRectTransform.anchoredPosition = fixedAnchoredPosition;
+            backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
+        }
+
+        if (centerForkIcon != null)
+        {
+            if (forkRectTransform == null)
+            {
+                forkRectTransform = centerForkIcon.rectTransform;
+            }
+
+            SetAnchoring(forkRectTransform, fixedAnchor);
+            forkRectTransform.anchoredPosition = fixedAnchoredPosition;
+        }
+    }
+
+    private static void SetAnchoring(RectTransform rectTransform, Vector2 anchor)
+    {
+        if (rectTransform == null)
+        {
+            return;
+        }
+
+        rectTransform.anchorMin = anchor;
+        rectTransform.anchorMax = anchor;
+    }
+
+    private bool TryApplyFixedCanvasPoint()
+    {
+        if (fixedCanvasPoint == null || barRectTransform == null || canvasRectTransform == null)
+        {
+            return false;
+        }
+
+        Camera uiCamera = parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? parentCanvas.worldCamera
+            : null;
+
+        Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(uiCamera, fixedCanvasPoint.position);
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPoint, uiCamera, out Vector2 localPoint))
+        {
+            return false;
+        }
+
+        barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        Vector2 anchoredPosition = localPoint + fixedPointOffset;
+        barRectTransform.anchoredPosition = anchoredPosition;
+
+        if (alignExtraElementsWithBar)
+        {
+            if (hungerBarBackground != null)
+            {
+                if (backgroundRectTransform == null)
+                {
+                    backgroundRectTransform = hungerBarBackground.rectTransform;
+                }
+
+                backgroundRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                backgroundRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                backgroundRectTransform.anchoredPosition = anchoredPosition;
+                backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
+            }
+
+            if (centerForkIcon != null)
+            {
+                if (forkRectTransform == null)
+                {
+                    forkRectTransform = centerForkIcon.rectTransform;
+                }
+
+                forkRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                forkRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                forkRectTransform.anchoredPosition = anchoredPosition;
+            }
+        }
+
+        return true;
+    }
+
+    private bool TryApplyCameraViewportPoint()
+    {
+        if (!useCameraViewportPointWhenFixed || barRectTransform == null || canvasRectTransform == null)
+        {
+            return false;
+        }
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            return false;
+        }
+
+        Camera uiCamera = parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? parentCanvas.worldCamera
+            : null;
+
+        Vector3 viewport = new Vector3(
+            Mathf.Clamp01(fixedViewportPoint.x),
+            Mathf.Clamp01(fixedViewportPoint.y),
+            Mathf.Max(0f, mainCamera.nearClipPlane + 0.01f));
+        Vector2 screenPoint = mainCamera.ViewportToScreenPoint(viewport);
+
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPoint, uiCamera, out Vector2 localPoint))
+        {
+            return false;
+        }
+
+        Vector2 anchoredPosition = localPoint + fixedPointOffset;
+        barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchoredPosition = anchoredPosition;
+
+        if (alignExtraElementsWithBar)
+        {
+            if (hungerBarBackground != null)
+            {
+                if (backgroundRectTransform == null)
+                {
+                    backgroundRectTransform = hungerBarBackground.rectTransform;
+                }
+
+                backgroundRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                backgroundRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                backgroundRectTransform.anchoredPosition = anchoredPosition;
+                backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
+            }
+
+            if (centerForkIcon != null)
+            {
+                if (forkRectTransform == null)
+                {
+                    forkRectTransform = centerForkIcon.rectTransform;
+                }
+
+                forkRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                forkRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                forkRectTransform.anchoredPosition = anchoredPosition;
+            }
+        }
+
+        return true;
+    }
+
+    private void EnsureCanvasReferences()
+    {
+        parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas == null)
+        {
+            parentCanvas = FindObjectOfType<Canvas>();
+            if (parentCanvas != null)
+            {
+                transform.SetParent(parentCanvas.transform, false);
+            }
+        }
+
+        canvasRectTransform = parentCanvas != null ? parentCanvas.transform as RectTransform : null;
     }
 
     private static Sprite CreateRingSprite()

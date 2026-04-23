@@ -7,11 +7,35 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class TopDownCameraFollow : MonoBehaviour
 {
+    private enum CameraViewMode
+    {
+        TopDown,
+        PokemonThreeQuarter
+    }
+
     [SerializeField]
     private Transform target;
 
     [SerializeField]
+    private CameraViewMode viewMode = CameraViewMode.PokemonThreeQuarter;
+
+    [SerializeField]
     private Vector3 offset = new Vector3(0f, 0f, -10f);
+
+    [SerializeField]
+    private float followHeight = 6f;
+
+    [SerializeField]
+    private float followDistance = 8f;
+
+    [SerializeField]
+    private float pitchAngle = 35f;
+
+    [SerializeField]
+    private float yawAngle = 0f;
+
+    [SerializeField]
+    private float rotationSmoothTime = 0.1f;
 
     [SerializeField]
     private float smoothTime = 0.12f;
@@ -27,6 +51,7 @@ public class TopDownCameraFollow : MonoBehaviour
 
     private Camera cachedCamera;
     private Vector3 velocity;
+    private Vector3 rotationVelocity;
     private float zoomVelocity;
 
     public Transform Target
@@ -69,7 +94,13 @@ public class TopDownCameraFollow : MonoBehaviour
             return;
         }
 
-        FollowTarget();
+        if (viewMode == CameraViewMode.PokemonThreeQuarter)
+        {
+            FollowTargetThreeQuarter();
+            return;
+        }
+
+        FollowTargetTopDown();
     }
 
     private void UpdateZoom()
@@ -103,7 +134,7 @@ public class TopDownCameraFollow : MonoBehaviour
         return dpad.y;
     }
 
-    private void FollowTarget()
+    private void FollowTargetTopDown()
     {
         Vector3 desiredPosition = target.position + offset;
         transform.position = Vector3.SmoothDamp(
@@ -112,5 +143,26 @@ public class TopDownCameraFollow : MonoBehaviour
             ref velocity,
             smoothTime
         );
+
+        transform.rotation = Quaternion.identity;
+    }
+
+    private void FollowTargetThreeQuarter()
+    {
+        Quaternion desiredRotation = Quaternion.Euler(pitchAngle, yawAngle, 0f);
+        Vector3 backward = desiredRotation * Vector3.back;
+        Vector3 desiredPosition = target.position + Vector3.up * Mathf.Max(0f, followHeight) + backward * Mathf.Max(0f, followDistance);
+
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
+            desiredPosition,
+            ref velocity,
+            smoothTime
+        );
+
+        Vector3 currentEuler = transform.rotation.eulerAngles;
+        Vector3 targetEuler = desiredRotation.eulerAngles;
+        Vector3 nextEuler = Vector3.SmoothDamp(currentEuler, targetEuler, ref rotationVelocity, Mathf.Max(0.01f, rotationSmoothTime));
+        transform.rotation = Quaternion.Euler(nextEuler);
     }
 }

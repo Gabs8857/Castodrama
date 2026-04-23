@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: b15db6ac339ed99e1996cf5069b8f9bf
+guid: 6716fa244d55c344db4a0abbb6349252
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8484188727788147294
-    second: ATH_SANSFOND_SANSREPONDRE_0
-  - first:
-      213: 2649385047637611018
-    second: ATH_SANSFOND_SANSREPONDRE_1
+      213: 8631193243204677833
+    second: Foodcircle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -99,65 +96,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ATH_SANSFOND_SANSREPONDRE_0
+      name: Foodcircle_0
       rect:
         serializedVersion: 2
-        x: 87
-        y: 69
-        width: 1127
-        height: 1128
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e529f2f52b4edb570800000000000000
-      internalID: 8484188727788147294
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ATH_SANSFOND_SANSREPONDRE_1
-      rect:
-        serializedVersion: 2
-        x: 4634
+        x: 0
         y: 0
-        width: 1180
-        height: 1752
+        width: 116
+        height: 116
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a02dbade9a184c420800000000000000
-      internalID: 2649385047637611018
+      spriteID: 9c077f0568828c770800000000000000
+      internalID: 8631193243204677833
       vertices: []
       indices: 
       edges: []
@@ -186,8 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ATH_SANSFOND_SANSREPONDRE_0: 8484188727788147294
-      ATH_SANSFOND_SANSREPONDRE_1: 2649385047637611018
+      Foodcircle_0: 8631193243204677833
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

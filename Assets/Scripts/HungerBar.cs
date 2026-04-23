@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Displays a circular hunger bar UI element positioned orbitally around a target sprite.
@@ -9,8 +12,16 @@ public class HungerBar : MonoBehaviour
 {
     private const string PrimaryTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
     private const string FallbackTargetName = "Map_V2_0";
+    private const string FoodCircleAssetPath = "Assets/ATH/Foodcircle.png";
 
     public Image hungerBar;
+    public Image hungerBarBackground;
+    public Sprite defaultBackgroundSprite;
+    public bool followFixedCanvasPoint = true;
+    public RectTransform fixedCanvasPoint;
+    public bool useCameraViewportPointWhenFixed = true;
+    public Vector2 fixedViewportPoint = new Vector2(0.5f, 0.12f);
+    public Vector2 fixedPointOffset = Vector2.zero;
     public Transform followTarget;
     public Vector2 followOffset = Vector2.zero;
     public bool autoPlaceAroundImage = true;
@@ -41,13 +52,16 @@ public class HungerBar : MonoBehaviour
         }
 
         barRectTransform = hungerBar != null ? hungerBar.rectTransform : GetComponent<RectTransform>();
-        parentCanvas = GetComponentInParent<Canvas>();
-        canvasRectTransform = parentCanvas != null ? parentCanvas.transform as RectTransform : null;
+        EnsureCanvasReferences();
         EnsureBarIsRenderable();
+        EnsureBackgroundImageExists();
+        EnsureBackgroundRenderable();
     }
 
     void Start()
     {
+        EnsureCanvasReferences();
+
         // Find the TopDownHunger system
         GameObject playerObject = GameObject.Find("Player");
         if (playerObject != null)
@@ -100,6 +114,16 @@ public class HungerBar : MonoBehaviour
 
     void LateUpdate()
     {
+        if (parentCanvas == null || canvasRectTransform == null)
+        {
+            EnsureCanvasReferences();
+        }
+
+        if (TryFollowFixedCanvasPoint())
+        {
+            return;
+        }
+
         if (followTarget == null || barRectTransform == null || canvasRectTransform == null)
         {
             return;
@@ -194,6 +218,82 @@ public class HungerBar : MonoBehaviour
         }
     }
 
+    bool TryFollowFixedCanvasPoint()
+    {
+        if (!followFixedCanvasPoint || barRectTransform == null || canvasRectTransform == null)
+        {
+            return false;
+        }
+
+        if (fixedCanvasPoint == null)
+        {
+            return TryFollowViewportPoint();
+        }
+
+        Camera uiCamera = parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? parentCanvas.worldCamera
+            : null;
+
+        Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(uiCamera, fixedCanvasPoint.position);
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPoint, uiCamera, out Vector2 localPoint))
+        {
+            return false;
+        }
+
+        barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchoredPosition = localPoint + fixedPointOffset;
+        return true;
+    }
+
+    bool TryFollowViewportPoint()
+    {
+        if (!useCameraViewportPointWhenFixed || barRectTransform == null || canvasRectTransform == null)
+        {
+            return false;
+        }
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            return false;
+        }
+
+        Camera uiCamera = parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? parentCanvas.worldCamera
+            : null;
+
+        Vector3 viewport = new Vector3(
+            Mathf.Clamp01(fixedViewportPoint.x),
+            Mathf.Clamp01(fixedViewportPoint.y),
+            Mathf.Max(0f, mainCamera.nearClipPlane + 0.01f));
+        Vector2 screenPoint = mainCamera.ViewportToScreenPoint(viewport);
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPoint, uiCamera, out Vector2 localPoint))
+        {
+            return false;
+        }
+
+        barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        barRectTransform.anchoredPosition = localPoint + fixedPointOffset;
+        return true;
+    }
+
+    void EnsureCanvasReferences()
+    {
+        parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas == null)
+        {
+            parentCanvas = FindObjectOfType<Canvas>();
+            if (parentCanvas != null)
+            {
+                transform.SetParent(parentCanvas.transform, false);
+            }
+        }
+
+        canvasRectTransform = parentCanvas != null ? parentCanvas.transform as RectTransform : null;
+    }
+
     void EnsureBarIsRenderable()
     {
         if (hungerBar == null)
@@ -217,6 +317,85 @@ public class HungerBar : MonoBehaviour
         hungerBar.preserveAspect = true;
         hungerBar.color = new Color(0.32f, 0.85f, 0.35f, 1f);
     }
+
+    void EnsureBackgroundRenderable()
+    {
+        if (hungerBarBackground == null)
+        {
+            return;
+        }
+
+        if (hungerBarBackground.sprite == null)
+        {
+            if (defaultBackgroundSprite == null)
+            {
+                defaultBackgroundSprite = TryLoadFoodCircleSprite();
+            }
+
+            if (defaultBackgroundSprite != null)
+            {
+                hungerBarBackground.sprite = defaultBackgroundSprite;
+            }
+        }
+
+        hungerBarBackground.preserveAspect = true;
+    }
+
+    void EnsureBackgroundImageExists()
+    {
+        if (hungerBarBackground != null)
+        {
+            return;
+        }
+
+        Transform existingBg = transform.Find("HungerBarBackground");
+        if (existingBg != null)
+        {
+            hungerBarBackground = existingBg.GetComponent<Image>();
+            if (hungerBarBackground != null)
+            {
+                return;
+            }
+        }
+
+        GameObject bgObject = new GameObject("HungerBarBackground");
+        bgObject.transform.SetParent(transform, false);
+        bgObject.transform.SetAsFirstSibling();
+
+        RectTransform bgRect = bgObject.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+
+        hungerBarBackground = bgObject.AddComponent<Image>();
+        hungerBarBackground.raycastTarget = false;
+    }
+
+    static Sprite TryLoadFoodCircleSprite()
+    {
+#if UNITY_EDITOR
+        return AssetDatabase.LoadAssetAtPath<Sprite>(FoodCircleAssetPath);
+#else
+        return null;
+#endif
+    }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        if (defaultBackgroundSprite == null)
+        {
+            defaultBackgroundSprite = TryLoadFoodCircleSprite();
+        }
+
+        if (hungerBarBackground != null && hungerBarBackground.sprite == null && defaultBackgroundSprite != null)
+        {
+            hungerBarBackground.sprite = defaultBackgroundSprite;
+            EditorUtility.SetDirty(hungerBarBackground);
+        }
+    }
+#endif
 
     Sprite CreateRingSprite()
     {
