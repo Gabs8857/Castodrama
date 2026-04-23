@@ -29,6 +29,7 @@ public class Hunger : MonoBehaviour
     private RectTransform canvasRectTransform;
     private Canvas parentCanvas;
     private SpriteRenderer followSpriteRenderer;
+    private AdaptiveHUDWidth adaptiveHudWidth;
 
     void Awake()
     {
@@ -76,7 +77,9 @@ public class Hunger : MonoBehaviour
         if (followTarget != null)
         {
             followSpriteRenderer = followTarget.GetComponent<SpriteRenderer>();
+            adaptiveHudWidth = followTarget.GetComponent<AdaptiveHUDWidth>();
             Debug.Log($"[HungerBar] SpriteRenderer found: {(followSpriteRenderer != null)}");
+            Debug.Log($"[HungerBar] AdaptiveHUDWidth found: {(adaptiveHudWidth != null)}");
         }
         else
         {
@@ -120,7 +123,15 @@ public class Hunger : MonoBehaviour
             return;
         }
 
-        Vector3 screenPoint = mainCamera.WorldToScreenPoint(followTarget.position);
+        Vector3 screenPoint;
+        if (adaptiveHudWidth != null && adaptiveHudWidth.TryGetAnchorWorldPosition(out Vector3 adaptiveWorldPosition))
+        {
+            screenPoint = mainCamera.WorldToScreenPoint(adaptiveWorldPosition);
+        }
+        else
+        {
+            screenPoint = mainCamera.WorldToScreenPoint(followTarget.position);
+        }
         Vector2 screenOffset = followOffset;
 
         float canvasScale = parentCanvas != null ? Mathf.Max(0.0001f, parentCanvas.scaleFactor) : 1f;

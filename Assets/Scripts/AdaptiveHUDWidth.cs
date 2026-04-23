@@ -65,4 +65,33 @@ public class AdaptiveHUDWidth : MonoBehaviour
         Vector3 cameraSpace = new Vector3(x, y, distanceFromCamera);
         transform.position = mainCamera.transform.TransformPoint(cameraSpace);
     }
+
+    public bool TryGetAnchorWorldPosition(out Vector3 worldPosition)
+    {
+        worldPosition = default;
+
+        if (spriteRenderer == null || mainCamera == null || originalHeight <= 0f || originalWidth <= 0f)
+        {
+            return false;
+        }
+
+        float cameraHeight = mainCamera.orthographicSize * 2f;
+        float cameraWidth = cameraHeight * mainCamera.aspect;
+
+        float targetHeight = cameraHeight * targetHeightPercent;
+        float targetScale = targetHeight / originalHeight;
+        float scaledWidth = originalWidth * targetScale;
+        float scaledHeight = originalHeight * targetScale;
+        float marginX = cameraWidth * marginXPercent;
+        float marginY = cameraHeight * marginYPercent;
+
+        float x = anchor == HudAnchor.Left
+            ? -cameraWidth * 0.5f + scaledWidth * 0.5f + marginX
+            : cameraWidth * 0.5f - scaledWidth * 0.5f - marginX;
+        float y = -cameraHeight * 0.5f + scaledHeight * 0.5f + marginY;
+
+        Vector3 cameraSpace = new Vector3(x, y, distanceFromCamera);
+        worldPosition = mainCamera.transform.TransformPoint(cameraSpace);
+        return true;
+    }
 }

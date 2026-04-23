@@ -285,7 +285,7 @@ RectTransform:
   m_GameObject: {fileID: 159262498}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 509976790}
@@ -349,16 +349,17 @@ MonoBehaviour:
   currentHunger: 0
   hungerBar: {fileID: 159262500}
   followTarget: {fileID: 1958984750}
-  followOffset: {x: 0, y: 0}
+  followOffset: {x: 4, y: 40}
   autoPlaceAroundImage: 1
   wrapAroundImage: 1
   matchTargetImageSize: 1
-  usePointOnTargetSprite: 1
-  targetPointNormalized: {x: 0.5, y: 0.5}
+  usePointOnTargetSprite: 0
+  targetPointNormalized: {x: 0.55, y: 0.95}
   orbitAngleDegrees: 130
   imagePaddingPixels: 1
   ringScaleMultiplier: 1.1
   minRingDiameterPixels: 56
+  maxRingDiameterPixels: 180
   autoTargetName: ATH_SANSFOND_SANSREPONDRE_0
 --- !u!1 &394322998
 GameObject:
@@ -621,7 +622,7 @@ RectTransform:
   m_GameObject: {fileID: 509976786}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 159262499}
