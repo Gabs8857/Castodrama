@@ -53,9 +53,6 @@ public class TopDownHungerBarUI : MonoBehaviour
     private bool alignExtraElementsWithBar = true;
 
     [SerializeField]
-    private float backgroundScaleMultiplier = 1.25f;
-
-    [SerializeField]
     private Transform followTarget;
 
     [SerializeField]
@@ -86,10 +83,13 @@ public class TopDownHungerBarUI : MonoBehaviour
     private float ringScaleMultiplier = 1.1f;
 
     [SerializeField]
-    private float minRingDiameterPixels = 56f;
+    private float minRingDiameterPixels = 200f;
 
     [SerializeField]
-    private float maxRingDiameterPixels = 180f;
+    private float maxRingDiameterPixels = 400f;
+
+    [SerializeField]
+    private float backgroundDiameterMultiplier = 0.5f;
 
     [SerializeField]
     private string autoTargetName = PrimaryTargetName;
@@ -362,6 +362,13 @@ public class TopDownHungerBarUI : MonoBehaviour
             return;
         }
 
+        if (hungerBarBackground.transform.parent != transform)
+        {
+            hungerBarBackground.transform.SetParent(transform, false);
+        }
+
+        hungerBarBackground.transform.SetAsFirstSibling();
+
         if (hungerBarBackground.sprite == null)
         {
             if (defaultBackgroundSprite == null)
@@ -375,12 +382,26 @@ public class TopDownHungerBarUI : MonoBehaviour
             }
         }
 
+        hungerBarBackground.enabled = true;
+        Color bgColor = hungerBarBackground.color;
+        if (bgColor.a < 0.95f)
+        {
+            bgColor.a = 1f;
+            hungerBarBackground.color = bgColor;
+        }
+
         hungerBarBackground.preserveAspect = true;
     }
     private void EnsureBackgroundImageExists()
     {
         if (hungerBarBackground != null)
         {
+            if (hungerBarBackground.transform.parent != transform)
+            {
+                hungerBarBackground.transform.SetParent(transform, false);
+            }
+
+            hungerBarBackground.transform.SetAsFirstSibling();
             return;
         }
 
@@ -478,7 +499,6 @@ public class TopDownHungerBarUI : MonoBehaviour
 
             SetAnchoring(backgroundRectTransform, fixedAnchor);
             backgroundRectTransform.anchoredPosition = fixedAnchoredPosition;
-            backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
         }
 
         if (centerForkIcon != null)
@@ -538,7 +558,6 @@ public class TopDownHungerBarUI : MonoBehaviour
                 backgroundRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
                 backgroundRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
                 backgroundRectTransform.anchoredPosition = anchoredPosition;
-                backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
             }
 
             if (centerForkIcon != null)
@@ -602,7 +621,6 @@ public class TopDownHungerBarUI : MonoBehaviour
                 backgroundRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
                 backgroundRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
                 backgroundRectTransform.anchoredPosition = anchoredPosition;
-                backgroundRectTransform.sizeDelta = barRectTransform.sizeDelta * Mathf.Max(0.1f, backgroundScaleMultiplier);
             }
 
             if (centerForkIcon != null)

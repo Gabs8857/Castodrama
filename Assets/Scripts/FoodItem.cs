@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Represents a food item that restores hunger when picked up by the player.
@@ -10,6 +11,7 @@ using UnityEngine;
 public class FoodItem : MonoBehaviour
 {
     private const int MinVisibleSortingOrder = 200;
+    private const float MinVisibleScale = 0.55f;
     private static Sprite defaultVisualSprite;
     private static Material unlitSpriteMaterial;
 
@@ -21,6 +23,21 @@ public class FoodItem : MonoBehaviour
 
     [SerializeField]
     private bool useUnlitMaterial = true;
+
+    [SerializeField]
+    private Color visibleTint = new Color(1f, 0.55f, 0.2f, 1f);
+
+    [SerializeField]
+    private float minVisibleWorldDiameter = 0.9f;
+
+    [SerializeField]
+    private bool addGlowLight = true;
+
+    [SerializeField]
+    private float glowOuterRadius = 1.1f;
+
+    [SerializeField]
+    private float glowIntensity = 0.9f;
 
     private void Awake()
     {
@@ -36,7 +53,15 @@ public class FoodItem : MonoBehaviour
         Sprite spriteToDisplay = foodSprite ?? GetDefaultVisualSprite();
         
         spriteRenderer.sprite = spriteToDisplay;
-        spriteRenderer.color = Color.white;
+        spriteRenderer.color = visibleTint;
+        spriteRenderer.enabled = true;
+
+        Vector3 currentScale = transform.localScale;
+        float safeScaleX = Mathf.Max(MinVisibleScale, Mathf.Abs(currentScale.x));
+        float safeScaleY = Mathf.Max(MinVisibleScale, Mathf.Abs(currentScale.y));
+        transform.localScale = new Vector3(safeScaleX, safeScaleY, 1f);
+
+        EnsureMinimumWorldDiameter(spriteRenderer);
 
         if (useUnlitMaterial)
         {
@@ -52,6 +77,44 @@ public class FoodItem : MonoBehaviour
         {
             spriteRenderer.sortingOrder = MinVisibleSortingOrder;
         }
+
+        if (addGlowLight)
+        {
+            EnsureGlowLight();
+        }
+    }
+
+    private void EnsureMinimumWorldDiameter(SpriteRenderer spriteRenderer)
+    {
+        if (spriteRenderer == null || spriteRenderer.sprite == null)
+        {
+            return;
+        }
+
+        float currentDiameter = Mathf.Max(spriteRenderer.bounds.size.x, spriteRenderer.bounds.size.y);
+        if (currentDiameter >= minVisibleWorldDiameter)
+        {
+            return;
+        }
+
+        float factor = minVisibleWorldDiameter / Mathf.Max(0.0001f, currentDiameter);
+        transform.localScale = new Vector3(transform.localScale.x * factor, transform.localScale.y * factor, 1f);
+    }
+
+    private void EnsureGlowLight()
+    {
+        Light2D light2D = GetComponent<Light2D>();
+        if (light2D == null)
+        {
+            light2D = gameObject.AddComponent<Light2D>();
+        }
+
+        light2D.lightType = Light2D.LightType.Point;
+        light2D.color = new Color(1f, 0.72f, 0.32f, 1f);
+        light2D.intensity = Mathf.Max(0.1f, glowIntensity);
+        light2D.pointLightOuterRadius = Mathf.Max(0.2f, glowOuterRadius);
+        light2D.pointLightInnerRadius = Mathf.Max(0f, glowOuterRadius * 0.2f);
+        light2D.falloffIntensity = 0.75f;
     }
 
     private void SetupPhysics()
@@ -152,6 +215,16 @@ public class FoodItem : MonoBehaviour
         }
 
         Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+        if (unlitShader == null)
+        {
+            unlitShader = Shader.Find("Sprites/Default");
+        }
+
+        if (unlitShader == null)
+        {
+            unlitShader = Shader.Find("Unlit/Transparent");
+        }
+
         if (unlitShader == null)
         {
             return null;

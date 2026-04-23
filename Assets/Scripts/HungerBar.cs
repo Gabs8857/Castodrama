@@ -32,8 +32,9 @@ public class HungerBar : MonoBehaviour
     public float orbitAngleDegrees = 130f;
     public float imagePaddingPixels = 14f;
     public float ringScaleMultiplier = 1.1f;
-    public float minRingDiameterPixels = 56f;
-    public float maxRingDiameterPixels = 180f;
+    public float minRingDiameterPixels = 200f;
+    public float maxRingDiameterPixels = 400f;
+    public float backgroundDiameterMultiplier = 0.5f;
     public string autoTargetName = "ATH_SANSFOND_SANSREPONDRE_0";
 
     private static Sprite runtimeWhiteSprite;
@@ -243,6 +244,14 @@ public class HungerBar : MonoBehaviour
         barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         barRectTransform.anchoredPosition = localPoint + fixedPointOffset;
+
+        if (hungerBarBackground != null && hungerBarBackground.rectTransform != null)
+        {
+            hungerBarBackground.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            hungerBarBackground.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            hungerBarBackground.rectTransform.anchoredPosition = localPoint + fixedPointOffset;
+        }
+
         return true;
     }
 
@@ -276,6 +285,14 @@ public class HungerBar : MonoBehaviour
         barRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         barRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         barRectTransform.anchoredPosition = localPoint + fixedPointOffset;
+
+        if (hungerBarBackground != null && hungerBarBackground.rectTransform != null)
+        {
+            hungerBarBackground.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            hungerBarBackground.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            hungerBarBackground.rectTransform.anchoredPosition = localPoint + fixedPointOffset;
+        }
+
         return true;
     }
 
@@ -325,6 +342,13 @@ public class HungerBar : MonoBehaviour
             return;
         }
 
+        if (hungerBarBackground.transform.parent != transform)
+        {
+            hungerBarBackground.transform.SetParent(transform, false);
+        }
+
+        hungerBarBackground.transform.SetAsFirstSibling();
+
         if (hungerBarBackground.sprite == null)
         {
             if (defaultBackgroundSprite == null)
@@ -338,6 +362,14 @@ public class HungerBar : MonoBehaviour
             }
         }
 
+        hungerBarBackground.enabled = true;
+        Color bgColor = hungerBarBackground.color;
+        if (bgColor.a < 0.95f)
+        {
+            bgColor.a = 1f;
+            hungerBarBackground.color = bgColor;
+        }
+
         hungerBarBackground.preserveAspect = true;
     }
 
@@ -345,6 +377,12 @@ public class HungerBar : MonoBehaviour
     {
         if (hungerBarBackground != null)
         {
+            if (hungerBarBackground.transform.parent != transform)
+            {
+                hungerBarBackground.transform.SetParent(transform, false);
+            }
+
+            hungerBarBackground.transform.SetAsFirstSibling();
             return;
         }
 
