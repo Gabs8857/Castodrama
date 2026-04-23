@@ -10,6 +10,7 @@ using UnityEngine;
 public class FoodItem : MonoBehaviour
 {
     private const int MinVisibleSortingOrder = 200;
+    private const float MinVisibleScale = 0.55f;
     private static Sprite defaultVisualSprite;
     private static Material unlitSpriteMaterial;
 
@@ -21,6 +22,9 @@ public class FoodItem : MonoBehaviour
 
     [SerializeField]
     private bool useUnlitMaterial = true;
+
+    [SerializeField]
+    private Color visibleTint = new Color(1f, 0.55f, 0.2f, 1f);
 
     private void Awake()
     {
@@ -36,7 +40,12 @@ public class FoodItem : MonoBehaviour
         Sprite spriteToDisplay = foodSprite ?? GetDefaultVisualSprite();
         
         spriteRenderer.sprite = spriteToDisplay;
-        spriteRenderer.color = Color.white;
+        spriteRenderer.color = visibleTint;
+
+        Vector3 currentScale = transform.localScale;
+        float safeScaleX = Mathf.Max(MinVisibleScale, Mathf.Abs(currentScale.x));
+        float safeScaleY = Mathf.Max(MinVisibleScale, Mathf.Abs(currentScale.y));
+        transform.localScale = new Vector3(safeScaleX, safeScaleY, 1f);
 
         if (useUnlitMaterial)
         {
@@ -152,6 +161,16 @@ public class FoodItem : MonoBehaviour
         }
 
         Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+        if (unlitShader == null)
+        {
+            unlitShader = Shader.Find("Sprites/Default");
+        }
+
+        if (unlitShader == null)
+        {
+            unlitShader = Shader.Find("Unlit/Transparent");
+        }
+
         if (unlitShader == null)
         {
             return null;
