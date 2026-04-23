@@ -21,6 +21,25 @@ public class TopDownHungerBarUI : MonoBehaviour
         set => fillImage = value;
     }
 
+    private void Start()
+    {
+        // Auto-assign the TopDownHunger from the player
+        if (hunger == null)
+        {
+            GameObject playerObject = GameObject.Find("Player");
+            if (playerObject != null)
+            {
+                hunger = playerObject.GetComponent<TopDownHunger>();
+            }
+        }
+
+        // Auto-assign the Image component if not assigned
+        if (fillImage == null)
+        {
+            fillImage = GetComponent<Image>();
+        }
+    }
+
     private void LateUpdate()
     {
         if (hunger == null || fillImage == null)

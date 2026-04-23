@@ -55,23 +55,19 @@ public class FoodItem : MonoBehaviour
         if (topDownHunger != null)
         {
             topDownHunger.AddHunger(hungerAmount);
-            Destroy(gameObject);
-            return;
         }
 
-        if (!other.CompareTag("Player"))
-        {
-            return;
-        }
-
+        // Also update legacy Hunger system if it exists
         Hunger legacyHunger = Object.FindFirstObjectByType<Hunger>();
-        if (legacyHunger == null)
+        if (legacyHunger != null)
         {
-            return;
+            legacyHunger.currentHunger = Mathf.Clamp(legacyHunger.currentHunger + hungerAmount, 0f, legacyHunger.maxHunger);
         }
 
-        legacyHunger.currentHunger = Mathf.Clamp(legacyHunger.currentHunger + hungerAmount, 0f, legacyHunger.maxHunger);
-        Destroy(gameObject);
+        if (topDownHunger != null || legacyHunger != null)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private static Sprite GetFallbackSprite()
@@ -81,7 +77,17 @@ public class FoodItem : MonoBehaviour
             return fallbackSprite;
         }
 
-        fallbackSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+        // Create a visible fallback sprite (32x32 yellow square)
+        Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+        Color[] colors = new Color[32 * 32];
+        for (int i = 0; i < colors.Length; i++)
+        {
+            colors[i] = Color.yellow;
+        }
+        texture.SetPixels(colors);
+        texture.Apply();
+        
+        fallbackSprite = Sprite.Create(texture, new Rect(0f, 0f, 32f, 32f), new Vector2(0.5f, 0.5f), 32f);
         return fallbackSprite;
     }
 
