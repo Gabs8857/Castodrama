@@ -38,10 +38,12 @@ public class DayAndNightCycle : MonoBehaviour
         _CycleMarks();
 
     }
+    }
     private void _CycleMarks()
     {
         _currentMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
     }
+
 }
