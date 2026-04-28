@@ -7,14 +7,48 @@ public class TeleportTrigger : MonoBehaviour
     [SerializeField] private bool copyDestinationRotation = false;
     [SerializeField] private float teleportCooldownSeconds = 0.2f;
     [SerializeField] private bool enableDebugLogs = true;
+    [SerializeField] private string debugNameFilter = "";
+    [SerializeField] private bool logOnTriggerExit = false;
 
     private static readonly Dictionary<int, float> PlayerCooldownUntil = new Dictionary<int, float>();
 
+    private string DebugPrefix => "TeleportTrigger[" + gameObject.name + "]";
+
+    private bool ShouldLog
+    {
+        get
+        {
+            if (!enableDebugLogs)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(debugNameFilter))
+            {
+                return true;
+            }
+
+            return gameObject.name.IndexOf(debugNameFilter, System.StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (!ShouldLog)
+        {
+            return;
+        }
+
+        string destinationName = destination != null ? destination.name : "<none>";
+        Vector3 destinationPosition = destination != null ? destination.position : Vector3.zero;
+        Debug.Log(DebugPrefix + ": enabled | destination=" + destinationName + " @ " + destinationPosition + " | cooldown=" + teleportCooldownSeconds.ToString("F2") + "s", this);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (enableDebugLogs)
+        if (ShouldLog)
         {
-            Debug.Log("TeleportTrigger(3D): trigger with " + other.name + " | tag=" + other.tag, this);
+            Debug.Log(DebugPrefix + " (3D): enter with " + other.name + " | tag=" + other.tag, this);
         }
 
         TryTeleport(other.gameObject);
@@ -22,21 +56,31 @@ public class TeleportTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (enableDebugLogs)
+        if (ShouldLog)
         {
-            Debug.Log("TeleportTrigger(2D): trigger with " + other.name + " | tag=" + other.tag, this);
+            Debug.Log(DebugPrefix + " (2D): enter with " + other.name + " | tag=" + other.tag, this);
         }
 
         TryTeleport(other.gameObject);
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!ShouldLog || !logOnTriggerExit)
+        {
+            return;
+        }
+
+        Debug.Log(DebugPrefix + " (2D): exit with " + other.name + " | tag=" + other.tag, this);
     }
 
     private void TryTeleport(GameObject triggerObject)
     {
         if (triggerObject == null)
         {
-            if (enableDebugLogs)
+            if (ShouldLog)
             {
-                Debug.LogWarning("TeleportTrigger: targetObject is null.", this);
+                Debug.LogWarning(DebugPrefix + ": targetObject is null.", this);
             }
 
             return;
@@ -45,9 +89,9 @@ public class TeleportTrigger : MonoBehaviour
         Transform target = ResolveTeleportTarget(triggerObject.transform);
         if (target == null)
         {
-            if (enableDebugLogs)
+            if (ShouldLog)
             {
-                Debug.LogWarning("TeleportTrigger: unable to resolve teleport target from trigger object " + triggerObject.name, this);
+                Debug.LogWarning(DebugPrefix + ": unable to resolve teleport target from trigger object " + triggerObject.name, this);
             }
 
             return;
@@ -56,9 +100,9 @@ public class TeleportTrigger : MonoBehaviour
         GameObject targetObject = target.gameObject;
         if (!targetObject.CompareTag("Player"))
         {
-            if (enableDebugLogs)
+            if (ShouldLog)
             {
-                Debug.Log("TeleportTrigger: ignored object (not Player): " + targetObject.name + " | tag=" + targetObject.tag + " | trigger source=" + triggerObject.name, this);
+                Debug.Log(DebugPrefix + ": ignored object (not Player): " + targetObject.name + " | tag=" + targetObject.tag + " | trigger source=" + triggerObject.name, this);
             }
 
             return;
@@ -66,32 +110,32 @@ public class TeleportTrigger : MonoBehaviour
 
         if (destination == null)
         {
-            Debug.LogWarning("TeleportTrigger: destination is not assigned.", this);
+            Debug.LogWarning(DebugPrefix + ": destination is not assigned.", this);
             return;
         }
 
         int playerId = targetObject.GetInstanceID();
         if (PlayerCooldownUntil.TryGetValue(playerId, out float cooldownUntil) && Time.time < cooldownUntil)
         {
-            if (enableDebugLogs)
+            if (ShouldLog)
             {
-                Debug.Log("TeleportTrigger: cooldown active for " + targetObject.name + " (" + (cooldownUntil - Time.time).ToString("F2") + "s remaining)", this);
+                Debug.Log(DebugPrefix + ": cooldown active for " + targetObject.name + " (" + (cooldownUntil - Time.time).ToString("F2") + "s remaining)", this);
             }
 
             return;
         }
 
-        if (enableDebugLogs)
+        if (ShouldLog)
         {
-            Debug.Log("TeleportTrigger: teleporting " + targetObject.name + " from " + target.position + " -> " + destination.position, this);
+            Debug.Log(DebugPrefix + ": teleporting " + targetObject.name + " from " + target.position + " -> " + destination.position, this);
         }
 
         Teleport(target);
         PlayerCooldownUntil[playerId] = Time.time + Mathf.Max(0f, teleportCooldownSeconds);
 
-        if (enableDebugLogs)
+        if (ShouldLog)
         {
-            Debug.Log("TeleportTrigger: teleport complete for " + targetObject.name + " | now at " + target.position, this);
+            Debug.Log(DebugPrefix + ": teleport complete for " + targetObject.name + " | now at " + target.position, this);
         }
     }
 
