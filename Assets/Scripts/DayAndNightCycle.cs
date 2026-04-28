@@ -14,8 +14,18 @@ public class DayAndNightCycle : MonoBehaviour
     }
 
     [SerializeField] private DayAndNighMark[] _marks;
-    [SerializeField] private float _cycleLenght = 24; // in seconds
+    [SerializeField] private float _cycleLenght = 300; // in seconds
     [SerializeField] private Light2D _light;
+
+    // PLAYER VISION
+    [Header("Player Vision")]
+    [SerializeField] private Light2D _playerVisionLight;
+
+    [SerializeField] private float _dayOuterRadius = 8f;
+    [SerializeField] private float _nightOuterRadius = 5f;
+
+    [SerializeField] private float _dayInnerRadius = 5f;
+    [SerializeField] private float _nightInnerRadius = 1f;
 
     // DEBUG
     [SerializeField] private bool _debugLogs = true;
@@ -27,7 +37,6 @@ public class DayAndNightCycle : MonoBehaviour
     private float _currentMarkTime, _nextMarkTime;
 
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _currentMarkIndex = -1;
@@ -39,10 +48,38 @@ public class DayAndNightCycle : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-       _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
+        // Safety check - prevent NullReferenceException
+        if (_marks == null || _marks.Length == 0 || _light == null)
+        {
+            if (_debugLogs)
+            {
+                Debug.LogWarning("[DayNight] Missing references! Assign _marks and _light in inspector.");
+            }
+            return;
+        }
+
+        _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
+
+        // NORMALIZED TIME (0 -> 1)
+        float timePercent = _currentCycleTime / _cycleLenght;
+
+        // PLAYER VISION EVOLUTION
+        float currentOuterRadius = Mathf.Lerp(
+            _dayOuterRadius,
+            _nightOuterRadius,
+            timePercent
+        );
+
+        float currentInnerRadius = Mathf.Lerp(
+            _dayInnerRadius,
+            _nightInnerRadius,
+            timePercent
+        );
+
+        _playerVisionLight.pointLightOuterRadius = currentOuterRadius;
+        _playerVisionLight.pointLightInnerRadius = currentInnerRadius;
 
         // DEBUG
         if (_debugLogs)
@@ -75,6 +112,10 @@ public class DayAndNightCycle : MonoBehaviour
 
     private void _CycleMarks()
     {
+        // Safety check
+        if (_marks == null || _marks.Length == 0)
+            return;
+
         _currentMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
