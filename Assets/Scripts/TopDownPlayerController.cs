@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class TopDownPlayerController : MonoBehaviour
 {
     [SerializeField]
@@ -11,6 +12,8 @@ public class TopDownPlayerController : MonoBehaviour
     private float inputDeadzone = 0.12f;
 
     private SpriteRenderer spriteRenderer;
+    private Rigidbody2D rb;
+    private Vector2 moveInput;
 
     public float MoveSpeed
     {
@@ -21,18 +24,16 @@ public class TopDownPlayerController : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     private void Update()
     {
-        Vector2 moveInput = ReadMoveInput();
+        moveInput = ReadMoveInput();
         if (moveInput.sqrMagnitude > 1f)
         {
             moveInput.Normalize();
         }
-
-        Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0f) * (moveSpeed * Time.deltaTime);
-        transform.position += movement;
 
         if (spriteRenderer != null)
         {
@@ -44,6 +45,14 @@ public class TopDownPlayerController : MonoBehaviour
             {
                 spriteRenderer.flipX = false;
             }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = moveInput * moveSpeed;
         }
     }
 

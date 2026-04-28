@@ -60,7 +60,7 @@ public static class TopDownBootstrap
             playerRigidbody = playerObject.AddComponent<Rigidbody2D>();
         }
 
-        playerRigidbody.bodyType = RigidbodyType2D.Kinematic;
+        playerRigidbody.bodyType = RigidbodyType2D.Dynamic;
         playerRigidbody.gravityScale = 0f;
         playerRigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
         playerRigidbody.simulated = true;

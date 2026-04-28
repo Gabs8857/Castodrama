@@ -11,6 +11,12 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
     }
 
     void Update()
@@ -50,6 +56,11 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (rb == null)
+        {
+            return;
+        }
+
         rb.linearVelocity = movement.normalized * speed;
     }
 }
