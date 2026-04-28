@@ -79,13 +79,6 @@ public class DayAndNightCycle : MonoBehaviour
         _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
 
-        // DEBUG
-        if (_debugLogs)
-        {
-            Debug.Log(
-                $"[DayNight] New target mark : {_nextMarkIndex} " +
-                $"at {_nextMarkTime:F2}s"
-            );
-        }
+
     }
 }
