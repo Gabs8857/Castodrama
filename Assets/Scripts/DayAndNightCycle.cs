@@ -17,50 +17,57 @@ public class DayAndNightCycle : MonoBehaviour
     [SerializeField] private float _cycleLenght = 24; // in seconds
     [SerializeField] private Light2D _light;
 
+    // DEBUG
+    [SerializeField] private bool _debugLogs = true;
+
     private const float _TIME_CHECK_EPSILON = 0.1f;
     
     private float _currentCycleTime;
     private int _currentMarkIndex, _nextMarkIndex;
     private float _currentMarkTime, _nextMarkTime;
 
-    private bool IsConfigured => _marks != null && _marks.Length > 0 && _cycleLenght > 0f;
-
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (_light == null)
-        {
-            _light = FindFirstObjectByType<Light2D>();
-        }
-
-        if (!IsConfigured)
-        {
-            enabled = false;
-            return;
-        }
-
         _currentMarkIndex = -1;
         _CycleMarks();
+
+        if (_debugLogs)
+        {
+            Debug.Log("[DayNight] Cycle started");
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-       if (_light == null)
-       {
-           return;
-       }
-
        _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
+
+        // DEBUG
+        if (_debugLogs)
+        {
+            Debug.Log($"[DayNight] Current Time : {_currentCycleTime:F2} / {_cycleLenght}");
+        }
 
         // Passed a mark ?
         if (Mathf.Abs(_currentCycleTime - _nextMarkTime) < _TIME_CHECK_EPSILON)
         {
-            DayAndNighMark next = _marks[_nextMarkIndex];
+            DayAndNighMark next = _marks[_currentMarkIndex];
 
             _light.color = next.color;
             _light.intensity = next.intensity;
+
+            // DEBUG
+            if (_debugLogs)
+            {
+                Debug.Log(
+                    $"[DayNight] Mark reached -> " +
+                    $"Index : {_currentMarkIndex}, " +
+                    $"Next Time : {_nextMarkTime:F2}, " +
+                    $"Intensity : {next.intensity}"
+                );
+            }
             
             _CycleMarks();
         }
@@ -68,14 +75,17 @@ public class DayAndNightCycle : MonoBehaviour
 
     private void _CycleMarks()
     {
-        if (!IsConfigured)
-        {
-            return;
-        }
-
         _currentMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
-        _currentMarkTime = _marks[_currentMarkIndex].timeRatio * _cycleLenght;
         _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
+
+        // DEBUG
+        if (_debugLogs)
+        {
+            Debug.Log(
+                $"[DayNight] New target mark : {_nextMarkIndex} " +
+                $"at {_nextMarkTime:F2}s"
+            );
+        }
     }
 }
