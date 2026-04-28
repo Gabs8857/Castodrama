@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;   
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class DayAndNightCycle : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class DayAndNightCycle : MonoBehaviour
 
     [SerializeField] private DayAndNighMark[] _marks;
     [SerializeField] private float _cycleLenght = 300; // in seconds
+    [SerializeField] private Light2D _light;
+
+    private const float TIME_CHECK_EPSILON = 0.1f;
     
     private float _currentCycleTime;
     private int _currentMarkIndex, _nextMarkIndex;
@@ -33,7 +37,7 @@ public class DayAndNightCycle : MonoBehaviour
        _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
 
     // Passed a mark ?
-    if (_currentCycleTime >= _nextMarkTime)
+    if (Mathf.Abs(_currentCycleTime - _nextMarkTime) < TIME_CHECK_EPSILON)
     {
         _CycleMarks();
 
