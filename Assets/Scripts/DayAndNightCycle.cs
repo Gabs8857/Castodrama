@@ -14,10 +14,13 @@ public class DayAndNightCycle : MonoBehaviour
     }
 
     [SerializeField] private DayAndNighMark[] _marks;
-    [SerializeField] private float _cycleLenght = 300; // in seconds
+    [SerializeField] private float _cycleLenght = 24; // in seconds
     [SerializeField] private Light2D _light;
 
-    private const float TIME_CHECK_EPSILON = 0.1f;
+    // DEBUG
+    [SerializeField] private bool _debugLogs = true;
+
+    private const float _TIME_CHECK_EPSILON = 0.1f;
     
     private float _currentCycleTime;
     private int _currentMarkIndex, _nextMarkIndex;
@@ -29,6 +32,11 @@ public class DayAndNightCycle : MonoBehaviour
     {
         _currentMarkIndex = -1;
         _CycleMarks();
+
+        if (_debugLogs)
+        {
+            Debug.Log("[DayNight] Cycle started");
+        }
     }
 
     // Update is called once per frame
@@ -36,18 +44,48 @@ public class DayAndNightCycle : MonoBehaviour
     {
        _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
 
-    // Passed a mark ?
-    if (Mathf.Abs(_currentCycleTime - _nextMarkTime) < TIME_CHECK_EPSILON)
-    {
-        _CycleMarks();
+        // DEBUG
+        if (_debugLogs)
+        {
+            Debug.Log($"[DayNight] Current Time : {_currentCycleTime:F2} / {_cycleLenght}");
+        }
 
+        // Passed a mark ?
+        if (Mathf.Abs(_currentCycleTime - _nextMarkTime) < _TIME_CHECK_EPSILON)
+        {
+            DayAndNighMark next = _marks[_currentMarkIndex];
+
+            _light.color = next.color;
+            _light.intensity = next.intensity;
+
+            // DEBUG
+            if (_debugLogs)
+            {
+                Debug.Log(
+                    $"[DayNight] Mark reached -> " +
+                    $"Index : {_currentMarkIndex}, " +
+                    $"Next Time : {_nextMarkTime:F2}, " +
+                    $"Intensity : {next.intensity}"
+                );
+            }
+            
+            _CycleMarks();
+        }
     }
-    }
+
     private void _CycleMarks()
     {
         _currentMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
         _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
-    }
 
+        // DEBUG
+        if (_debugLogs)
+        {
+            Debug.Log(
+                $"[DayNight] New target mark : {_nextMarkIndex} " +
+                $"at {_nextMarkTime:F2}s"
+            );
+        }
+    }
 }
