@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Test Endpoint</title>
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #171b2d;
+      --text: #eaf0ff;
+      --muted: #9fb0d8;
+      --accent: #4ec2ff;
+      --ok: #6de57b;
+      --err: #ff6d6d;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(circle at top right, #1f2b52, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: min(760px, 95vw);
+      background: linear-gradient(180deg, #1c2340 0%, var(--card) 100%);
+      border: 1px solid #2f3b66;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    h1 { margin-top: 0; }
+    p { color: var(--muted); }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #3e4b79;
+      background: #0f1430;
+      color: var(--text);
+      margin: 10px 0;
+    }
+    button {
+      background: linear-gradient(90deg, #2d7cff, var(--accent));
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    code {
+      display: inline-block;
+      margin-top: 10px;
+      color: #b8d7ff;
+      background: #0e152e;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #263257;
+    }
+    #status { margin-top: 12px; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Unity Contact Endpoint</h1>
+    <p>Test direct du endpoint PHP avant de brancher Unity.</p>
+
+    <label for="message">Message</label>
+    <input id="message" placeholder="Tape un message..." />
+    <button id="send">Envoyer</button>
+    <div id="status"></div>
+
+    <p>Configure Unity avec ce endpoint :</p>
+    <code id="endpoint"></code>
+  </main>
+
+  <script>
+    const endpoint = new URL('contact.php', window.location.href).toString();
+    document.getElementById('endpoint').textContent = endpoint;
+
+    const status = document.getElementById('status');
+    document.getElementById('send').addEventListener('click', async () => {
+      const message = document.getElementById('message').value.trim();
+      if (!message) {
+        status.style.color = 'var(--err)';
+        status.textContent = 'Message vide.';
+        return;
+      }
+
+      try {
+        const response = await fetch(endpoint + '?message=' + encodeURIComponent(message));
+        const json = await response.json();
+        if (!response.ok || !json.ok) {
+          throw new Error(json.error || 'HTTP ' + response.status);
+        }
+        status.style.color = 'var(--ok)';
+        status.textContent = 'Message enregistre.';
+      } catch (error) {
+        status.style.color = 'var(--err)';
+        status.textContent = 'Erreur: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
