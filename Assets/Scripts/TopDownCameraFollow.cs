@@ -17,7 +17,7 @@ public class TopDownCameraFollow : MonoBehaviour
     private Transform target;
 
     [SerializeField]
-    private CameraViewMode viewMode = CameraViewMode.PokemonThreeQuarter;
+    private CameraViewMode viewMode = CameraViewMode.TopDown;
 
     [SerializeField]
     private Vector3 offset = new Vector3(0f, 0f, -10f);

@@ -104,11 +104,8 @@ public static class TopDownBootstrap
         follow.Target = playerObject.transform;
         follow.Offset = new Vector3(0f, 0f, -10f);
         follow.SmoothTime = 0.12f;
-        cameraObject.transform.position = new Vector3(
-            playerObject.transform.position.x,
-            playerObject.transform.position.y + 6f,
-            playerObject.transform.position.z - 8f);
-        cameraObject.transform.rotation = Quaternion.Euler(35f, 0f, 0f);
+        cameraObject.transform.position = playerObject.transform.position + new Vector3(0f, 0f, -10f);
+        cameraObject.transform.rotation = Quaternion.identity;
 
         EnsureDangerZoneIsConfigured();
         EnsureDangerBarUiExists();
