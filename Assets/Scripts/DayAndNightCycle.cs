@@ -1,23 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;   
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
+using TMPro;
 
 public class DayAndNightCycle : MonoBehaviour
 {
-    [System.Serializable]
-    public class DayAndNighMark
-    {
-        public float timeRatio;
-        public Color color;
-        public float intensity;
-    }
+    [Header("Cycle Settings")]
+    [SerializeField] private float _cycleLenght = 24f; // In seconds
 
-    [SerializeField] private DayAndNighMark[] _marks;
-    [SerializeField] private float _cycleLenght = 300; // in seconds
-    [SerializeField] private Light2D _light;
-
-    // PLAYER VISION
     [Header("Player Vision")]
     [SerializeField] private Light2D _playerVisionLight;
 
@@ -27,20 +18,34 @@ public class DayAndNightCycle : MonoBehaviour
     [SerializeField] private float _dayInnerRadius = 5f;
     [SerializeField] private float _nightInnerRadius = 1f;
 
-    // DEBUG
+    [Header("End Night UI")]
+    [SerializeField] private Image _flashImage;
+    [SerializeField] private TMP_Text _endText;
+
+    [SerializeField] private float _flashDuration = 2f;
+
+    [Header("Debug")]
     [SerializeField] private bool _debugLogs = true;
 
-    private const float _TIME_CHECK_EPSILON = 0.1f;
-    
     private float _currentCycleTime;
-    private int _currentMarkIndex, _nextMarkIndex;
-    private float _currentMarkTime, _nextMarkTime;
-
+    private bool _nightEnded;
 
     void Start()
     {
-        _currentMarkIndex = -1;
-        _CycleMarks();
+        // Reset UI
+        if (_flashImage != null)
+        {
+            Color imageColor = _flashImage.color;
+            imageColor.a = 0f;
+            _flashImage.color = imageColor;
+        }
+
+        if (_endText != null)
+        {
+            Color textColor = _endText.color;
+            textColor.a = 0f;
+            _endText.color = textColor;
+        }
 
         if (_debugLogs)
         {
@@ -50,22 +55,16 @@ public class DayAndNightCycle : MonoBehaviour
 
     void Update()
     {
-        // Safety check - prevent NullReferenceException
-        if (_marks == null || _marks.Length == 0 || _light == null)
-        {
-            if (_debugLogs)
-            {
-                Debug.LogWarning("[DayNight] Missing references! Assign _marks and _light in inspector.");
-            }
+        if (_playerVisionLight == null)
             return;
-        }
 
-        _currentCycleTime = (_currentCycleTime + Time.deltaTime) % _cycleLenght;
+        // TIMER
+        _currentCycleTime += Time.deltaTime;
 
         // NORMALIZED TIME (0 -> 1)
-        float timePercent = _currentCycleTime / _cycleLenght;
+        float timePercent = Mathf.Clamp01(_currentCycleTime / _cycleLenght);
 
-        // PLAYER VISION EVOLUTION
+        // VISION EVOLUTION
         float currentOuterRadius = Mathf.Lerp(
             _dayOuterRadius,
             _nightOuterRadius,
@@ -84,49 +83,58 @@ public class DayAndNightCycle : MonoBehaviour
         // DEBUG
         if (_debugLogs)
         {
-            Debug.Log($"[DayNight] Current Time : {_currentCycleTime:F2} / {_cycleLenght}");
+            Debug.Log(
+                $"[DayNight] Vision : " +
+                $"Outer={currentOuterRadius:F2} | " +
+                $"Inner={currentInnerRadius:F2}"
+            );
         }
 
-        // Passed a mark ?
-        if (Mathf.Abs(_currentCycleTime - _nextMarkTime) < _TIME_CHECK_EPSILON)
+        // END OF NIGHT
+        if (!_nightEnded && _currentCycleTime >= _cycleLenght)
         {
-            DayAndNighMark next = _marks[_currentMarkIndex];
-
-            _light.color = next.color;
-            _light.intensity = next.intensity;
-
-            // DEBUG
-            if (_debugLogs)
-            {
-                Debug.Log(
-                    $"[DayNight] Mark reached -> " +
-                    $"Index : {_currentMarkIndex}, " +
-                    $"Next Time : {_nextMarkTime:F2}, " +
-                    $"Intensity : {next.intensity}"
-                );
-            }
-            
-            _CycleMarks();
+            _nightEnded = true;
+            StartCoroutine(_EndNightFlash());
         }
     }
 
-    private void _CycleMarks()
+    private IEnumerator _EndNightFlash()
     {
-        // Safety check
-        if (_marks == null || _marks.Length == 0)
-            return;
+        if (_flashImage == null || _endText == null)
+            yield break;
 
-        _currentMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
-        _nextMarkIndex = (_currentMarkIndex + 1) % _marks.Length;
-        _nextMarkTime = _marks[_nextMarkIndex].timeRatio * _cycleLenght;
+        float timer = 0f;
 
-        // DEBUG
+        Color imageColor = _flashImage.color;
+        Color textColor = _endText.color;
+
+        _endText.text = "La nuit est terminée, vous rentrez vous coucher.";
+
+        while (timer < _flashDuration)
+        {
+            timer += Time.deltaTime;
+
+            float alpha = Mathf.PingPong(timer * 2f, 1f);
+
+            imageColor.a = alpha;
+            textColor.a = alpha;
+
+            _flashImage.color = imageColor;
+            _endText.color = textColor;
+
+            yield return null;
+        }
+
+        // Final state
+        imageColor.a = 1f;
+        textColor.a = 1f;
+
+        _flashImage.color = imageColor;
+        _endText.color = textColor;
+
         if (_debugLogs)
         {
-            Debug.Log(
-                $"[DayNight] New target mark : {_nextMarkIndex} " +
-                $"at {_nextMarkTime:F2}s"
-            );
+            Debug.Log("[DayNight] Night ended");
         }
     }
 }
