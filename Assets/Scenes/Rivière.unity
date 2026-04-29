@@ -78515,6 +78515,7 @@ GameObject:
   - component: {fileID: 1878646399}
   - component: {fileID: 1878646398}
   - component: {fileID: 1878646397}
+  - component: {fileID: 1878646405}
   m_Layer: 0
   m_Name: "Rivi\xE8re"
   m_TagString: Untagged
@@ -80331,6 +80332,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2, y: 5}
   m_EdgeRadius: 0
+--- !u!114 &1878646405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878646364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 754beaac42c41d5499d9c2b27447a7d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RiverTeleport
+  riverSurface: {fileID: 1878646371}
+  riverBottom: {fileID: 828515941}
 --- !u!1 &1890992474
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,10 +9,16 @@ public class RiverTeleport : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("[RiverTeleport] OnTriggerEnter2D détecté avec: " + collision.gameObject.name + " | Tag: " + collision.tag);
+        
         if (collision.CompareTag("Player"))
         {
             isInRiverZone = true;
-            Debug.Log("Entrée dans la rivière - Appuie sur E pour aller au fond!");
+            Debug.Log("[RiverTeleport] ✓ JOUEUR EN RIVIÈRE! Appuie sur E pour aller au fond!");
+        }
+        else
+        {
+            Debug.Log("[RiverTeleport] ✗ Pas un joueur (tag: " + collision.tag + ")");
         }
     }
 
@@ -21,15 +27,19 @@ public class RiverTeleport : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             isInRiverZone = false;
-            Debug.Log("Sortie de la rivière");
+            Debug.Log("[RiverTeleport] Sortie de la rivière");
         }
     }
 
     private void Update()
     {
-        if (isInRiverZone && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (isInRiverZone)
         {
-            TeleportToRiverBottom();
+            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                Debug.Log("[RiverTeleport] E pressé! Téléportation...");
+                TeleportToRiverBottom();
+            }
         }
     }
 
@@ -39,23 +49,33 @@ public class RiverTeleport : MonoBehaviour
         
         if (player == null)
         {
-            Debug.LogWarning("Joueur non trouvé!");
+            Debug.LogError("[RiverTeleport] ✗ JOUEUR NON TROUVÉ!");
             return;
         }
+        
+        Debug.Log("[RiverTeleport] ✓ Joueur trouvé à: " + player.position);
 
-        if (riverSurface == null || riverBottom == null)
+        if (riverSurface == null)
         {
-            Debug.LogWarning("Rivière surface ou fond non assignée!");
+            Debug.LogError("[RiverTeleport] ✗ River Surface NON ASSIGNÉE!");
+            return;
+        }
+        
+        if (riverBottom == null)
+        {
+            Debug.LogError("[RiverTeleport] ✗ River Bottom NON ASSIGNÉE!");
             return;
         }
 
         // Calculer la position relative du joueur par rapport à la rivière surface
         Vector3 relativePosition = player.position - riverSurface.position;
+        Debug.Log("[RiverTeleport] Position relative: " + relativePosition);
         
         // Appliquer cette position relative au fond de la rivière
         Vector3 newPosition = riverBottom.position + relativePosition;
+        Debug.Log("[RiverTeleport] Nouvelle position: " + newPosition);
         
         player.position = newPosition;
-        Debug.Log("Téléporté au fond à position: " + newPosition + " | Décalage relatif: " + relativePosition);
+        Debug.Log("[RiverTeleport] ✓ TÉLÉPORTÉ AU FOND!");
     }
 }
