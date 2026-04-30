@@ -15,11 +15,19 @@ public class TopDownPlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 moveInput;
 
+    // Inventaire
+    private GameObject equippedItem;
+    private bool hasItem = false;
+    private Vector3 itemOffset = new Vector3(0.3f, 0.2f, 0); // Position relative par rapport au joueur
+
     public float MoveSpeed
     {
         get => moveSpeed;
         set => moveSpeed = Mathf.Max(0f, value);
     }
+
+    public bool HasItem => hasItem;
+    public GameObject EquippedItem => equippedItem;
 
     private void Awake()
     {
@@ -53,6 +61,47 @@ public class TopDownPlayerController : MonoBehaviour
         if (rb != null)
         {
             rb.linearVelocity = moveInput * moveSpeed;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        // L'item équippé suit le joueur
+        if (equippedItem != null)
+        {
+            // Adapter l'offset selon la direction du personnage
+            Vector3 adjustedOffset = itemOffset;
+            if (spriteRenderer.flipX)
+            {
+                adjustedOffset.x = -itemOffset.x;
+            }
+
+            equippedItem.transform.position = transform.position + adjustedOffset;
+        }
+    }
+
+    /// <summary>
+    /// Tente de ramasser un item. Retourne true si succès, false si le joueur a déjà un item.
+    /// </summary>
+    public bool PickUpItem(GameObject item)
+    {
+        if (hasItem)
+            return false; // Déjà un item équippé
+
+        equippedItem = item;
+        hasItem = true;
+        return true;
+    }
+
+    /// <summary>
+    /// Dépose l'item actuellement équippé.
+    /// </summary>
+    public void DropItem()
+    {
+        if (equippedItem != null)
+        {
+            equippedItem = null;
+            hasItem = false;
         }
     }
 
