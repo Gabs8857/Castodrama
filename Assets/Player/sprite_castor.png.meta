@@ -1,0 +1,1235 @@
+fileFormatVersion: 2
+guid: 62f5745f26f0a80478117d8a5b1ba93c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1452059578167205440
+    second: sprite_castor_0
+  - first:
+      213: -6805782905426434
+    second: sprite_castor_1
+  - first:
+      213: -65518793425312521
+    second: sprite_castor_2
+  - first:
+      213: 5933242531502417144
+    second: sprite_castor_3
+  - first:
+      213: 3884105601831245096
+    second: sprite_castor_4
+  - first:
+      213: -1994256205690712152
+    second: sprite_castor_5
+  - first:
+      213: -65347222163702061
+    second: sprite_castor_6
+  - first:
+      213: 2680078546146379486
+    second: sprite_castor_7
+  - first:
+      213: -8048555114096111928
+    second: sprite_castor_8
+  - first:
+      213: 7946233275544333136
+    second: sprite_castor_9
+  - first:
+      213: 49851760290869834
+    second: sprite_castor_10
+  - first:
+      213: -7964415227902605676
+    second: sprite_castor_11
+  - first:
+      213: 6826996606734563501
+    second: sprite_castor_12
+  - first:
+      213: -6113712020388125034
+    second: sprite_castor_13
+  - first:
+      213: -58378012203562351
+    second: sprite_castor_14
+  - first:
+      213: -5701717460650150228
+    second: sprite_castor_15
+  - first:
+      213: -1486460818307176034
+    second: sprite_castor_16
+  - first:
+      213: -3198800655738853030
+    second: sprite_castor_17
+  - first:
+      213: -3476381456331373394
+    second: sprite_castor_18
+  - first:
+      213: -4581661995838563692
+    second: sprite_castor_19
+  - first:
+      213: -8566067348840240548
+    second: sprite_castor_20
+  - first:
+      213: 2452238110128270159
+    second: sprite_castor_21
+  - first:
+      213: -3012095400569145943
+    second: sprite_castor_22
+  - first:
+      213: -6588450404524860430
+    second: sprite_castor_23
+  - first:
+      213: 1236566899759495554
+    second: sprite_castor_24
+  - first:
+      213: 5058068849940819101
+    second: sprite_castor_25
+  - first:
+      213: 5655704480429482028
+    second: sprite_castor_26
+  - first:
+      213: 8506823445732438005
+    second: sprite_castor_27
+  - first:
+      213: -6652845848907894378
+    second: sprite_castor_28
+  - first:
+      213: -2943905055078404123
+    second: sprite_castor_29
+  - first:
+      213: -5090558172719539228
+    second: sprite_castor_30
+  - first:
+      213: -9107070445989961228
+    second: sprite_castor_31
+  - first:
+      213: 230593597696262065
+    second: sprite_castor_32
+  - first:
+      213: 6065871899128324044
+    second: sprite_castor_33
+  - first:
+      213: 8224692685245752685
+    second: sprite_castor_34
+  - first:
+      213: -7964311827632539767
+    second: sprite_castor_35
+  - first:
+      213: 3209114720593708391
+    second: sprite_castor_36
+  - first:
+      213: 1998390180453920029
+    second: sprite_castor_37
+  - first:
+      213: 112616729802391877
+    second: sprite_castor_38
+  - first:
+      213: 1918079185838020489
+    second: sprite_castor_39
+  - first:
+      213: 8784629880051438921
+    second: sprite_castor_40
+  - first:
+      213: -8089967531073916670
+    second: sprite_castor_41
+  - first:
+      213: 5803195207240693245
+    second: sprite_castor_42
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: sprite_castor_0
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 1019
+        width: 266
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04e1c553e70c62410800000000000000
+      internalID: 1452059578167205440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_1
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 1023
+        width: 268
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efde08f2d22d7eff0800000000000000
+      internalID: -6805782905426434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_2
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 980
+        width: 104
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f4a5c7210b371ff0800000000000000
+      internalID: -65518793425312521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_3
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 1005
+        width: 109
+        height: 113
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f4e07095ac175250800000000000000
+      internalID: 5933242531502417144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_4
+      rect:
+        serializedVersion: 2
+        x: 1340
+        y: 983
+        width: 121
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 825914b477d17e530800000000000000
+      internalID: 3884105601831245096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_5
+      rect:
+        serializedVersion: 2
+        x: 1630
+        y: 1019
+        width: 271
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8afcfa40c8af254e0800000000000000
+      internalID: -1994256205690712152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_6
+      rect:
+        serializedVersion: 2
+        x: 2026
+        y: 998
+        width: 91
+        height: 107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3debfd33c07d71ff0800000000000000
+      internalID: -65347222163702061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_7
+      rect:
+        serializedVersion: 2
+        x: 2058
+        y: 988
+        width: 30
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed64331fc3d813520800000000000000
+      internalID: 2680078546146379486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_8
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 984
+        width: 22
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cec52d44c9cd4090800000000000000
+      internalID: -8048555114096111928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_9
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 783
+        width: 96
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05b653b2011b64e60800000000000000
+      internalID: 7946233275544333136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_10
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 790
+        width: 91
+        height: 107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a42b09f69eb11b000800000000000000
+      internalID: 49851760290869834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_11
+      rect:
+        serializedVersion: 2
+        x: 725
+        y: 807
+        width: 109
+        height: 146
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49647292c86b87190800000000000000
+      internalID: -7964415227902605676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_12
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 792
+        width: 109
+        height: 146
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da8f53b2e3d5ebe50800000000000000
+      internalID: 6826996606734563501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_13
+      rect:
+        serializedVersion: 2
+        x: 1371
+        y: 797
+        width: 110
+        height: 118
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 696eabd2f4bb72ba0800000000000000
+      internalID: -6113712020388125034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_14
+      rect:
+        serializedVersion: 2
+        x: 1633
+        y: 806
+        width: 270
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19ac9e7d189903ff0800000000000000
+      internalID: -58378012203562351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_15
+      rect:
+        serializedVersion: 2
+        x: 2028
+        y: 799
+        width: 91
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca63e44bd2e6fd0b0800000000000000
+      internalID: -5701717460650150228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_16
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 780
+        width: 30
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e99a348e2c70f5be0800000000000000
+      internalID: -1486460818307176034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_17
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 776
+        width: 22
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a59266760c39b93d0800000000000000
+      internalID: -3198800655738853030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_18
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 601
+        width: 96
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea40d9feb7961cfc0800000000000000
+      internalID: -3476381456331373394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_19
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 602
+        width: 91
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49a922180baaa60c0800000000000000
+      internalID: -4581661995838563692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_20
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 599
+        width: 258
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5a2e4691273f1980800000000000000
+      internalID: -8566067348840240548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_21
+      rect:
+        serializedVersion: 2
+        x: 1005
+        y: 610
+        width: 249
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4beed29199180220800000000000000
+      internalID: 2452238110128270159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_22
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 591
+        width: 121
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a5fc732133e236d0800000000000000
+      internalID: -3012095400569145943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_23
+      rect:
+        serializedVersion: 2
+        x: 1665
+        y: 642
+        width: 270
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fb5402a34f1194a0800000000000000
+      internalID: -6588450404524860430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_24
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 387
+        width: 105
+        height: 189
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 289bb213b0b292110800000000000000
+      internalID: 1236566899759495554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_25
+      rect:
+        serializedVersion: 2
+        x: 423
+        y: 386
+        width: 104
+        height: 190
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9ce03af1ded13640800000000000000
+      internalID: 5058068849940819101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_26
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 387
+        width: 103
+        height: 189
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c20a59e72491d7e40800000000000000
+      internalID: 5655704480429482028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_27
+      rect:
+        serializedVersion: 2
+        x: 1038
+        y: 415
+        width: 189
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ffa8d15ade4e0670800000000000000
+      internalID: 8506823445732438005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_28
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 399
+        width: 189
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 691b96ed2f75ca3a0800000000000000
+      internalID: -6652845848907894378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_29
+      rect:
+        serializedVersion: 2
+        x: 1705
+        y: 392
+        width: 96
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ef239b23f52527d0800000000000000
+      internalID: -2943905055078404123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_30
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 237
+        width: 219
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4eb17961054ba59b0800000000000000
+      internalID: -5090558172719539228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_31
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 221
+        width: 222
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f16f424eaf2d9180800000000000000
+      internalID: -9107070445989961228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_32
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 228
+        width: 211
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bf3a26c7ab333300800000000000000
+      internalID: 230593597696262065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_33
+      rect:
+        serializedVersion: 2
+        x: 998
+        y: 232
+        width: 266
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccf51989a5e4e2450800000000000000
+      internalID: 6065871899128324044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_34
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 231
+        width: 268
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d65a3d2cb6af32270800000000000000
+      internalID: 8224692685245752685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_35
+      rect:
+        serializedVersion: 2
+        x: 1712
+        y: 201
+        width: 96
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9873589e694197190800000000000000
+      internalID: -7964311827632539767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_36
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 24
+        width: 187
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7650774f5d0198c20800000000000000
+      internalID: 3209114720593708391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_37
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 27
+        width: 259
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1da59cf745bbbb10800000000000000
+      internalID: 1998390180453920029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_38
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 50
+        width: 190
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54143afa158109100800000000000000
+      internalID: 112616729802391877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_39
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 41
+        width: 205
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98712fa6bd26e9a10800000000000000
+      internalID: 1918079185838020489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_40
+      rect:
+        serializedVersion: 2
+        x: 1325
+        y: 42
+        width: 220
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9459fbb355649e970800000000000000
+      internalID: 8784629880051438921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_41
+      rect:
+        serializedVersion: 2
+        x: 1647
+        y: 27
+        width: 176
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20135e99469aabf80800000000000000
+      internalID: -8089967531073916670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sprite_castor_42
+      rect:
+        serializedVersion: 2
+        x: 1975
+        y: 22
+        width: 184
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df5b4d95b47198050800000000000000
+      internalID: 5803195207240693245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      sprite_castor_0: 1452059578167205440
+      sprite_castor_1: -6805782905426434
+      sprite_castor_10: 49851760290869834
+      sprite_castor_11: -7964415227902605676
+      sprite_castor_12: 6826996606734563501
+      sprite_castor_13: -6113712020388125034
+      sprite_castor_14: -58378012203562351
+      sprite_castor_15: -5701717460650150228
+      sprite_castor_16: -1486460818307176034
+      sprite_castor_17: -3198800655738853030
+      sprite_castor_18: -3476381456331373394
+      sprite_castor_19: -4581661995838563692
+      sprite_castor_2: -65518793425312521
+      sprite_castor_20: -8566067348840240548
+      sprite_castor_21: 2452238110128270159
+      sprite_castor_22: -3012095400569145943
+      sprite_castor_23: -6588450404524860430
+      sprite_castor_24: 1236566899759495554
+      sprite_castor_25: 5058068849940819101
+      sprite_castor_26: 5655704480429482028
+      sprite_castor_27: 8506823445732438005
+      sprite_castor_28: -6652845848907894378
+      sprite_castor_29: -2943905055078404123
+      sprite_castor_3: 5933242531502417144
+      sprite_castor_30: -5090558172719539228
+      sprite_castor_31: -9107070445989961228
+      sprite_castor_32: 230593597696262065
+      sprite_castor_33: 6065871899128324044
+      sprite_castor_34: 8224692685245752685
+      sprite_castor_35: -7964311827632539767
+      sprite_castor_36: 3209114720593708391
+      sprite_castor_37: 1998390180453920029
+      sprite_castor_38: 112616729802391877
+      sprite_castor_39: 1918079185838020489
+      sprite_castor_4: 3884105601831245096
+      sprite_castor_40: 8784629880051438921
+      sprite_castor_41: -8089967531073916670
+      sprite_castor_42: 5803195207240693245
+      sprite_castor_5: -1994256205690712152
+      sprite_castor_6: -65347222163702061
+      sprite_castor_7: 2680078546146379486
+      sprite_castor_8: -8048555114096111928
+      sprite_castor_9: 7946233275544333136
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
