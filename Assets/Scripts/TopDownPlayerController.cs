@@ -31,8 +31,11 @@ public class TopDownPlayerController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("[TopDownPlayerController] Awake() appelé");
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+        Debug.Log($"[TopDownPlayerController] SpriteRenderer trouvé: {(spriteRenderer != null ? "OUI" : "NON")}");
+        Debug.Log($"[TopDownPlayerController] Rigidbody2D trouvé: {(rb != null ? "OUI" : "NON")}");
     }
 
     private void Update()
@@ -85,11 +88,18 @@ public class TopDownPlayerController : MonoBehaviour
     /// </summary>
     public bool PickUpItem(GameObject item)
     {
+        Debug.Log($"[TopDownPlayerController.PickUpItem] Appelé avec: {item.name}");
+        Debug.Log($"[TopDownPlayerController.PickUpItem] hasItem: {hasItem}");
+        
         if (hasItem)
-            return false; // Déjà un item équippé
+        {
+            Debug.Log($"[TopDownPlayerController.PickUpItem] Déjà un item, retour false");
+            return false;
+        }
 
         equippedItem = item;
         hasItem = true;
+        Debug.Log($"[TopDownPlayerController.PickUpItem] Item ramassé avec succès!");
         return true;
     }
 
