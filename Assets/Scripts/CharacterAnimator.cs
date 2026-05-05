@@ -54,8 +54,11 @@ public class CharacterAnimator : MonoBehaviour
         // Vérifie si le personnage se déplace
         isMoving = rb.linearVelocity.sqrMagnitude > 0.01f;
 
-        // Si on ne bouge pas, pas d'animation
-        if (!isMoving)
+        // En nage : animer peu importe la vitesse
+        // En marche : animer seulement si on bouge
+        bool shouldAnimate = isSwimming || isMoving;
+
+        if (!shouldAnimate)
         {
             timeSinceLastSwitch = 0f;
             return;

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class TopDownPlayerController : MonoBehaviour
 {
@@ -31,11 +30,8 @@ public class TopDownPlayerController : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[TopDownPlayerController] Awake() appelé");
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        Debug.Log($"[TopDownPlayerController] SpriteRenderer trouvé: {(spriteRenderer != null ? "OUI" : "NON")}");
-        Debug.Log($"[TopDownPlayerController] Rigidbody2D trouvé: {(rb != null ? "OUI" : "NON")}");
     }
 
     private void Update()
@@ -50,11 +46,11 @@ public class TopDownPlayerController : MonoBehaviour
         {
             if (moveInput.x < -inputDeadzone)
             {
-                spriteRenderer.flipX = true;
+                spriteRenderer.flipX = false;  // Gauche = pas flipper
             }
             else if (moveInput.x > inputDeadzone)
             {
-                spriteRenderer.flipX = false;
+                spriteRenderer.flipX = true;   // Droite = flipper
             }
         }
     }
@@ -69,17 +65,15 @@ public class TopDownPlayerController : MonoBehaviour
 
     private void LateUpdate()
     {
-        // L'item équippé suit le joueur
+        // L'item équippé suit le joueur avec offset adapté selon la direction
         if (equippedItem != null)
         {
-            // Adapter l'offset selon la direction du personnage
             Vector3 adjustedOffset = itemOffset;
             if (spriteRenderer.flipX)
             {
                 adjustedOffset.x = -itemOffset.x;
             }
-
-            equippedItem.transform.position = transform.position + adjustedOffset;
+            equippedItem.transform.localPosition = adjustedOffset;
         }
     }
 
@@ -88,18 +82,23 @@ public class TopDownPlayerController : MonoBehaviour
     /// </summary>
     public bool PickUpItem(GameObject item)
     {
-        Debug.Log($"[TopDownPlayerController.PickUpItem] Appelé avec: {item.name}");
-        Debug.Log($"[TopDownPlayerController.PickUpItem] hasItem: {hasItem}");
-        
         if (hasItem)
-        {
-            Debug.Log($"[TopDownPlayerController.PickUpItem] Déjà un item, retour false");
             return false;
-        }
 
         equippedItem = item;
         hasItem = true;
-        Debug.Log($"[TopDownPlayerController.PickUpItem] Item ramassé avec succès!");
+        
+        // Parente l'item au joueur
+        item.transform.SetParent(transform);
+        item.transform.localPosition = itemOffset;
+        
+        // Démarre l'animation
+        CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
+        if (playerAnimator != null)
+        {
+            playerAnimator.StartSwimming();
+        }
+        
         return true;
     }
 
@@ -110,6 +109,15 @@ public class TopDownPlayerController : MonoBehaviour
     {
         if (equippedItem != null)
         {
+            // Arrête l'animation
+            CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
+            if (playerAnimator != null)
+            {
+                playerAnimator.StopSwimming();
+            }
+            
+            // Détache l'item du joueur
+            equippedItem.transform.SetParent(null);
             equippedItem = null;
             hasItem = false;
         }

@@ -98,11 +98,14 @@ public class TeleportTrigger : MonoBehaviour
         }
 
         GameObject targetObject = target.gameObject;
-        if (!targetObject.CompareTag("Player"))
+        
+        // Vérifie que c'est le joueur (TopDownPlayerController)
+        TopDownPlayerController controller = targetObject.GetComponent<TopDownPlayerController>();
+        if (controller == null)
         {
             if (ShouldLog)
             {
-                Debug.Log(DebugPrefix + ": ignored object (not Player): " + targetObject.name + " | tag=" + targetObject.tag + " | trigger source=" + triggerObject.name, this);
+                Debug.Log(DebugPrefix + ": ignored object (not player with TopDownPlayerController): " + targetObject.name + " | trigger source=" + triggerObject.name, this);
             }
 
             return;

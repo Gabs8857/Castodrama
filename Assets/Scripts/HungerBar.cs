@@ -64,7 +64,7 @@ public class HungerBar : MonoBehaviour
         EnsureCanvasReferences();
 
         // Find the TopDownHunger system
-        GameObject playerObject = GameObject.Find("Player");
+        GameObject playerObject = GameObject.Find("Castor");
         if (playerObject != null)
         {
             hungerSystem = playerObject.GetComponent<TopDownHunger>();

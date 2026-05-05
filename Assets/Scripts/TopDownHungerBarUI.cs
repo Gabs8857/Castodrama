@@ -150,7 +150,7 @@ public class TopDownHungerBarUI : MonoBehaviour
         // Find player's hunger system if not assigned
         if (hungerSystem == null)
         {
-            GameObject playerObject = GameObject.Find("Player");
+            GameObject playerObject = GameObject.Find("Castor");
             if (playerObject != null)
             {
                 hungerSystem = playerObject.GetComponent<TopDownHunger>();

@@ -6,7 +6,7 @@ using UnityEditor;
 
 public static class TopDownBootstrap
 {
-    private const string PlayerName = "Player";
+    private const string PlayerName = "Castor";
     private const string GroundName = "Ground";
     private const string DangerZoneName = "ZoneDanger";
     private const string DangerBarName = "DangerBar";
@@ -32,15 +32,10 @@ public static class TopDownBootstrap
             playerObject.AddComponent<TopDownPlayerController>();
         }
 
+        // Castor a déjà son SpriteRenderer et Sprite Library
         SpriteRenderer spriteRenderer = playerObject.GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
-        {
-            spriteRenderer = playerObject.AddComponent<SpriteRenderer>();
-        }
-
-        spriteRenderer.sprite = CreateWhiteSprite();
-        spriteRenderer.color = PlayerBrown;
-        spriteRenderer.sortingOrder = 10;
+        // Si Castor n'a pas de SpriteRenderer (qui ne devrait pas arriver), ne pas en créer un
+        // car Castor a déjà le bon avec Sprite Library
 
         TopDownHunger hunger = playerObject.GetComponent<TopDownHunger>();
         if (hunger == null)

@@ -26,18 +26,11 @@ public class EquippableItem : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log($"[EquippableItem.Awake] Initialisation de {itemName}");
-
         // Configure le SpriteRenderer
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && itemSprite != null)
         {
             spriteRenderer.sprite = itemSprite;
-            Debug.Log($"[EquippableItem.Awake] Sprite assigné");
-        }
-        else if (spriteRenderer == null)
-        {
-            Debug.LogError($"[EquippableItem.Awake] ERREUR: Pas de SpriteRenderer trouvé!");
         }
 
         // Force le collider en trigger
@@ -45,11 +38,6 @@ public class EquippableItem : MonoBehaviour
         if (collider != null)
         {
             collider.isTrigger = true;
-            Debug.Log($"[EquippableItem.Awake] Collider configuré en trigger");
-        }
-        else
-        {
-            Debug.LogError($"[EquippableItem.Awake] ERREUR: Pas de Collider2D trouvé!");
         }
 
         // Configure le rigidbody
@@ -59,17 +47,7 @@ public class EquippableItem : MonoBehaviour
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.gravityScale = 1f;
             rb.simulated = true;
-            Debug.Log($"[EquippableItem.Awake] Rigidbody configuré");
         }
-        else
-        {
-            Debug.LogError($"[EquippableItem.Awake] ERREUR: Pas de Rigidbody2D trouvé!");
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        Debug.Log($"[EquippableItem.OnTriggerStay2D] En contact continu avec: {collision.gameObject.name}");
     }
 
     private void Update()
@@ -79,64 +57,31 @@ public class EquippableItem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log($"[EquippableItem.OnTriggerEnter2D] DÉBUT - Collision detectée avec: {collision.gameObject.name}");
-        Debug.Log($"[EquippableItem.OnTriggerEnter2D] isPickedUp: {isPickedUp}, timeSinceSpawn: {timeSinceSpawn}");
-
         if (isPickedUp)
-        {
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] Item déjà ramassé, sortie");
             return;
-        }
 
         // Empêche de ramasser l'item immédiatement au démarrage
         if (timeSinceSpawn < pickupDelay)
-        {
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] Délai de sécurité pas encore écoulé ({timeSinceSpawn:F2}s / {pickupDelay}s)");
             return;
-        }
 
-        Debug.Log($"[EquippableItem.OnTriggerEnter2D] Collision avec: {collision.gameObject.name} (Tag: {collision.gameObject.tag})");
-
-        // Cherche le TopDownPlayerController directement
+        // Cherche le TopDownPlayerController
         player = collision.GetComponent<TopDownPlayerController>();
-        Debug.Log($"[EquippableItem.OnTriggerEnter2D] GetComponent<TopDownPlayerController>: {(player != null ? "TROUVÉ" : "NON")}");
         
         if (player == null)
-        {
             player = collision.GetComponentInParent<TopDownPlayerController>();
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] GetComponentInParent<TopDownPlayerController>: {(player != null ? "TROUVÉ" : "NON")}");
-        }
-
+        
         if (player == null)
-        {
             player = collision.GetComponentInChildren<TopDownPlayerController>();
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] GetComponentInChildren<TopDownPlayerController>: {(player != null ? "TROUVÉ" : "NON")}");
-        }
-
+        
         if (player == null)
-        {
             player = FindObjectOfType<TopDownPlayerController>();
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] FindObjectOfType<TopDownPlayerController>: {(player != null ? "TROUVÉ" : "NON")}");
-        }
 
         if (player != null)
         {
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] ✓ TopDownPlayerController TROUVÉ! Tentative PickUpItem...");
-            bool pickupSuccess = player.PickUpItem(gameObject);
-            Debug.Log($"[EquippableItem.OnTriggerEnter2D] PickUpItem retourné: {pickupSuccess}");
-            
-            if (pickupSuccess)
+            if (player.PickUpItem(gameObject))
             {
                 OnItemPickedUp();
             }
-            else
-            {
-                Debug.LogWarning("[EquippableItem.OnTriggerEnter2D] Le joueur a déjà un item!");
-            }
-        }
-        else
-        {
-            Debug.LogError($"[EquippableItem.OnTriggerEnter2D] ✗ ERREUR: Impossible de trouver TopDownPlayerController!");
         }
     }
 
@@ -144,7 +89,7 @@ public class EquippableItem : MonoBehaviour
     {
         isPickedUp = true;
 
-        // Désactive la gravité et configure le rigidbody si présent
+        // Désactive la gravité et configure le rigidbody
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -153,21 +98,19 @@ public class EquippableItem : MonoBehaviour
             rb.gravityScale = 0;
         }
 
-        // Désactive le collider pour éviter les interactions
+        // Désactive le collider
         Collider2D collider = GetComponent<Collider2D>();
         if (collider != null)
         {
             collider.enabled = false;
         }
 
-        // Augmente le sorting order pour que l'item soit visible devant le joueur
+        // Augmente le sorting order pour visibilité
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
             spriteRenderer.sortingOrder = 100;
         }
-
-        Debug.Log($"Item ramassé: {itemName}");
 
         if (destroyOnPickup)
         {
@@ -187,7 +130,7 @@ public class EquippableItem : MonoBehaviour
 
         isPickedUp = false;
 
-        // Réactive les composants
+        // Réactive le rigidbody
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -195,6 +138,7 @@ public class EquippableItem : MonoBehaviour
             rb.gravityScale = 1;
         }
 
+        // Réactive le collider
         Collider2D collider = GetComponent<Collider2D>();
         if (collider != null)
         {
@@ -207,7 +151,5 @@ public class EquippableItem : MonoBehaviour
         {
             spriteRenderer.sortingOrder = 0;
         }
-
-        Debug.Log($"Item lâché: {itemName}");
     }
 }

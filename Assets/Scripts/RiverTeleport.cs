@@ -9,22 +9,24 @@ public class RiverTeleport : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("[RiverTeleport] OnTriggerEnter2D détecté avec: " + collision.gameObject.name + " | Tag: " + collision.tag);
+        Debug.Log("[RiverTeleport] OnTriggerEnter2D détecté avec: " + collision.gameObject.name);
         
-        if (collision.CompareTag("Player"))
+        TopDownPlayerController controller = collision.GetComponent<TopDownPlayerController>();
+        if (controller != null)
         {
             isInRiverZone = true;
             Debug.Log("[RiverTeleport] ✓ JOUEUR EN RIVIÈRE! Appuie sur E pour aller au fond!");
         }
         else
         {
-            Debug.Log("[RiverTeleport] ✗ Pas un joueur (tag: " + collision.tag + ")");
+            Debug.Log("[RiverTeleport] ✗ Pas le joueur: " + collision.gameObject.name);
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        TopDownPlayerController controller = collision.GetComponent<TopDownPlayerController>();
+        if (controller != null)
         {
             isInRiverZone = false;
             Debug.Log("[RiverTeleport] Sortie de la rivière");
@@ -45,7 +47,9 @@ public class RiverTeleport : MonoBehaviour
 
     private void TeleportToRiverBottom()
     {
-        Transform player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        // Cherche le joueur via TopDownPlayerController au lieu du tag
+        TopDownPlayerController playerController = FindObjectOfType<TopDownPlayerController>();
+        Transform player = playerController != null ? playerController.transform : null;
         
         if (player == null)
         {
