@@ -81,5 +81,17 @@ public class RiverTeleport : MonoBehaviour
         
         player.position = newPosition;
         Debug.Log("[RiverTeleport] ✓ TÉLÉPORTÉ AU FOND!");
+        
+        // Change l'animation en nage profonde
+        CharacterAnimator animator = playerController.GetComponent<CharacterAnimator>();
+        if (animator != null)
+        {
+            animator.StartSwimmingDeep();
+            Debug.Log("[RiverTeleport] ✓ Animation nage profonde activée");
+        }
+        else
+        {
+            Debug.LogError("[RiverTeleport] ✗ CharacterAnimator NON TROUVÉ!");
+        }
     }
 }

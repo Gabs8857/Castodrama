@@ -18,16 +18,23 @@ public class CharacterAnimator : MonoBehaviour
     private string swimCategoryName = "Swim"; // Catégorie pour la nage
 
     [SerializeField]
+    private string deepSwimCategoryName = "deep_swim"; // Catégorie pour la nage profonde
+
+    [SerializeField]
     private string[] walkFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de marche (3 frames)
 
     [SerializeField]
     private string[] swimFrameNames = { "Frame1", "Frame2" }; // Frames de nage (2 frames)
+
+    [SerializeField]
+    private string[] deepSwimFrameNames = { "Frame1", "Frame2" }; // Frames de nage profonde (2 frames)
 
     private SpriteResolver spriteResolver;
     private Rigidbody2D rb;
     private float timeSinceLastSwitch = 0f;
     private int currentFrameIndex = 0;
     private bool isSwimming = false;
+    private bool isSwimmingDeep = false;
     private bool isMoving = false;
 
     private void Awake()
@@ -56,7 +63,7 @@ public class CharacterAnimator : MonoBehaviour
 
         // En nage : animer peu importe la vitesse
         // En marche : animer seulement si on bouge
-        bool shouldAnimate = isSwimming || isMoving;
+        bool shouldAnimate = isSwimming || isSwimmingDeep || isMoving;
 
         if (!shouldAnimate)
         {
@@ -75,11 +82,36 @@ public class CharacterAnimator : MonoBehaviour
 
     private void SwitchFrame()
     {
-        string[] frameNames = isSwimming ? swimFrameNames : walkFrameNames;
-        string categoryName = isSwimming ? swimCategoryName : walkCategoryName;
+        string[] frameNames;
+        string categoryName;
+        
+        if (isSwimmingDeep)
+        {
+            frameNames = deepSwimFrameNames;
+            categoryName = deepSwimCategoryName;
+        }
+        else if (isSwimming)
+        {
+            frameNames = swimFrameNames;
+            categoryName = swimCategoryName;
+        }
+        else
+        {
+            frameNames = walkFrameNames;
+            categoryName = walkCategoryName;
+        }
         
         string labelToSet = frameNames[currentFrameIndex];
-        spriteResolver.SetCategoryAndLabel(categoryName, labelToSet);
+        Debug.Log($"[CharacterAnimator] SwitchFrame - Category: {categoryName}, Label: {labelToSet}, isSwimmingDeep: {isSwimmingDeep}, isSwimming: {isSwimming}");
+        
+        try
+        {
+            spriteResolver.SetCategoryAndLabel(categoryName, labelToSet);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[CharacterAnimator] ERROR setting category/label: {e.Message}");
+        }
         
         currentFrameIndex = (currentFrameIndex + 1) % frameNames.Length;
     }
@@ -116,4 +148,38 @@ public class CharacterAnimator : MonoBehaviour
     /// Retourne si le personnage est en train de nager
     /// </summary>
     public bool IsSwimming => isSwimming;
+
+    /// <summary>
+    /// Retourne si le personnage est en train de nager profondément
+    /// </summary>
+    public bool IsSwimmingDeep => isSwimmingDeep;
+
+    /// <summary>
+    /// Active l'animation de nage profonde
+    /// </summary>
+    public void StartSwimmingDeep()
+    {
+        if (!isSwimmingDeep)
+        {
+            isSwimmingDeep = true;
+            isSwimming = false; // Désactive la nage normale
+            currentFrameIndex = 0;
+            timeSinceLastSwitch = 0f;
+            Debug.Log($"[CharacterAnimator] Mode NAGE PROFONDE activé");
+        }
+    }
+
+    /// <summary>
+    /// Désactive l'animation de nage profonde et repasse à la marche
+    /// </summary>
+    public void StopSwimmingDeep()
+    {
+        if (isSwimmingDeep)
+        {
+            isSwimmingDeep = false;
+            currentFrameIndex = 0;
+            timeSinceLastSwitch = 0f;
+            Debug.Log($"[CharacterAnimator] Mode MARCHE activé (sortie nage profonde)");
+        }
+    }
 }

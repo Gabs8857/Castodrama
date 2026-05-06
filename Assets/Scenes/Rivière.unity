@@ -55662,7 +55662,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6805782905426434, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
+  m_Sprite: {fileID: 8224692685245752685, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -55684,10 +55684,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteResolver
-  m_CategoryHash: 5.7934595e-11
+  m_CategoryHash: 0.000055999422
   m_labelHash: 0.000036713704
   m_SpriteKey: 0
-  m_SpriteHash: 958845770
+  m_SpriteHash: 405456113
 --- !u!114 &394323002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55714,7 +55714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 905e24dd3ee4e22468e127e2a87229bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteLibrarySwitcher
-  spriteLibrary: {fileID: 0}
+  spriteLibrary: {fileID: 394323002}
   newLibraryAsset: {fileID: 7108339969198208228, guid: 0e81a9eb61cc97c4b85d365f54ec7770, type: 3}
 --- !u!114 &394323004
 MonoBehaviour:
@@ -55731,11 +55731,15 @@ MonoBehaviour:
   frameSwitchSpeed: 0.5
   walkCategoryName: Walk
   swimCategoryName: Swim
+  deepSwimCategoryName: deep_swim
   walkFrameNames:
   - Frame1
   - Frame2
   - Frame3
   swimFrameNames:
+  - Frame1
+  - Frame2
+  deepSwimFrameNames:
   - Frame1
   - Frame2
 --- !u!50 &394323006
@@ -56266,7 +56270,6 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
-  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -56394,18 +56397,6 @@ Transform:
   - {fileID: 1958984750}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &519420033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14f79dee897b346248b5baaed21231a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
 --- !u!1 &557980675
 GameObject:
   m_ObjectHideFlags: 0

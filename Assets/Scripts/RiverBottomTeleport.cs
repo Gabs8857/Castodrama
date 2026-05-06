@@ -16,6 +16,14 @@ public class RiverBottomTeleport : MonoBehaviour
         {
             isInRiverBottomZone = true;
             Debug.Log("[RiverBottomTeleport] ✓ JOUEUR AU FOND! Appuie sur E pour remonter!");
+            
+            // Active l'animation de nage profonde
+            CharacterAnimator animator = controller.GetComponent<CharacterAnimator>();
+            if (animator != null)
+            {
+                animator.StartSwimmingDeep();
+                Debug.Log("[RiverBottomTeleport] ✓ Animation nage profonde activée");
+            }
         }
         else
         {
@@ -30,6 +38,14 @@ public class RiverBottomTeleport : MonoBehaviour
         {
             isInRiverBottomZone = false;
             Debug.Log("[RiverBottomTeleport] Sortie du fond");
+            
+            // Désactive l'animation de nage profonde
+            CharacterAnimator animator = controller.GetComponent<CharacterAnimator>();
+            if (animator != null)
+            {
+                animator.StopSwimmingDeep();
+                Debug.Log("[RiverBottomTeleport] ✓ Animation nage profonde désactivée");
+            }
         }
     }
 

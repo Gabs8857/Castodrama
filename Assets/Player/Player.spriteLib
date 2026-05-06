@@ -50,6 +50,22 @@ MonoBehaviour:
       m_SpriteOverride: {fileID: 230593597696262065, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
     m_FromMain: 0
     m_EntryOverrideCount: 3
+  - m_Name: deep_swim
+    m_Hash: 946528492
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Frame1
+      m_Hash: 554740912
+      m_Sprite: {fileID: 6065871899128324044, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6065871899128324044, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
+    - m_Name: Frame2
+      m_Hash: 941227274
+      m_Sprite: {fileID: 8224692685245752685, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8224692685245752685, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 2
   m_PrimaryLibraryGUID: 
-  m_ModificationHash: 639131603728014788
+  m_ModificationHash: 639137076515031755
   m_Version: 1
