@@ -192,24 +192,7 @@ public class EquippableItem : MonoBehaviour
         grabMessageCanvas.renderMode = RenderMode.WorldSpace;
 
         RectTransform canvasRect = canvasGO.GetComponent<RectTransform>();
-        canvasRect.sizeDelta = new Vector2(200, 100);
+        canvasRect.sizeDelta = new Vector2(120, 50);
         canvasRect.localPosition = new Vector3(0, 1.5f, 0);
-
-        GameObject textGO = new GameObject("Text");
-        textGO.transform.SetParent(canvasGO.transform);
-        textGO.transform.localPosition = Vector3.zero;
-
-        grabMessageText = textGO.AddComponent<TextMeshProUGUI>();
-        grabMessageText.text = "Appuyez sur G pour grab";
-        grabMessageText.alignment = TextAlignmentOptions.Center;
-        grabMessageText.fontSize = 4;
-        grabMessageText.color = Color.white;
-
-        RectTransform textRect = textGO.GetComponent<RectTransform>();
-        textRect.sizeDelta = new Vector2(200, 100);
-
-        Outline outline = textGO.AddComponent<Outline>();
-        outline.effectColor = Color.black;
-        outline.effectDistance = new Vector2(0.1f, -0.1f);
     }
 }
