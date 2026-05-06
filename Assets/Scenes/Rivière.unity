@@ -1023,7 +1023,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1609091375808260191, guid: 189d26dc337633d4b846f3be26a6c79b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1044,7 +1044,7 @@ Transform:
   m_GameObject: {fileID: 193513260}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.11, y: -1.11, z: 0}
+  m_LocalPosition: {x: -4.1099854, y: -1.1100006, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1103,7 +1103,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 193513260}
-  m_BodyType: 0
+  m_BodyType: 2
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -77590,13 +77590,13 @@ SceneRoots:
   m_Roots:
   - {fileID: 1064702108}
   - {fileID: 394322999}
-  - {fileID: 193513262}
   - {fileID: 1890992478}
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 405844806}
   - {fileID: 36948806}
   - {fileID: 579248676}
+  - {fileID: 193513262}
   - {fileID: 509976790}
   - {fileID: 622534072}
   - {fileID: 105440735}

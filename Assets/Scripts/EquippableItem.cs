@@ -1,10 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.InputSystem;
 
-/// <summary>
-/// Script pour les items qui peuvent être ramassés et équippés par le joueur.
-/// L'item suivra le joueur après avoir été ramassé.
-/// À attacher sur un GameObject avec un BoxCollider2D/CircleCollider2D en Trigger.
-/// </summary>
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -17,12 +15,15 @@ public class EquippableItem : MonoBehaviour
     private string itemName = "Item";
 
     [SerializeField]
-    private Sprite itemSprite; // Assigne ton sprite ici dans l'Inspector
+    private Sprite itemSprite;
 
     private TopDownPlayerController player;
     private bool isPickedUp = false;
-    private float pickupDelay = 0.5f; // Délai avant de pouvoir être ramassé
+    private float pickupDelay = 0.5f;
     private float timeSinceSpawn = 0f;
+    
+    private Canvas grabMessageCanvas;
+    private TextMeshProUGUI grabMessageText;
 
     private void Awake()
     {
@@ -31,57 +32,72 @@ public class EquippableItem : MonoBehaviour
         if (spriteRenderer != null && itemSprite != null)
         {
             spriteRenderer.sprite = itemSprite;
+            spriteRenderer.sortingOrder = 50;
         }
 
-        // Force le collider en trigger
+        // Configure collider en trigger
         Collider2D collider = GetComponent<Collider2D>();
-        if (collider != null)
-        {
-            collider.isTrigger = true;
-        }
+        collider.isTrigger = true;
 
-        // Configure le rigidbody
+        // Configure rigidbody comme FoodItem
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 1f;
-            rb.simulated = true;
-        }
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rb.simulated = true;
+        
+        Debug.Log($"[EquippableItem] Setup complet pour {gameObject.name}");
     }
 
     private void Update()
     {
         timeSinceSpawn += Time.deltaTime;
+
+        if (player != null && !isPickedUp && timeSinceSpawn >= pickupDelay)
+        {
+            if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame)
+            {
+                Debug.Log($"[EquippableItem] G pressé!");
+                if (player.PickUpItem(gameObject))
+                {
+                    OnItemPickedUp();
+                }
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log($"[EquippableItem] OnTriggerEnter2D!!! Collision avec: {collision.gameObject.name}");
+        
         if (isPickedUp)
             return;
 
-        // Empêche de ramasser l'item immédiatement au démarrage
         if (timeSinceSpawn < pickupDelay)
             return;
 
-        // Cherche le TopDownPlayerController
-        player = collision.GetComponent<TopDownPlayerController>();
-        
+        player = collision.GetComponentInParent<TopDownPlayerController>();
         if (player == null)
-            player = collision.GetComponentInParent<TopDownPlayerController>();
-        
-        if (player == null)
-            player = collision.GetComponentInChildren<TopDownPlayerController>();
-        
-        if (player == null)
-            player = FindObjectOfType<TopDownPlayerController>();
+            player = collision.GetComponent<TopDownPlayerController>();
 
         if (player != null)
         {
-            if (player.PickUpItem(gameObject))
-            {
-                OnItemPickedUp();
-            }
+            Debug.Log($"[EquippableItem] ✓ Joueur trouvé!");
+            ShowGrabMessage();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        TopDownPlayerController controller = collision.GetComponentInParent<TopDownPlayerController>();
+        if (controller == null)
+            controller = collision.GetComponent<TopDownPlayerController>();
+        
+        if (controller == player)
+        {
+            Debug.Log($"[EquippableItem] Joueur sort");
+            HideGrabMessage();
+            player = null;
         }
     }
 
@@ -89,7 +105,6 @@ public class EquippableItem : MonoBehaviour
     {
         isPickedUp = true;
 
-        // Désactive la gravité et configure le rigidbody
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -98,19 +113,19 @@ public class EquippableItem : MonoBehaviour
             rb.gravityScale = 0;
         }
 
-        // Désactive le collider
         Collider2D collider = GetComponent<Collider2D>();
         if (collider != null)
         {
             collider.enabled = false;
         }
 
-        // Augmente le sorting order pour visibilité
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
             spriteRenderer.sortingOrder = 100;
         }
+
+        HideGrabMessage();
 
         if (destroyOnPickup)
         {
@@ -118,9 +133,6 @@ public class EquippableItem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Appelle cette méthode pour lâcher l'item (ex: au appui sur une touche).
-    /// </summary>
     public void Drop()
     {
         if (player != null)
@@ -130,26 +142,74 @@ public class EquippableItem : MonoBehaviour
 
         isPickedUp = false;
 
-        // Réactive le rigidbody
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 1;
+            rb.bodyType = RigidbodyType2D.Kinematic;
         }
 
-        // Réactive le collider
         Collider2D collider = GetComponent<Collider2D>();
         if (collider != null)
         {
             collider.enabled = true;
         }
 
-        // Réinitialise le sorting order
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
-            spriteRenderer.sortingOrder = 0;
+            spriteRenderer.sortingOrder = 50;
         }
+    }
+
+    private void ShowGrabMessage()
+    {
+        if (grabMessageCanvas == null)
+        {
+            CreateGrabMessage();
+        }
+
+        if (grabMessageCanvas != null)
+        {
+            grabMessageCanvas.gameObject.SetActive(true);
+        }
+    }
+
+    private void HideGrabMessage()
+    {
+        if (grabMessageCanvas != null)
+        {
+            grabMessageCanvas.gameObject.SetActive(false);
+        }
+    }
+
+    private void CreateGrabMessage()
+    {
+        GameObject canvasGO = new GameObject("GrabMessage");
+        canvasGO.transform.SetParent(transform);
+        canvasGO.transform.localPosition = Vector3.zero;
+
+        grabMessageCanvas = canvasGO.AddComponent<Canvas>();
+        grabMessageCanvas.renderMode = RenderMode.WorldSpace;
+
+        RectTransform canvasRect = canvasGO.GetComponent<RectTransform>();
+        canvasRect.sizeDelta = new Vector2(200, 100);
+        canvasRect.localPosition = new Vector3(0, 1.5f, 0);
+
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(canvasGO.transform);
+        textGO.transform.localPosition = Vector3.zero;
+
+        grabMessageText = textGO.AddComponent<TextMeshProUGUI>();
+        grabMessageText.text = "Appuyez sur G pour grab";
+        grabMessageText.alignment = TextAlignmentOptions.Center;
+        grabMessageText.fontSize = 4;
+        grabMessageText.color = Color.white;
+
+        RectTransform textRect = textGO.GetComponent<RectTransform>();
+        textRect.sizeDelta = new Vector2(200, 100);
+
+        Outline outline = textGO.AddComponent<Outline>();
+        outline.effectColor = Color.black;
+        outline.effectDistance = new Vector2(0.1f, -0.1f);
     }
 }

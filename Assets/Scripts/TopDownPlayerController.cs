@@ -82,21 +82,30 @@ public class TopDownPlayerController : MonoBehaviour
     /// </summary>
     public bool PickUpItem(GameObject item)
     {
+        Debug.Log($"[TopDownPlayerController] PickUpItem appelé pour: {item.name}, hasItem={hasItem}");
+        
         if (hasItem)
+        {
+            Debug.LogWarning($"[TopDownPlayerController] Grab refusé - joueur a déjà un item!");
             return false;
+        }
 
+        Debug.Log($"[TopDownPlayerController] ✓ Grab de {item.name} accepté!");
+        
         equippedItem = item;
         hasItem = true;
         
         // Parente l'item au joueur
         item.transform.SetParent(transform);
         item.transform.localPosition = itemOffset;
+        Debug.Log($"[TopDownPlayerController] Item parenté et positionné");
         
         // Démarre l'animation
         CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
         if (playerAnimator != null)
         {
             playerAnimator.StartSwimming();
+            Debug.Log($"[TopDownPlayerController] Animation nage démarrée");
         }
         
         return true;
