@@ -53,11 +53,18 @@ public class EquippableItem : MonoBehaviour
     {
         timeSinceSpawn += Time.deltaTime;
 
-        if (player != null && !isPickedUp && timeSinceSpawn >= pickupDelay)
+        if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame)
         {
-            if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame)
+            if (isPickedUp)
             {
-                Debug.Log($"[EquippableItem] G pressé!");
+                // Si déjà en main, on le repose
+                Debug.Log($"[EquippableItem] G pressé pour reposer!");
+                Drop();
+            }
+            else if (player != null && timeSinceSpawn >= pickupDelay)
+            {
+                // Si pas en main, on le pick up
+                Debug.Log($"[EquippableItem] G pressé pour grab!");
                 if (player.PickUpItem(gameObject))
                 {
                     OnItemPickedUp();
