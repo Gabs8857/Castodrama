@@ -102,6 +102,7 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
 
     /// <summary>
     /// Tente de ramasser un item. Retourne true si succès, false si le joueur a déjà un item.
+    /// IMPORTANT: Conserve l'état d'animation actuel du personnage (nage/marche)
     /// </summary>
     public bool PickUpItem(GameObject item)
     {
@@ -115,43 +116,47 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
 
         Debug.Log($"[TopDownPlayerController] ✓ Grab de {item.name} accepté!");
         
+        // Log l'état actuel du personnage avant de ramasser
+        CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
+        if (playerAnimator != null)
+        {
+            bool wasSwimming = playerAnimator.IsSwimming || playerAnimator.IsSwimmingDeep;
+            Debug.Log($"[TopDownPlayerController] État du personnage: {(wasSwimming ? "NAGE" : "MARCHE")} - État CONSERVÉ après pickup");
+        }
+        
         equippedItem = item;
         hasItem = true;
         
         // Parente l'item au joueur
         item.transform.SetParent(transform);
         item.transform.localPosition = itemOffset;
-        Debug.Log($"[TopDownPlayerController] Item parenté et positionné");
-        
-        // Démarre l'animation
-        CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
-        if (playerAnimator != null)
-        {
-            playerAnimator.StartSwimming();
-            Debug.Log($"[TopDownPlayerController] Animation nage démarrée");
-        }
+        Debug.Log($"[TopDownPlayerController] Item parenté et positionné - Pas de changement d'animation");
         
         return true;
     }
 
     /// <summary>
     /// Dépose l'item actuellement équippé.
+    /// IMPORTANT: Conserve l'état d'animation actuel du personnage (nage/marche)
     /// </summary>
     public void DropItem()
     {
         if (equippedItem != null)
         {
-            // Arrête l'animation
+            // Log l'état actuel du personnage avant de déposer
             CharacterAnimator playerAnimator = GetComponent<CharacterAnimator>();
             if (playerAnimator != null)
             {
-                playerAnimator.StopSwimming();
+                bool wasSwimming = playerAnimator.IsSwimming || playerAnimator.IsSwimmingDeep;
+                Debug.Log($"[TopDownPlayerController] État du personnage: {(wasSwimming ? "NAGE" : "MARCHE")} - État CONSERVÉ après drop");
             }
             
             // Détache l'item du joueur
             equippedItem.transform.SetParent(null);
             equippedItem = null;
             hasItem = false;
+            
+            Debug.Log($"[TopDownPlayerController] Item déposé - Pas de changement d'animation");
         }
     }
 
