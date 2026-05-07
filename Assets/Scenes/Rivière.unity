@@ -894,6 +894,7 @@ GameObject:
   - component: {fileID: 159262499}
   - component: {fileID: 159262501}
   - component: {fileID: 159262500}
+  - component: {fileID: 159262502}
   m_Layer: 5
   m_Name: HungerBar
   m_TagString: Untagged
@@ -917,7 +918,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 126, y: -251.65894}
+  m_AnchoredPosition: {x: 168, y: -329}
   m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &159262500
@@ -958,6 +959,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 159262498}
   m_CullTransparentMesh: 1
+--- !u!114 &159262502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159262498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53c971a8df5b3f24bb31b198f3c026d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatusBarUI
+  hungerSystem: {fileID: 0}
+  hungerBarFill: {fileID: 0}
+  hungerBarBackground: {fileID: 0}
+  hungerBackgroundSprite: {fileID: 0}
+  hungerCenterIcon: {fileID: 0}
+  hungerRing: {fileID: 0}
+  hungerFixedOnScreen: 1
+  hungerFixedCanvasPoint: {fileID: 0}
+  hungerFixedAnchoredPosition: {x: 0, y: 84}
+  hungerBarSize: {x: 300, y: 300}
+  dangerSystem: {fileID: 0}
+  dangerBarFill: {fileID: 0}
+  dangerBarBackground: {fileID: 0}
+  dangerAnchoredPosition: {x: 132, y: 124}
+  dangerBarSize: {x: 96, y: 96}
+  dangerRingThicknessFactor: 0.34
 --- !u!1 &167915458
 GameObject:
   m_ObjectHideFlags: 0
@@ -68701,9 +68730,11 @@ MonoBehaviour:
   hungerBarBackground: {fileID: 0}
   hungerBackgroundSprite: {fileID: 0}
   hungerCenterIcon: {fileID: 0}
+  hungerRing: {fileID: 0}
   hungerFixedOnScreen: 1
   hungerFixedCanvasPoint: {fileID: 0}
   hungerFixedAnchoredPosition: {x: 0, y: 84}
+  hungerBarSize: {x: 128, y: 128}
   dangerSystem: {fileID: 0}
   dangerBarFill: {fileID: 0}
   dangerBarBackground: {fileID: 0}
