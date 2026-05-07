@@ -68684,15 +68684,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dbc80de756808f448dbb6c586cd1ab6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownDangerBarUI
-  dangerSystem: {fileID: 0}
-  dangerFill: {fileID: 0}
-  dangerBackground: {fileID: 0}
-  fixedOnScreen: 1
-  anchor: {x: 0, y: 0}
-  anchoredPosition: {x: 315, y: 680}
-  barSize: {x: 220, y: 40}
-  ringThicknessFactor: 0.34
-  rootRect: {fileID: 0}
 --- !u!114 &1585702122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77078,8 +77069,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c62774f0d8017564b974f517bd02ea77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ATHManager
-  athGameObject: {fileID: 0}
-  athRect: {fileID: 0}
 --- !u!1 &1942929151
 GameObject:
   m_ObjectHideFlags: 0

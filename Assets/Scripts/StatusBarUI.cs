@@ -29,6 +29,9 @@ public class StatusBarUI : MonoBehaviour
     private Image hungerCenterIcon;
 
     [SerializeField]
+    private Image hungerRing;  // Cercle autour de la barre
+
+    [SerializeField]
     private bool hungerFixedOnScreen = true;
 
     [SerializeField]
@@ -36,6 +39,9 @@ public class StatusBarUI : MonoBehaviour
 
     [SerializeField]
     private Vector2 hungerFixedAnchoredPosition = new Vector2(0f, 84f);
+
+    [SerializeField]
+    private Vector2 hungerBarSize = new Vector2(128f, 128f);
 
     // ==================== DANGER ====================
     [SerializeField]
@@ -58,11 +64,13 @@ public class StatusBarUI : MonoBehaviour
 
     private RectTransform hungerRectTransform;
     private RectTransform dangerRectTransform;
+    private RectTransform hungerRingRectTransform;
 
     private void Awake()
     {
         hungerRectTransform = hungerBarFill?.GetComponent<RectTransform>();
         dangerRectTransform = dangerBarFill?.GetComponent<RectTransform>();
+        hungerRingRectTransform = hungerRing?.GetComponent<RectTransform>();
     }
 
     private void Start()
@@ -90,6 +98,21 @@ public class StatusBarUI : MonoBehaviour
         if (hungerFixedOnScreen && hungerRectTransform != null && hungerFixedCanvasPoint != null)
         {
             hungerRectTransform.anchoredPosition = hungerFixedAnchoredPosition;
+            hungerRectTransform.sizeDelta = hungerBarSize;
+        }
+
+        // Crée automatiquement le ring s'il n'existe pas
+        if (hungerRing == null && hungerRectTransform != null)
+        {
+            hungerRing = CreateRingAroundBar(hungerRectTransform.gameObject, hungerBarSize);
+        }
+
+        // Configure le ring autour de la HungerBar
+        if (hungerRingRectTransform != null && hungerRectTransform != null)
+        {
+            hungerRingRectTransform.anchoredPosition = hungerRectTransform.anchoredPosition;
+            // Le ring est légèrement plus grand que la barre
+            hungerRingRectTransform.sizeDelta = hungerBarSize * 1.15f;
         }
 
         if (dangerRectTransform != null)
@@ -97,6 +120,51 @@ public class StatusBarUI : MonoBehaviour
             dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
             dangerRectTransform.sizeDelta = dangerBarSize;
         }
+    }
+
+    /// <summary>
+    /// Crée automatiquement un ring/cercle autour de la barre
+    /// </summary>
+    private Image CreateRingAroundBar(GameObject parentBar, Vector2 barSize)
+    {
+        // Cherche d'abord si un ring existe déjà
+        Transform existingRing = parentBar.transform.Find("Ring");
+        if (existingRing != null)
+        {
+            Image existingImage = existingRing.GetComponent<Image>();
+            if (existingImage != null)
+            {
+                return existingImage;
+            }
+        }
+
+        // Crée le GameObject Ring
+        GameObject ringObject = new GameObject("Ring");
+        ringObject.transform.SetParent(parentBar.transform, false);
+
+        RectTransform ringRect = ringObject.AddComponent<RectTransform>();
+        ringRect.anchoredPosition = Vector2.zero;
+        ringRect.sizeDelta = barSize * 1.15f;
+
+        // Crée l'Image du ring
+        Image ringImage = ringObject.AddComponent<Image>();
+        ringImage.sprite = CreateCircleSprite();
+        ringImage.color = new Color(1f, 1f, 1f, 0.3f); // Blanc semi-transparent
+        ringImage.type = Image.Type.Simple;
+
+        Debug.Log("[StatusBarUI] Ring créé automatiquement autour de HungerBar");
+        return ringImage;
+    }
+
+    /// <summary>
+    /// Crée un sprite blanc circulaire simple
+    /// </summary>
+    private Sprite CreateCircleSprite()
+    {
+        return Sprite.Create(Texture2D.whiteTexture, 
+            new Rect(0f, 0f, 1f, 1f), 
+            new Vector2(0.5f, 0.5f), 
+            1f);
     }
 
     private void Update()
