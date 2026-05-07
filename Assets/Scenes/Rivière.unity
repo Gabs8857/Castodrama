@@ -322,8 +322,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -361,7 +361,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -66.21171, y: 0, z: -399.53085, w: 0}
+  m_margin: {x: -185.91867, y: 0, z: -187.32733, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -391,8 +391,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.07750001, y: 0.15777779}
   m_AnchorMax: {x: 0.07750001, y: 0.15777779}
-  m_AnchoredPosition: {x: 66, y: 0.2000122}
-  m_SizeDelta: {x: 191.90002, y: 50}
+  m_AnchoredPosition: {x: 624.92, y: 28.5}
+  m_SizeDelta: {x: -187.09, y: 124.6965}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!1 &54979702
 GameObject:
@@ -894,7 +894,6 @@ GameObject:
   - component: {fileID: 159262499}
   - component: {fileID: 159262501}
   - component: {fileID: 159262500}
-  - component: {fileID: 159262502}
   m_Layer: 5
   m_Name: HungerBar
   m_TagString: Untagged
@@ -918,8 +917,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 24, y: -24}
-  m_SizeDelta: {x: 16.2868, y: 44.8632}
+  m_AnchoredPosition: {x: 126, y: -251.65894}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &159262500
 MonoBehaviour:
@@ -959,40 +958,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 159262498}
   m_CullTransparentMesh: 1
---- !u!114 &159262502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 159262498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2efb173261f6a940b3adcf85c5e173c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Hunger
-  hungerBar: {fileID: 159262500}
-  hungerBarBackground: {fileID: 159262500}
-  defaultBackgroundSprite: {fileID: 8631193243204677833, guid: 6716fa244d55c344db4a0abbb6349252, type: 3}
-  followFixedCanvasPoint: 1
-  fixedCanvasPoint: {fileID: 0}
-  useCameraViewportPointWhenFixed: 1
-  fixedViewportPoint: {x: 0.2, y: 0.35}
-  fixedPointOffset: {x: 0, y: 0}
-  followTarget: {fileID: 0}
-  followOffset: {x: 4, y: 40}
-  autoPlaceAroundImage: 1
-  wrapAroundImage: 1
-  matchTargetImageSize: 1
-  usePointOnTargetSprite: 0
-  targetPointNormalized: {x: 0.55, y: 0.95}
-  orbitAngleDegrees: 130
-  imagePaddingPixels: 1
-  ringScaleMultiplier: 1.1
-  minRingDiameterPixels: 56
-  maxRingDiameterPixels: 180
-  backgroundDiameterMultiplier: 0.5
-  autoTargetName: ATH_SANSFOND_SANSREPONDRE_0
 --- !u!1 &167915458
 GameObject:
   m_ObjectHideFlags: 0
@@ -56007,7 +55972,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbdf8b26cfd53dcbf90b8fa424645e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  speed: 5
+  moveSpeed: 5
+  inputDeadzone: 0.12
 --- !u!114 &394323009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58221,8 +58187,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 75}
-  m_SizeDelta: {x: 800, y: 150}
+  m_AnchoredPosition: {x: 193.37503, y: 102.92998}
+  m_SizeDelta: {x: 187.0804, y: 205.86}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &904443581
 MonoBehaviour:
@@ -68679,6 +68645,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1585702120}
   - component: {fileID: 1585702121}
+  - component: {fileID: 1585702122}
   m_Layer: 0
   m_Name: DangerBar
   m_TagString: Untagged
@@ -68725,6 +68692,33 @@ MonoBehaviour:
   anchoredPosition: {x: 315, y: 680}
   barSize: {x: 220, y: 40}
   ringThicknessFactor: 0.34
+  rootRect: {fileID: 0}
+--- !u!114 &1585702122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585702119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53c971a8df5b3f24bb31b198f3c026d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatusBarUI
+  hungerSystem: {fileID: 0}
+  hungerBarFill: {fileID: 0}
+  hungerBarBackground: {fileID: 0}
+  hungerBackgroundSprite: {fileID: 0}
+  hungerCenterIcon: {fileID: 0}
+  hungerFixedOnScreen: 1
+  hungerFixedCanvasPoint: {fileID: 0}
+  hungerFixedAnchoredPosition: {x: 0, y: 84}
+  dangerSystem: {fileID: 0}
+  dangerBarFill: {fileID: 0}
+  dangerBarBackground: {fileID: 0}
+  dangerAnchoredPosition: {x: 132, y: 124}
+  dangerBarSize: {x: 96, y: 96}
+  dangerRingThicknessFactor: 0.34
 --- !u!1 &1623740862
 GameObject:
   m_ObjectHideFlags: 0
@@ -76980,6 +76974,7 @@ GameObject:
   - component: {fileID: 1890992477}
   - component: {fileID: 1890992476}
   - component: {fileID: 1890992475}
+  - component: {fileID: 1890992479}
   m_Layer: 5
   m_Name: ATH
   m_TagString: Untagged
@@ -77071,6 +77066,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1890992479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890992474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c62774f0d8017564b974f517bd02ea77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ATHManager
+  athGameObject: {fileID: 0}
+  athRect: {fileID: 0}
 --- !u!1 &1942929151
 GameObject:
   m_ObjectHideFlags: 0

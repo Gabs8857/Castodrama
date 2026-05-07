@@ -1,1 +1,0 @@
-Reducing backgroundDiameterMultiplier from 0.5f to 0.25f to make background smaller and ring more visible
