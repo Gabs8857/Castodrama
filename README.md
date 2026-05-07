@@ -22,44 +22,56 @@ Base Unity du projet collaboratif Castodrama.
 
 ## Architecture des Scripts
 
+### �️ Architecture Générale
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      JOUEUR                              │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  PlayerController (base)                                │
+│    • Mouvement simple (clavier + gamepad)               │
+│    • Configuration Rigidbody2D                          │
+│    • À la base de tout                                  │
+│                   ▲                                      │
+│                   │ hérité par                           │
+│                   │                                      │
+│  TopDownPlayerController (spécialisé)                   │
+│    • Hérite du mouvement de PlayerController            │
+│    • Inventaire (ramassage/dépôt d'items)              │
+│    • Détection centralisée de zones (eau, etc.)        │
+│    • Gestion des animations selon la direction         │
+│    • Centre névralgique du jeu                         │
+│                   ▼                                      │
+│    ┌─────────────┬──────────────┬─────────────┐         │
+│    │             │              │             │         │
+│    ▼             ▼              ▼             ▼         │
+│ Zones      Animations       Inventaire       ...        │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
 ### 🎮 Système de Détection de Zones
 
 L'architecture utilise un système d'interfaces pour gérer la détection de zones (eau, lave, feu, glace, etc.). Cela permet une gestion centralisée et extensible des interactions environnementales.
 
-#### 📊 Diagramme d'Imbrication
+#### 📊 Diagramme Détaillé des Zones
 
 ```
-┌──────────────────────────────────────────────────────┐
-│  TopDownPlayerController                             │
-│  • Gère le mouvement et l'inventaire                 │
-│  • Centralise la détection de zones                  │
-│  • Contient: ZoneDetectionManager                    │
-│  • Implémente: IZoneDetectable                       │
-└──────────────────────────────────────────────────────┘
-              │
-    ┌─────────┼─────────┐
-    │         │         │
-    ▼         ▼         ▼
-┌─────────────────────────────────────────────────────┐
-│        CharacterAnimator                             │
-│  • Gère les animations (marche/nage/nage profonde)  │
-│  • Implémente: IZoneDetectable                      │
-│  • Réagit aux changements de zones du joueur        │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│        EquippableItem                                │
-│  • Gère les items à ramasser                        │
-│  • Implémente: IZoneDetectable                      │
-│  • Peut réagir aux zones (eau, lave, etc.)          │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│        WaterZoneTrigger                              │
-│  • Détecteur de zone d'eau                          │
-│  • Notifie TopDownPlayerController                  │
-│  • Modèle pour d'autres détecteurs de zones         │
-└─────────────────────────────────────────────────────┘
+WaterZoneTrigger (détecte collision)
+        │
+        │ collision détectée
+        ▼
+TopDownPlayerController.OnEnterZone()
+        │
+        ├─ Enregistre dans ZoneDetectionManager
+        │
+        └─ Notifie les composants:
+           ├─ CharacterAnimator (nage/marche)
+           ├─ EquippableItem (réagit aux zones)
+           └─ Autres composants IZoneDetectable
 ```
 
 #### 🔄 Flux de Détection
@@ -70,10 +82,61 @@ L'architecture utilise un système d'interfaces pour gérer la détection de zon
 4. Le PlayerController notifie tous ses autres composants (`CharacterAnimator`, `EquippableItem`)
 5. Chaque composant réagit selon ses besoins
 
-#### 📝 Exemple d'Utilisation
+---
+
+### 📊 Systèmes d'Interface Utilisateur
+
+#### Barres d'État Unifiées (StatusBarUI)
+
+```
+StatusBarUI (unique script pour 2 barres)
+    │
+    ├─ Connexion: TopDownHunger
+    │   └─ Affiche barre de faim circulaire (haut centre)
+    │
+    └─ Connexion: TopDownDanger
+        └─ Affiche barre de danger circulaire (bas gauche)
+```
+
+**Avantages:**
+- ✅ Un seul script au lieu de 3
+- ✅ Gestion unifiée des 2 barres
+- ✅ Plus facile à maintenir
+- ✅ Configuration cohérente
+
+---
+
+### 📝 Scripts Principaux
+
+#### Contrôleurs de Joueur
+
+| Script | Rôle | Hérite de |
+|--------|------|-----------|
+| `PlayerController.cs` | Base réutilisable avec mouvement simple | MonoBehaviour |
+| `TopDownPlayerController.cs` | Contrôle du joueur principal | PlayerController |
+
+#### Systèmes Essentiels
+
+| Script | Fonction |
+|--------|----------|
+| `CharacterAnimator.cs` | Gestion animations (marche/nage/nage profonde) |
+| `EquippableItem.cs` | Items à ramasser/déposer |
+| `WaterZoneTrigger.cs` | Détecteur de zone d'eau |
+| `StatusBarUI.cs` | Barres d'état unifiées (faim + danger) |
+
+#### Systèmes de Zones
+
+| Script | Rôle |
+|--------|------|
+| `IZoneDetectable.cs` | Interface commune pour les objets réagissant aux zones |
+| `ZoneDetectionManager.cs` | Gestionnaire utilitaire de suivi des zones |
+
+---
+
+### 📝 Exemple d'Utilisation
 
 ```csharp
-// Depuis n'importe quel script
+// Accéder au gestionnaire de zones
 TopDownPlayerController playerController = GetComponent<TopDownPlayerController>();
 
 // Vérifier si le joueur est dans l'eau
@@ -90,14 +153,16 @@ foreach (var zone in currentZones)
 }
 ```
 
-#### ✨ Avantages de cette Architecture
+---
 
-- **Centralisation** : Toute la logique de zones est gérée au même endroit
+### ✨ Principes d'Architecture
+
+- **Héritage** : PlayerController → TopDownPlayerController (DRY - Don't Repeat Yourself)
+- **Centralisation** : TopDownPlayerController est le hub central
+- **Interfaces** : IZoneDetectable permet une extensibilité facile
 - **Découplage** : Les scripts ne dépendent pas directement les uns des autres
-- **Extensibilité** : Facile d'ajouter de nouvelles zones ou comportements
-- **Réutilisabilité** : N'importe quel objet peut implémenter `IZoneDetectable`
-- **Maintenabilité** : Code organisé et facile à comprendre
-- **Performance** : Les zones sont trackées une seule fois au niveau du joueur
+- **Réutilisabilité** : PlayerController peut servir de base pour NPJ, ennemis, etc.
+- **Maintenabilité** : Code organisé et bien documenté
 
 #### 🔧 Interfaces et Classes Clés
 
