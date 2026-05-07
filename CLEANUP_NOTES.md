@@ -1,60 +1,96 @@
-## Scripts Obsolètes et À Nettoyer
+# Notes de Nettoyage et Refactorisation
 
-### 🗑️ Scripts À Supprimer
+## Architecture Refactorisée
 
-#### **SwimmingAnimator.cs** ❌ DOUBLON
-- **Raison** : Remplacé par `CharacterAnimator.cs`
-- **Fonction** : Gère uniquement la nage avec 2 frames
-- **Alternative** : `CharacterAnimator.cs` gère marche + nage + nage profonde
-- **Statut** : Plus utilisé dans le projet
-- **Action** : Supprimer ce fichier
+### 1. Héritage PlayerController
 
-### 📋 Scripts À Évaluer
+**Nouveau flux:**
+```
+PlayerController (classe de base avec mouvement)
+    |
+    +-- TopDownPlayerController (classe spécialisée pour le joueur)
+```
 
-#### **FoodItem.cs** ⚠️ À Évaluer
-- **Raison** : Alternative ancienne à `EquippableItem.cs`
-- **Fonction** : Items de nourriture qui s'auto-détruisent et restaurent la faim
-- **Alternative** : `EquippableItem.cs` permet ramassage/dépôt
-- **Différence** : FoodItem = destructible automatiquement vs EquippableItem = réutilisable
-- **Recommandation** : 
-  - Si tu veux des items destructibles (nourriture, bonus) → Garder FoodItem
-  - Si tu veux seulement des items réutilisables (branche) → Supprimer FoodItem
-  - **Suggestion** : Garder FoodItem pour la variété, mais l'améliorer pour utiliser IZoneDetectable
+**Avantages:**
+- Code réutilisable
+- Pas de duplication
+- PlayerController peut servir pour NPJ, ennemis, etc.
 
-#### **ATHController.cs** ⚠️ À Évaluer
-- **Statut** : Script pour gérer l'ATH (animation/visibility)
-- **Utilisation** : À vérifier dans les scènes
+---
 
-### ✅ Scripts Essentiels (À Conserver)
+### 2. Barres d'État Unifiées
 
-- `TopDownPlayerController.cs` - Centre névralgique
-- `CharacterAnimator.cs` - Gestion des animations
+**Ancien système:**
+- TopDownHungerBarUI.cs (barre faim)
+- TopDownDangerBarUI.cs (barre danger)
+- HungerBar.cs (ancien doublon)
+
+**Nouveau système:**
+- StatusBarUI.cs (gère les 2 barres)
+
+**Avantages:**
+- 1 seul fichier au lieu de 3
+- Plus facile à maintenir
+- Cohérent et organisé
+
+---
+
+## Scripts À Conserver
+
+### Systèmes de Joueur
+- `PlayerController.cs` - Contrôle simple (base réutilisable)
+- `TopDownPlayerController.cs` - Contrôle du joueur principal
+- `CharacterAnimator.cs` - Animations du personnage
 - `EquippableItem.cs` - Items ramassables
+- `StatusBarUI.cs` - Barres d'état (Faim + Danger)
+
+### Système de Zones
 - `WaterZoneTrigger.cs` - Détecteur d'eau
 - `IZoneDetectable.cs` - Interface de zones
 - `ZoneDetectionManager.cs` - Gestionnaire de zones
+
+### Autres Systèmes
 - `DialogueManager.cs` - Système de dialogue
 - `NPCInteraction.cs` - Interactions PNJ
-- `TopDownHunger.cs` - Système de faim
-- `TopDownDanger.cs` - Système de danger
+- `TopDownHunger.cs` - Logique de faim
+- `TopDownDanger.cs` - Logique de danger
 - `DayAndNightCycle.cs` - Cycle jour/nuit
 
 ---
 
-## ✅ Corrections Effectuées
+## Scripts À Supprimer
 
-### TopDownPlayerController.PickUpItem() et DropItem()
+| Script | Raison | Remplacé par |
+|--------|--------|--------------|
+| **SwimmingAnimator.cs** | Doublon | CharacterAnimator.cs |
+| **TopDownHungerBarUI.cs** | Remplacé | StatusBarUI.cs |
+| **TopDownDangerBarUI.cs** | Remplacé | StatusBarUI.cs |
+| **HungerBar.cs** | Ancien doublon | StatusBarUI.cs |
 
-**Problème** : L'animation était forcée lors du ramassage/dépôt
-- PickUpItem() → Forçait `StartSwimming()`
-- DropItem() → Forçait `StopSwimming()`
+---
 
-**Solution** : Conserver l'état actuel du personnage
-- PickUpItem() → Log l'état actuel, ne change pas l'animation
-- DropItem() → Log l'état actuel, ne change pas l'animation
-- La nage/marche reste déterminée par la zone (eau/terre) uniquement
+## Refactorisations Effectuées
 
-**Résultat** :
-- ✅ Tu peux nager tout en tenant une branche
-- ✅ Tu peux marcher tout en tenant une branche
-- ✅ La branche n'interfère plus avec l'animation
+### 1. Héritage PlayerController ✅
+- TopDownPlayerController hérite maintenant de PlayerController
+- Suppression de la duplication de ReadMoveInput()
+- Appels à base.Awake() et base.Update()
+
+### 2. StatusBarUI ✅
+- Nouveau fichier unifié pour les barres
+- Gère faim et danger
+- Plus facile à configurer dans l'éditeur Unity
+
+### 3. Animation d'Items ✅
+- PickUpItem() ne force plus la nage
+- DropItem() ne force plus la marche
+- L'animation reste déterminée uniquement par la zone
+
+---
+
+## Migration
+
+Pour migrer les scènes:
+1. Remplacer TopDownHungerBarUI par StatusBarUI sur le Canvas
+2. Remplacer TopDownDangerBarUI par StatusBarUI sur le Canvas
+3. Supprimer les anciens scripts du projet

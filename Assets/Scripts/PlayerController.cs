@@ -1,14 +1,25 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Classe de base pour les contrôleurs de joueur
+/// Gère le mouvement basic (clavier + gamepad)
+/// 
+/// À étendre pour ajouter des fonctionnalités spéciales (inventaire, zones, etc.)
+/// Voir: TopDownPlayerController pour un exemple complet
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 5f;
+    [SerializeField]
+    protected float moveSpeed = 5f;
 
-    private Rigidbody2D rb;
-    private Vector2 movement;
+    [SerializeField]
+    protected float inputDeadzone = 0.12f;
 
-    void Awake()
+    protected Rigidbody2D rb;
+    protected Vector2 moveInput;
+
+    protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
@@ -19,7 +30,30 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
+    {
+        moveInput = ReadMoveInput();
+        if (moveInput.sqrMagnitude > 1f)
+        {
+            moveInput.Normalize();
+        }
+    }
+
+    protected virtual void FixedUpdate()
+    {
+        if (rb == null)
+        {
+            return;
+        }
+
+        rb.linearVelocity = moveInput * moveSpeed;
+    }
+
+    /// <summary>
+    /// Lit l'entrée du joueur (clavier + gamepad)
+    /// À surcharger pour ajouter d'autres entrées
+    /// </summary>
+    protected virtual Vector2 ReadMoveInput()
     {
         Vector2 keyboardInput = Vector2.zero;
 
@@ -49,18 +83,10 @@ public class PlayerController : MonoBehaviour
             gamepadInput = Gamepad.current.leftStick.ReadValue();
         }
 
-        // Keep strongest source so keyboard and stick can both drive movement.
-        movement = keyboardInput.sqrMagnitude >= gamepadInput.sqrMagnitude ? keyboardInput : gamepadInput;
-        movement = Vector2.ClampMagnitude(movement, 1f);
-    }
-
-    void FixedUpdate()
-    {
-        if (rb == null)
+        if (gamepadInput.magnitude < inputDeadzone)
         {
-            return;
+            gamepadInput = Vector2.zero;
         }
 
-        rb.linearVelocity = movement.normalized * speed;
-    }
-}
+        return gamepadInput.sqrMagnitude > keyboardInput.sqrMagnitude ? gamepadInput : keyboardInput;
+    }}

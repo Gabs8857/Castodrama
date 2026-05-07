@@ -1,28 +1,21 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
-/// Contrôleur principal du joueur (Castor)
-/// Gère:
-/// - Le mouvement top-down (clavier + gamepad)
+/// Contrôleur du joueur principal (Castor) - Classe spécialisée
+/// Hérité de PlayerController qui gère le mouvement de base
+/// 
+/// Ajoute au mouvement:
 /// - L'inventaire (ramassage et dépôt d'items)
 /// - La détection centralisée des zones (eau, lave, feu, etc.)
 /// - La notification des autres systèmes (animations, items, etc.)
+/// - La gestion du sprite selon la direction
 /// 
 /// C'est le centre névralgique auquel tous les autres scripts se connectent.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
+public class TopDownPlayerController : PlayerController, IZoneDetectable
 {
-    [SerializeField]
-    private float moveSpeed = 6.5f;
-
-    [SerializeField]
-    private float inputDeadzone = 0.12f;
-
     private SpriteRenderer spriteRenderer;
-    private Rigidbody2D rb;
-    private Vector2 moveInput;
 
     // Inventaire
     private GameObject equippedItem;
@@ -32,12 +25,6 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
     // Détection de zones - centralisée
     private ZoneDetectionManager zoneManager;
 
-    public float MoveSpeed
-    {
-        get => moveSpeed;
-        set => moveSpeed = Mathf.Max(0f, value);
-    }
-
     public bool HasItem => hasItem;
     public GameObject EquippedItem => equippedItem;
     
@@ -46,10 +33,11 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
     /// </summary>
     public ZoneDetectionManager ZoneManager => zoneManager;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake(); // Appelle Awake du PlayerController
+        
         spriteRenderer = GetComponent<SpriteRenderer>();
-        rb = GetComponent<Rigidbody2D>();
         
         // Initialise le gestionnaire de zones
         zoneManager = new ZoneDetectionManager(this);
@@ -57,14 +45,11 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
         Debug.Log($"[TopDownPlayerController] Initialisation complète");
     }
 
-    private void Update()
+    protected override void Update()
     {
-        moveInput = ReadMoveInput();
-        if (moveInput.sqrMagnitude > 1f)
-        {
-            moveInput.Normalize();
-        }
-
+        base.Update(); // Appelle Update du PlayerController (lecture des entrées)
+        
+        // Ajoute la gestion du sprite selon la direction
         if (spriteRenderer != null)
         {
             if (moveInput.x < -inputDeadzone)
@@ -75,14 +60,6 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
             {
                 spriteRenderer.flipX = true;   // Droite = flipper
             }
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (rb != null)
-        {
-            rb.linearVelocity = moveInput * moveSpeed;
         }
     }
 
@@ -158,46 +135,6 @@ public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
             
             Debug.Log($"[TopDownPlayerController] Item déposé - Pas de changement d'animation");
         }
-    }
-
-    private Vector2 ReadMoveInput()
-    {
-        Vector2 keyboardInput = Vector2.zero;
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
-            {
-                keyboardInput.x -= 1f;
-            }
-
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
-            {
-                keyboardInput.x += 1f;
-            }
-
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
-            {
-                keyboardInput.y -= 1f;
-            }
-
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
-            {
-                keyboardInput.y += 1f;
-            }
-        }
-
-        if (keyboardInput.sqrMagnitude > 1f)
-        {
-            keyboardInput.Normalize();
-        }
-
-        Vector2 gamepadInput = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue() : Vector2.zero;
-        if (gamepadInput.magnitude < inputDeadzone)
-        {
-            gamepadInput = Vector2.zero;
-        }
-
-        return gamepadInput.sqrMagnitude > keyboardInput.sqrMagnitude ? gamepadInput : keyboardInput;
     }
 
     /// <summary>
