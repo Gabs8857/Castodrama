@@ -94,6 +94,12 @@ public class StatusBarUI : MonoBehaviour
             }
         }
 
+        // Crée automatiquement le ring s'il n'existe pas
+        if (hungerRing == null)
+        {
+            hungerRing = CreateRingAroundBar(gameObject, hungerBarSize);
+        }
+
         // Configure les positions fixes si activé
         if (hungerFixedOnScreen && hungerRectTransform != null && hungerFixedCanvasPoint != null)
         {
@@ -101,18 +107,13 @@ public class StatusBarUI : MonoBehaviour
             hungerRectTransform.sizeDelta = hungerBarSize;
         }
 
-        // Crée automatiquement le ring s'il n'existe pas
-        if (hungerRing == null && hungerRectTransform != null)
-        {
-            hungerRing = CreateRingAroundBar(hungerRectTransform.gameObject, hungerBarSize);
-        }
-
         // Configure le ring autour de la HungerBar
-        if (hungerRingRectTransform != null && hungerRectTransform != null)
+        if (hungerRingRectTransform != null)
         {
-            hungerRingRectTransform.anchoredPosition = hungerRectTransform.anchoredPosition;
+            hungerRingRectTransform.anchoredPosition = Vector2.zero;
             // Le ring est légèrement plus grand que la barre
-            hungerRingRectTransform.sizeDelta = hungerBarSize * 1.15f;
+            hungerRingRectTransform.sizeDelta = hungerBarSize * 1.2f;
+            Debug.Log("[StatusBarUI] Ring configuré à la position: " + hungerRingRectTransform.anchoredPosition);
         }
 
         if (dangerRectTransform != null)
@@ -134,6 +135,7 @@ public class StatusBarUI : MonoBehaviour
             Image existingImage = existingRing.GetComponent<Image>();
             if (existingImage != null)
             {
+                hungerRingRectTransform = existingRing.GetComponent<RectTransform>();
                 return existingImage;
             }
         }
@@ -144,23 +146,31 @@ public class StatusBarUI : MonoBehaviour
 
         RectTransform ringRect = ringObject.AddComponent<RectTransform>();
         ringRect.anchoredPosition = Vector2.zero;
-        ringRect.sizeDelta = barSize * 1.15f;
+        ringRect.sizeDelta = barSize * 1.2f;
 
-        // Crée l'Image du ring
+        // Crée l'Image du ring - avec contour/border visible
         Image ringImage = ringObject.AddComponent<Image>();
-        ringImage.sprite = CreateCircleSprite();
-        ringImage.color = new Color(1f, 1f, 1f, 0.3f); // Blanc semi-transparent
+        ringImage.sprite = CreateRingSprite();
+        ringImage.color = new Color(0.7f, 0.7f, 0.7f, 0.8f); // Gris plus visible
         ringImage.type = Image.Type.Simple;
 
-        Debug.Log("[StatusBarUI] Ring créé automatiquement autour de HungerBar");
+        // Force le ring à être derrière la barre de remplissage
+        CanvasGroup canvasGroup = ringObject.AddComponent<CanvasGroup>();
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+
+        hungerRingRectTransform = ringRect;
+        Debug.Log("[StatusBarUI] Ring créé autour de HungerBar avec size: " + ringRect.sizeDelta);
         return ringImage;
     }
 
     /// <summary>
-    /// Crée un sprite blanc circulaire simple
+    /// Crée un sprite circulaire avec un contour/ring visible
     /// </summary>
-    private Sprite CreateCircleSprite()
+    private Sprite CreateRingSprite()
     {
+        // Pour maintenant, utilise la texture blanche
+        // Tu peux remplacer ça avec une vraie texture circulaire si tu en as une
         return Sprite.Create(Texture2D.whiteTexture, 
             new Rect(0f, 0f, 1f, 1f), 
             new Vector2(0.5f, 0.5f), 
