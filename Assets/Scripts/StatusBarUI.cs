@@ -120,6 +120,16 @@ public class StatusBarUI : MonoBehaviour
         {
             dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
             dangerRectTransform.sizeDelta = dangerBarSize;
+            
+            // Rendre invisible pour le moment
+            if (dangerBarFill != null)
+            {
+                dangerBarFill.enabled = false;
+            }
+            if (dangerBarBackground != null)
+            {
+                dangerBarBackground.enabled = false;
+            }
         }
     }
 
