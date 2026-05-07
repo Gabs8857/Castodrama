@@ -94,18 +94,19 @@ public class StatusBarUI : MonoBehaviour
             }
         }
 
-        // Crée le ring blanc s'il n'existe pas
-        if (hungerRing == null)
-        {
-            hungerRing = CreateRing();
-        }
-
         // Configure la HungerBar - cercle vert qui se remplit
         if (hungerBarFill != null)
         {
             hungerBarFill.fillMethod = Image.FillMethod.Radial360;
             hungerBarFill.fillOrigin = (int)Image.Origin360.Top;
             hungerBarFill.color = new Color(0f, 1f, 0f, 1f); // Vert
+            
+            // Charge le sprite Foodcircle pour un vrai cercle
+            Sprite foodcircleSprite = Resources.Load<Sprite>("ATH/Foodcircle");
+            if (foodcircleSprite != null)
+            {
+                hungerBarFill.sprite = foodcircleSprite;
+            }
             
             RectTransform fillRect = hungerBarFill.GetComponent<RectTransform>();
             if (fillRect != null)
@@ -115,11 +116,10 @@ public class StatusBarUI : MonoBehaviour
             }
         }
 
-        // Configure le ring blanc (background)
-        if (hungerRingRectTransform != null)
+        // Masquer le ring s'il existe (les gros carrés)
+        if (hungerRing != null)
         {
-            hungerRingRectTransform.anchoredPosition = hungerFixedAnchoredPosition;
-            hungerRingRectTransform.sizeDelta = new Vector2(110f, 110f); // Légèrement plus grand que le fill
+            hungerRing.enabled = false;
         }
 
         if (dangerRectTransform != null)
@@ -127,7 +127,6 @@ public class StatusBarUI : MonoBehaviour
             dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
             dangerRectTransform.sizeDelta = dangerBarSize;
             
-            // Rendre invisible pour le moment
             if (dangerBarFill != null)
             {
                 dangerBarFill.enabled = false;
@@ -137,30 +136,6 @@ public class StatusBarUI : MonoBehaviour
                 dangerBarBackground.enabled = false;
             }
         }
-    }
-
-    /// <summary>
-    /// Crée le ring blanc autour de la HungerBar
-    /// </summary>
-    private Image CreateRing()
-    {
-        GameObject ringObject = new GameObject("Ring");
-        ringObject.transform.SetParent(gameObject.transform, false);
-
-        RectTransform ringRect = ringObject.AddComponent<RectTransform>();
-        ringRect.anchoredPosition = hungerFixedAnchoredPosition;
-        ringRect.sizeDelta = new Vector2(110f, 110f);
-
-        Image ringImage = ringObject.AddComponent<Image>();
-        ringImage.sprite = Sprite.Create(Texture2D.whiteTexture, 
-            new Rect(0f, 0f, 1f, 1f), 
-            new Vector2(0.5f, 0.5f), 
-            1f);
-        ringImage.color = new Color(0.8f, 0.8f, 0.8f, 0.9f); // Gris/blanc semi-opaque
-        ringImage.type = Image.Type.Simple;
-
-        hungerRingRectTransform = ringRect;
-        return ringImage;
     }
 
     private void Update()
