@@ -111,9 +111,9 @@ public class StatusBarUI : MonoBehaviour
         if (hungerRingRectTransform != null)
         {
             hungerRingRectTransform.anchoredPosition = Vector2.zero;
-            // Le ring est légèrement plus grand que la barre
-            hungerRingRectTransform.sizeDelta = hungerBarSize * 1.2f;
-            Debug.Log("[StatusBarUI] Ring configuré à la position: " + hungerRingRectTransform.anchoredPosition);
+            // Ring de taille fixe
+            hungerRingRectTransform.sizeDelta = new Vector2(160f, 160f);
+            Debug.Log("[StatusBarUI] Ring configuré à la position: " + hungerRingRectTransform.anchoredPosition + ", size: " + hungerRingRectTransform.sizeDelta);
         }
 
         if (dangerRectTransform != null)
@@ -146,31 +146,41 @@ public class StatusBarUI : MonoBehaviour
 
         RectTransform ringRect = ringObject.AddComponent<RectTransform>();
         ringRect.anchoredPosition = Vector2.zero;
-        ringRect.sizeDelta = barSize * 1.2f;
+        ringRect.sizeDelta = new Vector2(160f, 160f); // Taille fixe du cercle
 
-        // Crée l'Image du ring - avec contour/border visible
+        // Crée l'Image du ring avec le sprite Foodcircle
         Image ringImage = ringObject.AddComponent<Image>();
-        ringImage.sprite = CreateRingSprite();
-        ringImage.color = new Color(0.7f, 0.7f, 0.7f, 0.8f); // Gris plus visible
+        
+        // Charge le sprite Foodcircle
+        Sprite foodcircleSprite = Resources.Load<Sprite>("ATH/Foodcircle");
+        if (foodcircleSprite == null)
+        {
+            // Fallback si la ressource n'est pas trouvée
+            foodcircleSprite = Sprite.Create(Texture2D.whiteTexture, 
+                new Rect(0f, 0f, 1f, 1f), 
+                new Vector2(0.5f, 0.5f), 
+                1f);
+        }
+        
+        ringImage.sprite = foodcircleSprite;
+        ringImage.color = new Color(1f, 1f, 1f, 1f); // Blanc opaque
         ringImage.type = Image.Type.Simple;
 
-        // Force le ring à être derrière la barre de remplissage
+        // Force le ring à être interactif
         CanvasGroup canvasGroup = ringObject.AddComponent<CanvasGroup>();
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
 
         hungerRingRectTransform = ringRect;
-        Debug.Log("[StatusBarUI] Ring créé autour de HungerBar avec size: " + ringRect.sizeDelta);
+        Debug.Log("[StatusBarUI] Ring créé avec Foodcircle sprite, size: " + ringRect.sizeDelta);
         return ringImage;
     }
 
     /// <summary>
-    /// Crée un sprite circulaire avec un contour/ring visible
+    /// Crée un sprite blanc circulaire simple (fallback)
     /// </summary>
     private Sprite CreateRingSprite()
     {
-        // Pour maintenant, utilise la texture blanche
-        // Tu peux remplacer ça avec une vraie texture circulaire si tu en as une
         return Sprite.Create(Texture2D.whiteTexture, 
             new Rect(0f, 0f, 1f, 1f), 
             new Vector2(0.5f, 0.5f), 
