@@ -18,6 +18,15 @@ public class PlayerController : MonoBehaviour
 
     protected Rigidbody2D rb;
     protected Vector2 moveInput;
+    
+    /// <summary>
+    /// Propriété publique pour accéder/modifier la vitesse de mouvement
+    /// </summary>
+    public float MoveSpeed
+    {
+        get => moveSpeed;
+        set => moveSpeed = value;
+    }
 
     protected virtual void Awake()
     {

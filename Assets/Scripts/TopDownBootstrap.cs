@@ -140,11 +140,11 @@ public static class TopDownBootstrap
             barObject = new GameObject(DangerBarName);
             barObject.transform.SetParent(athRect, false);
             barObject.AddComponent<RectTransform>();
-            barObject.AddComponent<TopDownDangerBarUI>();
+            barObject.AddComponent<StatusBarUI>();
         }
-        else if (barObject.GetComponent<TopDownDangerBarUI>() == null)
+        else if (barObject.GetComponent<StatusBarUI>() == null)
         {
-            barObject.AddComponent<TopDownDangerBarUI>();
+            barObject.AddComponent<StatusBarUI>();
         }
     }
 #endif
@@ -207,9 +207,9 @@ public static class TopDownBootstrap
             barObject.AddComponent<RectTransform>();
         }
 
-        if (barObject.GetComponent<TopDownDangerBarUI>() == null)
+        if (barObject.GetComponent<StatusBarUI>() == null)
         {
-            barObject.AddComponent<TopDownDangerBarUI>();
+            barObject.AddComponent<StatusBarUI>();
         }
     }
 
