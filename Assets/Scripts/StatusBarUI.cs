@@ -99,7 +99,7 @@ public class StatusBarUI : MonoBehaviour
         {
             hungerBarFill.fillMethod = Image.FillMethod.Radial360;
             hungerBarFill.fillOrigin = (int)Image.Origin360.Top;
-            hungerBarFill.color = new Color(0f, 1f, 0f, 1f); // Vert
+            hungerBarFill.color = new Color(0f, 1f, 0f, 1f); 
             
             // Charge le sprite Foodcircle pour un vrai cercle
             Sprite foodcircleSprite = Resources.Load<Sprite>("ATH/Foodcircle");
@@ -112,7 +112,7 @@ public class StatusBarUI : MonoBehaviour
             if (fillRect != null)
             {
                 fillRect.anchoredPosition = hungerFixedAnchoredPosition;
-                fillRect.sizeDelta = new Vector2(100f, 100f);
+                fillRect.sizeDelta = new Vector2(150f, 150f);
             }
         }
 
@@ -143,8 +143,16 @@ public class StatusBarUI : MonoBehaviour
         // Mets à jour la barre de faim
         if (hungerSystem != null && hungerBarFill != null)
         {
-            float hungerFillAmount = hungerSystem.CurrentHunger / hungerSystem.MaxHunger;
-            hungerBarFill.fillAmount = hungerFillAmount;
+            // Utilise NormalizedHunger comme l'ancien script
+            float normalized = hungerSystem.NormalizedHunger;
+            hungerBarFill.fillAmount = normalized;
+            
+            // Change la couleur: rouge quand affamé, vert quand plein
+            hungerBarFill.color = Color.Lerp(
+                new Color(0.9f, 0.2f, 0.2f, 1f),  // Rouge
+                new Color(0.32f, 0.85f, 0.35f, 1f), // Vert
+                normalized
+            );
         }
 
         // Mets à jour la barre de danger
