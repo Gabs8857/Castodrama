@@ -1,8 +1,18 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Contrôleur principal du joueur (Castor)
+/// Gère:
+/// - Le mouvement top-down (clavier + gamepad)
+/// - L'inventaire (ramassage et dépôt d'items)
+/// - La détection centralisée des zones (eau, lave, feu, etc.)
+/// - La notification des autres systèmes (animations, items, etc.)
+/// 
+/// C'est le centre névralgique auquel tous les autres scripts se connectent.
+/// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class TopDownPlayerController : MonoBehaviour
+public class TopDownPlayerController : MonoBehaviour, IZoneDetectable
 {
     [SerializeField]
     private float moveSpeed = 6.5f;
@@ -19,6 +29,9 @@ public class TopDownPlayerController : MonoBehaviour
     private bool hasItem = false;
     private Vector3 itemOffset = new Vector3(0.3f, 0.2f, 0); // Position relative par rapport au joueur
 
+    // Détection de zones - centralisée
+    private ZoneDetectionManager zoneManager;
+
     public float MoveSpeed
     {
         get => moveSpeed;
@@ -27,11 +40,21 @@ public class TopDownPlayerController : MonoBehaviour
 
     public bool HasItem => hasItem;
     public GameObject EquippedItem => equippedItem;
+    
+    /// <summary>
+    /// Accès au gestionnaire de zones
+    /// </summary>
+    public ZoneDetectionManager ZoneManager => zoneManager;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+        
+        // Initialise le gestionnaire de zones
+        zoneManager = new ZoneDetectionManager(this);
+        
+        Debug.Log($"[TopDownPlayerController] Initialisation complète");
     }
 
     private void Update()
@@ -170,5 +193,43 @@ public class TopDownPlayerController : MonoBehaviour
         }
 
         return gamepadInput.sqrMagnitude > keyboardInput.sqrMagnitude ? gamepadInput : keyboardInput;
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand le joueur entre dans une zone
+    /// </summary>
+    public void OnEnterZone(ZoneType zoneType)
+    {
+        Debug.Log($"[TopDownPlayerController] ✓ ENTRÉE zone: {zoneType}");
+        zoneManager?.EnterZone(zoneType);
+        
+        // Notifie les autres composants (CharacterAnimator, EquippableItem, etc.)
+        IZoneDetectable[] detectables = GetComponents<IZoneDetectable>();
+        foreach (IZoneDetectable detectable in detectables)
+        {
+            if (detectable != this) // Évite de se notifier soi-même
+            {
+                detectable.OnEnterZone(zoneType);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand le joueur sort d'une zone
+    /// </summary>
+    public void OnExitZone(ZoneType zoneType)
+    {
+        Debug.Log($"[TopDownPlayerController] ✓ SORTIE zone: {zoneType}");
+        zoneManager?.ExitZone(zoneType);
+        
+        // Notifie les autres composants
+        IZoneDetectable[] detectables = GetComponents<IZoneDetectable>();
+        foreach (IZoneDetectable detectable in detectables)
+        {
+            if (detectable != this) // Évite de se notifier soi-même
+            {
+                detectable.OnExitZone(zoneType);
+            }
+        }
     }
 }

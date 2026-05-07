@@ -1,31 +1,40 @@
 using UnityEngine;
 
 /// <summary>
-/// Script à attacher sur la zone d'eau (rivière)
-/// Détecte quand un objet avec CharacterAnimator rentre/sort de l'eau
-/// Et active/désactive l'animation de nage correspondante
+/// Détecteur de zone d'eau - Notifie le TopDownPlayerController
+/// Le joueur se charge de notifier les autres composants (CharacterAnimator, EquippableItem, etc.)
 /// </summary>
 public class WaterZoneTrigger : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        CharacterAnimator animator = collision.GetComponent<CharacterAnimator>();
+        Debug.Log($"[WaterZoneTrigger] {collision.gameObject.name} est entré dans l'eau");
         
-        if (animator != null)
+        // Cherche le TopDownPlayerController
+        TopDownPlayerController playerController = collision.GetComponent<TopDownPlayerController>();
+        
+        if (playerController != null)
         {
-            Debug.Log($"[WaterZoneTrigger] {collision.gameObject.name} est entré dans l'eau - Mode NAGE ACTIVÉ");
-            animator.StartSwimming();
+            playerController.OnEnterZone(ZoneType.Water);
+            Debug.Log($"[WaterZoneTrigger] ✓ Notifié {collision.gameObject.name} de l'entrée en eau");
+        }
+        else
+        {
+            Debug.Log($"[WaterZoneTrigger] ⚠ Pas de TopDownPlayerController sur {collision.gameObject.name}");
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        CharacterAnimator animator = collision.GetComponent<CharacterAnimator>();
+        Debug.Log($"[WaterZoneTrigger] {collision.gameObject.name} a quitté l'eau");
         
-        if (animator != null)
+        // Cherche le TopDownPlayerController
+        TopDownPlayerController playerController = collision.GetComponent<TopDownPlayerController>();
+        
+        if (playerController != null)
         {
-            Debug.Log($"[WaterZoneTrigger] {collision.gameObject.name} a quitté l'eau - Mode MARCHE RÉACTIVÉ");
-            animator.StopSwimming();
+            playerController.OnExitZone(ZoneType.Water);
+            Debug.Log($"[WaterZoneTrigger] ✓ Notifié {collision.gameObject.name} de la sortie d'eau");
         }
     }
 }

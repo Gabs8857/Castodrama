@@ -3,10 +3,21 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Élément interactif que le joueur peut ramasser
+/// Gère:
+/// - La détection de proximité du joueur
+/// - L'affichage du message "Appuyer sur G pour ramasser"
+/// - Le ramassage (parentage au joueur)
+/// - Le dépôt (détachement du joueur)
+/// - Les réactions aux zones (eau, lave, etc.)
+/// 
+/// Implémente IZoneDetectable pour pouvoir réagir aux changements de zones
+/// </summary>
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class EquippableItem : MonoBehaviour
+public class EquippableItem : MonoBehaviour, IZoneDetectable
 {
     [SerializeField]
     private bool destroyOnPickup = false;
@@ -201,5 +212,49 @@ public class EquippableItem : MonoBehaviour
         RectTransform canvasRect = canvasGO.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(120, 50);
         canvasRect.localPosition = new Vector3(0, 1.5f, 0);
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand l'item entre dans une zone
+    /// </summary>
+    public void OnEnterZone(ZoneType zoneType)
+    {
+        Debug.Log($"[EquippableItem] {gameObject.name} est entré dans la zone: {zoneType}");
+        
+        // Pour l'instant, aucune action spéciale
+        // Peut être utilisé pour des effets futurs (ex: brûler dans la lave)
+        switch (zoneType)
+        {
+            case ZoneType.Water:
+                Debug.Log($"[EquippableItem] Item dans l'eau");
+                break;
+            case ZoneType.Lava:
+                Debug.Log($"[EquippableItem] Item dans la lave - Destruction?");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand l'item sort d'une zone
+    /// </summary>
+    public void OnExitZone(ZoneType zoneType)
+    {
+        Debug.Log($"[EquippableItem] {gameObject.name} a quitté la zone: {zoneType}");
+        
+        // Pour l'instant, aucune action spéciale
+        // Peut être utilisé pour des effets futurs
+    }
+
+    /// <summary>
+    /// Retourne si l'item est dans une zone spécifique
+    /// </summary>
+    public bool IsInZone(ZoneType zoneType)
+    {
+        TopDownPlayerController playerController = player;
+        if (playerController != null)
+        {
+            return playerController.ZoneManager.IsInZone(zoneType);
+        }
+        return false;
     }
 }

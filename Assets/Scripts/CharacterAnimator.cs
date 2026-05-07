@@ -2,11 +2,17 @@ using UnityEngine;
 using UnityEngine.U2D.Animation;
 
 /// <summary>
-/// Script pour gérer les animations du Castor en fonction du mouvement
-/// Switch entre "Walk" et "Swim" selon la catégorie du Sprite Library
-/// Support pour multiple frames
+/// Gestionnaire d'animations du Castor
+/// Gère:
+/// - Les animations de marche (3 frames) selon le mouvement
+/// - Les animations de nage (2 frames) dans l'eau
+/// - Les animations de nage profonde (2 frames) au fond de rivière
+/// - Le switch automatique entre les états via la Sprite Library Unity 2D Animation
+/// 
+/// Implémente IZoneDetectable pour réagir aux changements de zones (entrée/sortie d'eau)
+/// Récupère aussi l'état des zones via TopDownPlayerController.ZoneManager
 /// </summary>
-public class CharacterAnimator : MonoBehaviour
+public class CharacterAnimator : MonoBehaviour, IZoneDetectable
 {
     [SerializeField]
     private float frameSwitchSpeed = 0.5f; // Temps entre les frames
@@ -181,5 +187,44 @@ public class CharacterAnimator : MonoBehaviour
             timeSinceLastSwitch = 0f;
             Debug.Log($"[CharacterAnimator] Mode MARCHE activé (sortie nage profonde)");
         }
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand le perso entre dans une zone
+    /// </summary>
+    public void OnEnterZone(ZoneType zoneType)
+    {
+        Debug.Log($"[CharacterAnimator] Entrée dans la zone: {zoneType}");
+        
+        if (zoneType == ZoneType.Water)
+        {
+            StartSwimming();
+        }
+    }
+
+    /// <summary>
+    /// Implémentation de IZoneDetectable - Appelé quand le perso sort d'une zone
+    /// </summary>
+    public void OnExitZone(ZoneType zoneType)
+    {
+        Debug.Log($"[CharacterAnimator] Sortie de la zone: {zoneType}");
+        
+        if (zoneType == ZoneType.Water)
+        {
+            StopSwimming();
+        }
+    }
+
+    /// <summary>
+    /// Retourne si l'objet est actuellement dans une zone
+    /// </summary>
+    public bool IsInZone(ZoneType zoneType)
+    {
+        TopDownPlayerController playerController = GetComponent<TopDownPlayerController>();
+        if (playerController != null)
+        {
+            return playerController.ZoneManager.IsInZone(zoneType);
+        }
+        return false;
     }
 }
