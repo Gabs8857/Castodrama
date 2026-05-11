@@ -204,7 +204,9 @@ public static class TopDownBootstrap
         {
             barObject = new GameObject(DangerBarName);
             barObject.transform.SetParent(parentForDangerBar, false);
-            barObject.AddComponent<RectTransform>();
+            RectTransform barRect = barObject.AddComponent<RectTransform>();
+            // Set initial size so the bar is visible
+            barRect.sizeDelta = new Vector2(150f, 150f);
         }
 
         if (barObject.GetComponent<StatusBarUI>() == null)

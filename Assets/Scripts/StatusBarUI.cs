@@ -118,43 +118,105 @@ public class StatusBarUI : MonoBehaviour
     private RectTransform canvasRectTransform;
     private SpriteRenderer hungerFollowSpriteRenderer;
     private AdaptiveHUDWidth hungerAdaptiveHudWidth;
+    private bool debugLogged = false;
+    private bool hungerUpdateLogged = false;
+    private RectTransform hungerParentRectTransform;
 
     private void Awake()
     {
+        Debug.Log("[StatusBarUI.Awake] Starting Awake");
+        
         if (hungerBarFill == null)
         {
+            // First try to get Image on this GameObject
             hungerBarFill = GetComponent<Image>();
+            Debug.Log($"[StatusBarUI.Awake] GetComponent<Image>: {(hungerBarFill != null ? "FOUND" : "NOT FOUND")}");
+            
+            // If not found, search in children (the actual Image is on a child)
+            if (hungerBarFill == null)
+            {
+                hungerBarFill = GetComponentInChildren<Image>();
+                Debug.Log($"[StatusBarUI.Awake] GetComponentInChildren<Image>: {(hungerBarFill != null ? "FOUND" : "NOT FOUND")}");
+                
+                if (hungerBarFill != null)
+                {
+                    Debug.Log($"[StatusBarUI.Awake] Found Image on child: {hungerBarFill.gameObject.name}");
+                }
+            }
+            
+            // If still not found, create one
+            if (hungerBarFill == null)
+            {
+                Debug.Log("[StatusBarUI.Awake] Image not found, creating one");
+                hungerBarFill = gameObject.AddComponent<Image>();
+            }
+        }
+
+        if (hungerBarFill != null)
+        {
+            Debug.Log($"[StatusBarUI.Awake] hungerBarFill sprite: {hungerBarFill.sprite}, color: {hungerBarFill.color}");
+        }
+        else
+        {
+            Debug.LogError("[StatusBarUI.Awake] Could not find Image component!");
         }
 
         hungerRectTransform = hungerBarFill != null ? hungerBarFill.rectTransform : GetComponent<RectTransform>();
-        dangerRectTransform = dangerBarFill?.GetComponent<RectTransform>();
+        hungerParentRectTransform = GetComponent<RectTransform>(); // Parent that has StatusBarUI
+        dangerRectTransform = dangerBarFill != null ? dangerBarFill.GetComponent<RectTransform>() : null;
 
         EnsureCanvasReferences();
         EnsureHungerBarIsRenderable();
         EnsureHungerBackgroundImageExists();
         EnsureHungerBackgroundRenderable();
+        
+        Debug.Log("[StatusBarUI.Awake] Awake complete");
     }
 
     private void Start()
     {
+        Debug.Log("[StatusBarUI.Start] Starting Start");
         EnsureCanvasReferences();
 
         // Trouve les systèmes
         if (hungerSystem == null)
         {
             GameObject playerObject = GameObject.Find("Castor");
+            Debug.Log($"[StatusBarUI.Start] Looking for Castor: {(playerObject != null ? "FOUND" : "NOT FOUND")}");
+            
             if (playerObject != null)
             {
                 hungerSystem = playerObject.GetComponent<TopDownHunger>();
+                Debug.Log($"[StatusBarUI.Start] GetComponent<TopDownHunger>: {(hungerSystem != null ? "FOUND" : "NOT FOUND")}");
+                
+                if (hungerSystem == null)
+                {
+                    Debug.LogWarning($"[StatusBarUI.Start] Castor found but TopDownHunger component not found. Adding it now.");
+                    hungerSystem = playerObject.AddComponent<TopDownHunger>();
+                    Debug.Log("[StatusBarUI.Start] Added TopDownHunger component");
+                }
+            }
+            else
+            {
+                Debug.LogError("[StatusBarUI.Start] Player object 'Castor' not found!");
             }
         }
 
         if (dangerSystem == null)
         {
-            GameObject playerObject = GameObject.Find("Player");
+            GameObject playerObject = GameObject.Find("Castor");
+            if (playerObject == null)
+            {
+                playerObject = GameObject.Find("Player");
+            }
+
             if (playerObject != null)
             {
                 dangerSystem = playerObject.GetComponent<TopDownDanger>();
+            }
+            else
+            {
+                Debug.LogError("[StatusBarUI.Start] Player object not found for danger system!");
             }
         }
 
@@ -182,14 +244,39 @@ public class StatusBarUI : MonoBehaviour
             dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
             dangerRectTransform.sizeDelta = dangerBarSize;
         }
+        
+        Debug.Log($"[StatusBarUI.Start] Complete - hungerSystem: {(hungerSystem != null ? "OK" : "NULL")}, hungerBarFill: {(hungerBarFill != null ? "OK" : "NULL")}, hungerFollowTarget: {(hungerFollowTarget != null ? "OK" : "NULL")}");
     }
 
     private void Update()
     {
+        // Try to find hunger system if not already found (handles timing issues)
+        if (hungerSystem == null)
+        {
+            GameObject playerObject = GameObject.Find("Castor");
+            if (playerObject != null)
+            {
+                hungerSystem = playerObject.GetComponent<TopDownHunger>();
+                if (hungerSystem == null && !debugLogged)
+                {
+                    Debug.LogWarning($"[StatusBarUI] TopDownHunger not found on Castor, will try to add it");
+                    hungerSystem = playerObject.AddComponent<TopDownHunger>();
+                }
+            }
+        }
+
         // Mets à jour la barre de faim
         if (hungerSystem != null && hungerBarFill != null)
         {
             UpdateHungerBarVisuals();
+        }
+        else if (!debugLogged && (hungerSystem == null || hungerBarFill == null))
+        {
+            if (hungerSystem == null)
+                Debug.LogWarning("[StatusBarUI] hungerSystem is null - hunger bar cannot update");
+            if (hungerBarFill == null)
+                Debug.LogWarning("[StatusBarUI] hungerBarFill is null - hunger bar cannot update");
+            debugLogged = true;
         }
 
         // Mets à jour la barre de danger
@@ -213,6 +300,10 @@ public class StatusBarUI : MonoBehaviour
 
         if (hungerFollowTarget == null || hungerRectTransform == null || canvasRectTransform == null)
         {
+            if (!debugLogged && hungerFollowTarget == null)
+            {
+                Debug.LogWarning("[StatusBarUI] hungerFollowTarget is null - bar won't follow player");
+            }
             return;
         }
 
@@ -324,16 +415,21 @@ public class StatusBarUI : MonoBehaviour
     {
         if (hungerBarFill == null)
         {
+            Debug.LogError("[StatusBarUI.EnsureHungerBarIsRenderable] hungerBarFill is NULL!");
             return;
         }
+
+        Debug.Log($"[StatusBarUI.EnsureHungerBarIsRenderable] hungerBarFill sprite before: {hungerBarFill.sprite}");
 
         if (hungerBarFill.sprite == null)
         {
             if (runtimeWhiteSprite == null)
             {
                 runtimeWhiteSprite = CreateRingSprite();
+                Debug.Log($"[StatusBarUI.EnsureHungerBarIsRenderable] Created ring sprite: {runtimeWhiteSprite}");
             }
             hungerBarFill.sprite = runtimeWhiteSprite;
+            Debug.Log($"[StatusBarUI.EnsureHungerBarIsRenderable] Assigned ring sprite");
         }
 
         hungerBarFill.type = Image.Type.Filled;
@@ -342,6 +438,8 @@ public class StatusBarUI : MonoBehaviour
         hungerBarFill.fillClockwise = true;
         hungerBarFill.preserveAspect = true;
         hungerBarFill.color = new Color(0.32f, 0.85f, 0.35f, 1f);
+        
+        Debug.Log($"[StatusBarUI.EnsureHungerBarIsRenderable] Complete - sprite: {hungerBarFill.sprite}, color: {hungerBarFill.color}");
     }
 
     void EnsureHungerBackgroundRenderable()
@@ -368,6 +466,13 @@ public class StatusBarUI : MonoBehaviour
             if (defaultBackgroundSprite != null)
             {
                 hungerBarBackground.sprite = defaultBackgroundSprite;
+            }
+            else
+            {
+                // If we can't load the sprite, disable the background
+                hungerBarBackground.enabled = false;
+                Debug.LogWarning("[StatusBarUI] Could not load FoodCircle sprite, disabling background");
+                return;
             }
         }
 
@@ -578,6 +683,12 @@ public class StatusBarUI : MonoBehaviour
         float normalized = hungerSystem.NormalizedHunger;
         hungerBarFill.fillAmount = normalized;
         hungerBarFill.color = Color.Lerp(new Color(0.9f, 0.2f, 0.2f, 1f), new Color(0.32f, 0.85f, 0.35f, 1f), normalized);
+        
+        if (!hungerUpdateLogged)
+        {
+            Debug.Log($"[StatusBarUI] Hunger bar working! normalized={normalized:F2}, currentHunger={hungerSystem.CurrentHunger:F2}");
+            hungerUpdateLogged = true;
+        }
     }
 
     void UpdateDangerBarVisuals()
