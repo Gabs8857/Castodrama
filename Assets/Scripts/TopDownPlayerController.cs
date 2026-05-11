@@ -74,6 +74,13 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
                 adjustedOffset.x = -itemOffset.x;
             }
             equippedItem.transform.localPosition = adjustedOffset;
+
+            // Faire miroir le sprite de l'item selon la direction du joueur
+            SpriteRenderer itemSpriteRenderer = equippedItem.GetComponent<SpriteRenderer>();
+            if (itemSpriteRenderer != null)
+            {
+                itemSpriteRenderer.flipX = spriteRenderer.flipX;
+            }
         }
     }
 
