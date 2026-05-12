@@ -106,30 +106,137 @@ StatusBarUI (unique script pour 2 barres)
 
 ---
 
-### 📝 Scripts Principaux
+---
 
-#### Contrôleurs de Joueur
+## 📚 Inventaire Complet des Scripts (31 fichiers)
 
-| Script | Rôle | Hérite de |
-|--------|------|-----------|
-| `PlayerController.cs` | Base réutilisable avec mouvement simple | MonoBehaviour |
-| `TopDownPlayerController.cs` | Contrôle du joueur principal | PlayerController |
+Tous les scripts sont localisés dans le dossier `Assets/Scripts/` (structure plate, pas de sous-dossiers).
 
-#### Systèmes Essentiels
+### 🎮 Système de Joueur & Mouvement (3 scripts)
 
-| Script | Fonction |
-|--------|----------|
-| `CharacterAnimator.cs` | Gestion animations (marche/nage/nage profonde) |
-| `EquippableItem.cs` | Items à ramasser/déposer |
-| `WaterZoneTrigger.cs` | Détecteur de zone d'eau |
-| `StatusBarUI.cs` | Barres d'état unifiées (faim + danger) |
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `PlayerController.cs` | `PlayerController` | Base réutilisable avec mouvement simple (clavier + gamepad), configuration Rigidbody2D - À la base de tout |
+| `TopDownPlayerController.cs` | `TopDownPlayerController` | Contrôle du joueur principal (hérite de PlayerController). Gère l'inventaire, détection de zones, animations selon la direction. **Hub central du jeu** |
+| `TopDownCameraFollow.cs` | `TopDownCameraFollow` | Système de caméra qui suit le joueur en douceur avec contrôle du zoom au gamepad et modes d'affichage multiples |
 
-#### Systèmes de Zones
+### 🎨 Animations & Visuels (4 scripts)
 
-| Script | Rôle |
-|--------|------|
-| `IZoneDetectable.cs` | Interface commune pour les objets réagissant aux zones |
-| `ZoneDetectionManager.cs` | Gestionnaire utilitaire de suivi des zones |
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `CharacterAnimator.cs` | `CharacterAnimator` | Gère les animations du personnage (marche 3 frames, nage 2 frames, nage profonde) avec commutation dynamique |
+| `SpriteLibrarySwitcher.cs` | `SpriteLibrarySwitcher` | Bascule les assets de la sprite library au runtime pour changer l'apparence du personnage |
+| `ATHController.cs` | `ATHController` | Contrôle les animations du décor ATH avec lecture unique sans scintillement |
+| `AdaptiveHUDWidth.cs` | `AdaptiveHUDWidth` | Ajuste dynamiquement les éléments HUD selon le ratio d'aspect de l'écran tout en conservant les proportions |
+
+### 📊 État du Jeu & Mécaniques (3 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `TopDownHunger.cs` | `TopDownHunger` | Système de faim du joueur avec taux de vidage et mécaniques de restauration |
+| `TopDownDanger.cs` | `TopDownDanger` | Suivi du niveau de danger qui augmente dans les zones dangereuses et diminue ailleurs |
+| `DayAndNightCycle.cs` | `DayAndNightCycle` | Implémente le cycle jour/nuit avec rayon de vision ajustable et effets de flash UI |
+
+### 🎒 Inventaire & Items (2 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `EquippableItem.cs` | `EquippableItem` | Items interactifs que le joueur peut ramasser/déposer avec détection de proximité et réactions aux zones |
+| `FoodItem.cs` | `FoodItem` | Items alimentaires qui restaurent la faim au ramassage avec teinte visuelle et montant customizable |
+
+### 🗺️ Systèmes de Zones & Triggers (4 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `IZoneDetectable.cs` | `IZoneDetectable` / `ZoneType` | Interface et enum pour le système de détection de zones. Permet aux objets de réagir aux changements de zones (Eau, Lave, Feu, Glace) |
+| `ZoneDetectionManager.cs` | `ZoneDetectionManager` | Système centralisé de suivi des zones qui notifie les objets zone-aware lors de l'entrée/sortie |
+| `DangerZoneTrigger.cs` | `DangerZoneTrigger` | Trigger qui augmente le niveau de danger à l'entrée, le diminue à la sortie |
+| `WaterZoneTrigger.cs` | `WaterZoneTrigger` | Trigger qui détecte quand le joueur entre/sort des zones d'eau |
+
+### 🌊 Téléportation & Navigation (3 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `TeleportTrigger.cs` | `TeleportTrigger` | Système de téléportation générique avec cooldown, rotation de destination et logging de débogage |
+| `RiverTeleport.cs` | `RiverTeleport` | Permet au joueur de se téléporter de la surface à la rivière profonde en pressant 'E' |
+| `RiverBottomTeleport.cs` | `RiverBottomTeleport` | Gère la téléportation de la rivière profonde vers la surface et active l'animation de nage profonde |
+
+### 🖼️ Interface Utilisateur (3 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `StatusBarUI.cs` | `StatusBarUI` | Gestionnaire unifié pour les 2 barres circulaires (faim + danger) avec positionnement adaptatif |
+| `DangerUI.cs` | `DangerUI` | Met à jour le remplissage de la barre de danger selon le niveau de danger du joueur |
+| `Danger.cs` | `Danger` | Système de danger hérité (probablement remplacé par TopDownDanger) avec détection de zones forestières |
+
+### 💬 Dialogue & Interaction (2 scripts)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `DialogueManager.cs` | `DialogueManager` | Gère le système narratif Ink avec progression de l'histoire et interface de dialogue UI |
+| `NPCInteraction.cs` | `NPCInteraction` | Détecte la proximité du joueur aux PNJs et déclenche des dialogues multi-parties avec touche 'E' |
+
+### 🌐 Systèmes Externes (1 script)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `ContacteWebPage.cs` | `ContacteWebPage` | Envoie les messages de formulaire à un endpoint web avec animation UI glissante |
+
+### 🚀 Initialisation & Bootstrap (1 script)
+
+| Script | Classe | Utilité |
+|--------|--------|---------|
+| `TopDownBootstrap.cs` | `TopDownBootstrap` | Système d'initialisation de scène qui crée/configure le joueur et les éléments UI au runtime |
+
+---
+
+## 🏗️ Architecture et Hiérarchie
+
+### Hiérarchie d'Héritage
+
+```
+MonoBehaviour
+├─ PlayerController (base réutilisable)
+│  └─ TopDownPlayerController (centre névralgique) ← HUB CENTRAL
+│     ├─ CharacterAnimator
+│     ├─ TopDownHunger
+│     ├─ TopDownDanger
+│     ├─ ZoneDetectionManager
+│     └─ ...autres composants
+
+├─ TopDownCameraFollow
+├─ DayAndNightCycle
+├─ DialogueManager
+├─ TopDownBootstrap
+└─ ...autres systèmes autonomes
+```
+
+### Pattern de Communication
+
+```
+Triggers (eau, danger, etc.)
+         │
+         │ détectent collisions
+         ▼
+TopDownPlayerController.OnEnterZone()
+         │
+         ├─ Enregistre dans ZoneDetectionManager
+         │
+         └─ Notifie les composants:
+            ├─ CharacterAnimator (change animations)
+            ├─ EquippableItem (réactions aux zones)
+            ├─ TopDownDanger (ajuste danger)
+            └─ Autres composants IZoneDetectable
+```
+
+### Patterns de Conception Utilisés
+
+- ✅ **Héritage** : PlayerController → TopDownPlayerController (DRY)
+- ✅ **Interface Pattern** : `IZoneDetectable` pour extensibilité
+- ✅ **Manager Pattern** : `ZoneDetectionManager` centralisé
+- ✅ **Bootstrap Pattern** : `TopDownBootstrap` pour initialisation
+- ✅ **Component Pattern** : Architecture basée sur les composants Unity
+- ✅ **Observer Pattern** : Systèmes notifient les observateurs des changements
 
 ---
 
@@ -151,22 +258,19 @@ foreach (var zone in currentZones)
 {
     Debug.Log($"Le joueur est dans la zone: {zone}");
 }
+
+// Accéder aux systèmes connexes
+var hunger = playerController.GetComponent<TopDownHunger>();
+var danger = playerController.GetComponent<TopDownDanger>();
 ```
 
 ---
 
 ### ✨ Principes d'Architecture
 
-- **Héritage** : PlayerController → TopDownPlayerController (DRY - Don't Repeat Yourself)
-- **Centralisation** : TopDownPlayerController est le hub central
-- **Interfaces** : IZoneDetectable permet une extensibilité facile
+- **Centralisation** : `TopDownPlayerController` est le hub central
+- **Interfaces** : `IZoneDetectable` permet une extensibilité facile
 - **Découplage** : Les scripts ne dépendent pas directement les uns des autres
-- **Réutilisabilité** : PlayerController peut servir de base pour NPJ, ennemis, etc.
-- **Maintenabilité** : Code organisé et bien documenté
-
-#### 🔧 Interfaces et Classes Clés
-
-- **IZoneDetectable** : Interface commune pour les objets qui réagissent aux zones
-- **ZoneType** : Énumération des types de zones possibles
-- **ZoneDetectionManager** : Gestionnaire utilitaire de suivi des zones
-- **TopDownPlayerController** : Centre névralgique de gestion
+- **Réutilisabilité** : `PlayerController` peut servir de base pour NPJ, ennemis, etc.
+- **Maintenabilité** : Code organisé, bien documenté et facile à modifier
+- **Extensibilité** : Nouveaux systèmes peuvent être ajoutés sans modification des existants
