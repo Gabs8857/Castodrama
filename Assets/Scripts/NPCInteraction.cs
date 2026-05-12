@@ -5,46 +5,51 @@ public class NPCInteraction : MonoBehaviour
 {
     public DialogueManager dialogueManager;
 
+    public TextAsset[] npcDialogues;
+
     private bool playerNearby = false;
+
+    private int dialogueIndex = 0;
+
+    private bool isTalking = false;
 
     void Update()
     {
+        // 🔥 interaction
         if (playerNearby &&
-            Keyboard.current.eKey.wasPressedThisFrame)
+            Keyboard.current.eKey.wasPressedThisFrame &&
+            !isTalking)
         {
-            Debug.Log("E appuyé");
+            if (dialogueIndex < npcDialogues.Length)
+            {
+                Debug.Log("Dialogue index = " + dialogueIndex);
 
-            if (dialogueManager != null)
-            {
-                dialogueManager.StartDialogue();
+                isTalking = true;
+
+                dialogueManager.StartDialogue(npcDialogues[dialogueIndex]);
             }
-            else
-            {
-                Debug.LogError("DialogueManager NON assigné !");
-            }
+        }
+
+        // 🔥 détecte fin dialogue proprement
+        if (isTalking && dialogueManager.dialogueFinished)
+        {
+            dialogueIndex++;        // passe au suivant
+            isTalking = false;      // reset état
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Entrée trigger : " + other.name);
-
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Le joueur est proche");
-
             playerNearby = true;
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        Debug.Log("Sortie trigger : " + other.name);
-
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Le joueur est parti");
-
             playerNearby = false;
         }
     }

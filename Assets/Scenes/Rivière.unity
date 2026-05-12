@@ -2412,7 +2412,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 558e656b8298b1d45bbf57a600883d3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimator
-  frameSwitchSpeed: 0.5
+  frameSwitchSpeed: 0.3
+  directionSmoothingSpeed: 12
   walkCategoryName: Walk
   swimCategoryName: Swim
   deepSwimCategoryName: deep_swim
@@ -2426,6 +2427,16 @@ MonoBehaviour:
   deepSwimFrameNames:
   - Frame1
   - Frame2
+  walkUpCategoryName: Walk_Up
+  walkDownCategoryName: Walk_Down
+  walkUpFrameNames:
+  - Frame1
+  - Frame2
+  - Frame3
+  walkDownFrameNames:
+  - Frame1
+  - Frame2
+  - Frame3
 --- !u!50 &394323006
 Rigidbody2D:
   serializedVersion: 5
@@ -4746,7 +4757,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueManager
   dialoguePanel: {fileID: 904443579}
   dialogueText: {fileID: 51414151}
-  inkJSON: {fileID: 4900000, guid: 90a092200c9bf2b43adb647f86541258, type: 3}
+  dialogueFinished: 0
+  playerMovement: {fileID: 0}
 --- !u!4 &980903285
 Transform:
   m_ObjectHideFlags: 0
@@ -15013,7 +15025,7 @@ MonoBehaviour:
   hungerFollowFixedCanvasPoint: 1
   hungerFixedCanvasPoint: {fileID: 0}
   hungerUseCameraViewportPointWhenFixed: 1
-  hungerFixedViewportPoint: {x: 0.318, y: 0.266}
+  hungerFixedViewportPoint: {x: 0, y: 0}
   hungerFixedPointOffset: {x: 0, y: 0}
   hungerFollowTarget: {fileID: 0}
   hungerFollowOffset: {x: 0, y: 0}
@@ -15026,7 +15038,7 @@ MonoBehaviour:
   hungerImagePaddingPixels: 14
   hungerRingScaleMultiplier: 1.1
   hungerMinRingDiameterPixels: 200
-  hungerMaxRingDiameterPixels: 400
+  hungerMaxRingDiameterPixels: 0
   dangerSystem: {fileID: 0}
   dangerBarFill: {fileID: 0}
   dangerBarBackground: {fileID: 0}
@@ -22770,6 +22782,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteraction
   dialogueManager: {fileID: 980903284}
+  npcDialogues:
+  - {fileID: 4900000, guid: 90a092200c9bf2b43adb647f86541258, type: 3}
+  - {fileID: 4900000, guid: c5283d44dfbc5964abf02f556b073dab, type: 3}
 --- !u!212 &1779306996
 SpriteRenderer:
   serializedVersion: 2

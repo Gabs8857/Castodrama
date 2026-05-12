@@ -15,7 +15,10 @@ using UnityEngine.U2D.Animation;
 public class CharacterAnimator : MonoBehaviour, IZoneDetectable
 {
     [SerializeField]
-    private float frameSwitchSpeed = 0.5f; // Temps entre les frames
+    private float frameSwitchSpeed = 0.1f; // Temps entre les frames (~10 FPS pour animations fluides)
+
+    [SerializeField]
+    private float directionSmoothingSpeed = 12f; // Vitesse de lissage (élimine le ping entre directions)
 
     [SerializeField]
     private string walkCategoryName = "Walk"; // Catégorie pour la marche
@@ -35,6 +38,18 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     [SerializeField]
     private string[] deepSwimFrameNames = { "Frame1", "Frame2" }; // Frames de nage profonde (2 frames)
 
+    [SerializeField]
+    private string walkUpCategoryName = "Walk_Up"; // Catégorie pour la montée
+
+    [SerializeField]
+    private string walkDownCategoryName = "Walk_Down"; // Catégorie pour la descente
+
+    [SerializeField]
+    private string[] walkUpFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de montée (3 frames)
+
+    [SerializeField]
+    private string[] walkDownFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de descente (3 frames)
+
     private SpriteResolver spriteResolver;
     private Rigidbody2D rb;
     private float timeSinceLastSwitch = 0f;
@@ -42,6 +57,9 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     private bool isSwimming = false;
     private bool isSwimmingDeep = false;
     private bool isMoving = false;
+    private Vector2 lastMovementDirection = Vector2.down; // Dernière direction de mouvement
+    private Vector2 smoothedMovementDirection = Vector2.down; // Direction lissée pour éviter les saccades
+    private string currentCategoryName = "Walk"; // Catégorie actuellement utilisée
 
     private void Awake()
     {
@@ -67,6 +85,19 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         // Vérifie si le personnage se déplace
         isMoving = rb.linearVelocity.sqrMagnitude > 0.01f;
 
+        // Mémorise la dernière direction de mouvement (pour les animations)
+        if (isMoving)
+        {
+            lastMovementDirection = rb.linearVelocity.normalized;
+        }
+
+        // 🔥 LISSE LA DIRECTION pour éviter les changements brusques (élimine le ping)
+        smoothedMovementDirection = Vector2.Lerp(
+            smoothedMovementDirection,
+            lastMovementDirection,
+            directionSmoothingSpeed * Time.deltaTime
+        );
+
         // En nage : animer peu importe la vitesse
         // En marche : animer seulement si on bouge
         bool shouldAnimate = isSwimming || isSwimmingDeep || isMoving;
@@ -74,6 +105,18 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         if (!shouldAnimate)
         {
             timeSinceLastSwitch = 0f;
+            return;
+        }
+
+        // 🔥 DÉTECTE LE CHANGEMENT DE DIRECTION ET CHANGE IMMÉDIATEMENT
+        string nextCategory = GetCurrentCategory();
+        if (nextCategory != currentCategoryName)
+        {
+            // Catégorie a changé ! Réinitialise et change immédiatement
+            currentCategoryName = nextCategory;
+            currentFrameIndex = 0;
+            timeSinceLastSwitch = 0f;
+            SwitchFrame();
             return;
         }
 
@@ -86,29 +129,39 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         }
     }
 
+    /// <summary>
+    /// Détermine la catégorie d'animation à utiliser selon l'état
+    /// </summary>
+    private string GetCurrentCategory()
+    {
+        if (isSwimmingDeep)
+            return deepSwimCategoryName;
+        
+        if (isSwimming)
+            return swimCategoryName;
+        
+        // Détecte si le mouvement est plus vertical que horizontal
+        float absX = Mathf.Abs(smoothedMovementDirection.x);
+        float absY = Mathf.Abs(smoothedMovementDirection.y);
+        
+        if (absY > absX)
+        {
+            // Mouvement principalement vertical
+            if (smoothedMovementDirection.y > 0)
+                return walkUpCategoryName; // Montée
+            else
+                return walkDownCategoryName; // Descente
+        }
+        
+        return walkCategoryName; // Mouvement horizontal ou diagonal
+    }
+
     private void SwitchFrame()
     {
-        string[] frameNames;
-        string categoryName;
+        string categoryName = GetCurrentCategory();
         
-        if (isSwimmingDeep)
-        {
-            frameNames = deepSwimFrameNames;
-            categoryName = deepSwimCategoryName;
-        }
-        else if (isSwimming)
-        {
-            frameNames = swimFrameNames;
-            categoryName = swimCategoryName;
-        }
-        else
-        {
-            frameNames = walkFrameNames;
-            categoryName = walkCategoryName;
-        }
-        
+        string[] frameNames = GetFrameNamesForCategory(categoryName);
         string labelToSet = frameNames[currentFrameIndex];
-        Debug.Log($"[CharacterAnimator] SwitchFrame - Category: {categoryName}, Label: {labelToSet}, isSwimmingDeep: {isSwimmingDeep}, isSwimming: {isSwimming}");
         
         try
         {
@@ -120,6 +173,22 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         }
         
         currentFrameIndex = (currentFrameIndex + 1) % frameNames.Length;
+    }
+
+    /// <summary>
+    /// Retourne le tableau de frames pour une catégorie donnée
+    /// </summary>
+    private string[] GetFrameNamesForCategory(string categoryName)
+    {
+        if (categoryName == deepSwimCategoryName)
+            return deepSwimFrameNames;
+        if (categoryName == swimCategoryName)
+            return swimFrameNames;
+        if (categoryName == walkUpCategoryName)
+            return walkUpFrameNames;
+        if (categoryName == walkDownCategoryName)
+            return walkDownFrameNames;
+        return walkFrameNames; // Par défaut
     }
 
     /// <summary>

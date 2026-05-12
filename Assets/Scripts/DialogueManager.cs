@@ -8,48 +8,72 @@ public class DialogueManager : MonoBehaviour
     public GameObject dialoguePanel;
     public TMP_Text dialogueText;
 
-    public TextAsset inkJSON;
-
     private Story story;
+
+    public bool dialogueFinished = false;
+
+    //  référence au script de mouvement du joueur
+    public MonoBehaviour playerMovement;
 
     void Start()
     {
-        Debug.Log("DialogueManager lancé");
-
         dialoguePanel.SetActive(false);
+    }
+
+    public void StartDialogue(TextAsset inkJSON)
+    {
+        Debug.Log("Dialogue démarré");
+
+        dialogueFinished = false;
+
+        if (inkJSON == null)
+        {
+            Debug.LogError("Ink file NULL !");
+            return;
+        }
 
         story = new Story(inkJSON.text);
 
         story.ChoosePathString("start");
 
-        Debug.Log("Story créée");
-    }
-
-    public void StartDialogue()
-    {
-        Debug.Log("Dialogue démarré");
-
         dialoguePanel.SetActive(true);
+
+        // 🔥 BLOQUE LE JOUEUR
+        if (playerMovement != null)
+            playerMovement.enabled = false;
 
         ContinueStory();
     }
 
+    void Update()
+    {
+        if (!dialoguePanel.activeSelf)
+            return;
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            ContinueStory();
+        }
+    }
+
     void ContinueStory()
     {
-        Debug.Log("ContinueStory appelé");
+        if (story == null)
+        {
+            Debug.LogError("Story NULL");
+            return;
+        }
 
         if (story.canContinue)
         {
-            string line = story.Continue().Trim();
+            string line = story.Continue();
 
-            Debug.Log("LINE = " + line);
+            Debug.Log("LINE = [" + line + "]");
 
-            dialogueText.text = line;
+            dialogueText.text = line.Trim();
         }
         else
         {
-            Debug.Log("Fin du dialogue");
-
             EndDialogue();
         }
     }
@@ -57,48 +81,11 @@ public class DialogueManager : MonoBehaviour
     void EndDialogue()
     {
         dialoguePanel.SetActive(false);
-
-        // 🔥 Efface le texte
         dialogueText.text = "";
+        dialogueFinished = true;
 
-        story.ResetState();
-        story.ChoosePathString("start");
-    }
-
-    void Update()
-    {
-        // Dialogue suivant
-        if (dialoguePanel.activeSelf &&
-            Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            Debug.Log("SPACE appuyé");
-
-            ContinueStory();
-        }
-
-        // 🔥 Annuler dialogue si le joueur bouge
-        if (dialoguePanel.activeSelf && IsMoving())
-        {
-            Debug.Log("Dialogue annulé car mouvement");
-
-            EndDialogue();
-        }
-    }
-
-    bool IsMoving()
-    {
-        return
-            Keyboard.current.zKey.isPressed ||
-            Keyboard.current.qKey.isPressed ||
-            Keyboard.current.sKey.isPressed ||
-            Keyboard.current.dKey.isPressed ||
-
-            Keyboard.current.wKey.isPressed ||
-            Keyboard.current.aKey.isPressed ||
-
-            Keyboard.current.upArrowKey.isPressed ||
-            Keyboard.current.downArrowKey.isPressed ||
-            Keyboard.current.leftArrowKey.isPressed ||
-            Keyboard.current.rightArrowKey.isPressed;
+        //  RÉACTIVE LE JOUEUR
+        if (playerMovement != null)
+            playerMovement.enabled = true;
     }
 }

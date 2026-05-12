@@ -1,7 +1,7 @@
 === start ===
-Test : Salut voyageur !
-Testeur : Tu vas bien ?
-Test : Moi ça va super.
-Testeur : Bah ça teste sur Ink tu connais
-Test : La rue, la vraie
+
+Salut voyageur !
+Tu vas bien ?
+Moi ça va super.
+Bah ça teste sur Ink tu connais
 -> END
