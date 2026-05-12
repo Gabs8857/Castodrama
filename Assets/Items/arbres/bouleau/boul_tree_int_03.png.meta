@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: ff692211f44869d48a7ba96c3b3f1456
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5911658936462920367
+    second: boul_tree_int_03_0
+  - first:
+      213: 5161620452387828217
+    second: boul_tree_int_03_1
+  - first:
+      213: 1954666430445260787
+    second: boul_tree_int_03_2
+  - first:
+      213: -5231206058009532818
+    second: boul_tree_int_03_3
+  - first:
+      213: 1110594686995336983
+    second: boul_tree_int_03_4
+  - first:
+      213: -7350478710157170352
+    second: boul_tree_int_03_5
+  - first:
+      213: 7394671155760646244
+    second: boul_tree_int_03_6
+  - first:
+      213: 7488669015485024063
+    second: boul_tree_int_03_7
+  - first:
+      213: -6689056787257685482
+    second: boul_tree_int_03_8
+  - first:
+      213: 2170182080563987593
+    second: boul_tree_int_03_9
+  - first:
+      213: -5652988809478936752
+    second: boul_tree_int_03_10
+  - first:
+      213: -69474586048154296
+    second: boul_tree_int_03_11
+  - first:
+      213: 433321025987522362
+    second: boul_tree_int_03_12
+  - first:
+      213: 7134024836386573646
+    second: boul_tree_int_03_13
+  - first:
+      213: 6871493187951222165
+    second: boul_tree_int_03_14
+  - first:
+      213: 13071421311450280
+    second: boul_tree_int_03_15
+  - first:
+      213: -8343212037367540831
+    second: boul_tree_int_03_16
+  - first:
+      213: -4774684243978947344
+    second: boul_tree_int_03_17
+  - first:
+      213: 4114550292794207958
+    second: boul_tree_int_03_18
+  - first:
+      213: 4986502602177608321
+    second: boul_tree_int_03_19
+  - first:
+      213: -7808989957390963533
+    second: boul_tree_int_03_20
+  - first:
+      213: -4711184009998264290
+    second: boul_tree_int_03_21
+  - first:
+      213: -2884628276186654733
+    second: boul_tree_int_03_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boul_tree_int_03_0
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 571
+        width: 50
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1553dd2c48195fda0800000000000000
+      internalID: -5911658936462920367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_1
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 664
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f1b7f93472c1a740800000000000000
+      internalID: 5161620452387828217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_2
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 526
+        width: 123
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ff021123ce502b10800000000000000
+      internalID: 1954666430445260787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_3
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 503
+        width: 129
+        height: 134
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e66687d6ec50767b0800000000000000
+      internalID: -5231206058009532818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_4
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 605
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71f0bcfcbff996f00800000000000000
+      internalID: 1110594686995336983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 520
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 059a200ce8addf990800000000000000
+      internalID: -7350478710157170352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_6
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 468
+        width: 67
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 468c0fdcc362f9660800000000000000
+      internalID: 7394671155760646244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_7
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 418
+        width: 165
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f37857cfac81de760800000000000000
+      internalID: 7488669015485024063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_8
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 503
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61a0719ca42bb23a0800000000000000
+      internalID: -6689056787257685482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_9
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 477
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9844fe9aa190e1e10800000000000000
+      internalID: 2170182080563987593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_10
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 452
+        width: 37
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 057efbbe0ac8c81b0800000000000000
+      internalID: -5652988809478936752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_11
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 424
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 845bea96b3d290ff0800000000000000
+      internalID: -69474586048154296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_12
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 399
+        width: 74
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3fa1b36d27730600800000000000000
+      internalID: 433321025987522362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_13
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 420
+        width: 43
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4dc2af7ac5210360800000000000000
+      internalID: 7134024836386573646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_14
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 395
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59d5950d5a27c5f50800000000000000
+      internalID: 6871493187951222165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_15
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 406
+        width: 23
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ac7aff63607e2000800000000000000
+      internalID: 13071421311450280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_16
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 381
+        width: 34
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a3d1f23bd4f63c80800000000000000
+      internalID: -8343212037367540831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_17
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 404
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f4fafa3af9ecbdb0800000000000000
+      internalID: -4774684243978947344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_18
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 375
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6de6a7401b1d91930800000000000000
+      internalID: 4114550292794207958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_19
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 341
+        width: 97
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18a7b5272bd933540800000000000000
+      internalID: 4986502602177608321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_20
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 349
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bc6e1fe105e0a390800000000000000
+      internalID: -7808989957390963533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_21
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 292
+        width: 20
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e189d849a138e9eb0800000000000000
+      internalID: -4711184009998264290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boul_tree_int_03_22
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 269
+        width: 159
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f7d8d0cdddb7f7d0800000000000000
+      internalID: -2884628276186654733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boul_tree_int_03_0: -5911658936462920367
+      boul_tree_int_03_1: 5161620452387828217
+      boul_tree_int_03_10: -5652988809478936752
+      boul_tree_int_03_11: -69474586048154296
+      boul_tree_int_03_12: 433321025987522362
+      boul_tree_int_03_13: 7134024836386573646
+      boul_tree_int_03_14: 6871493187951222165
+      boul_tree_int_03_15: 13071421311450280
+      boul_tree_int_03_16: -8343212037367540831
+      boul_tree_int_03_17: -4774684243978947344
+      boul_tree_int_03_18: 4114550292794207958
+      boul_tree_int_03_19: 4986502602177608321
+      boul_tree_int_03_2: 1954666430445260787
+      boul_tree_int_03_20: -7808989957390963533
+      boul_tree_int_03_21: -4711184009998264290
+      boul_tree_int_03_22: -2884628276186654733
+      boul_tree_int_03_3: -5231206058009532818
+      boul_tree_int_03_4: 1110594686995336983
+      boul_tree_int_03_5: -7350478710157170352
+      boul_tree_int_03_6: 7394671155760646244
+      boul_tree_int_03_7: 7488669015485024063
+      boul_tree_int_03_8: -6689056787257685482
+      boul_tree_int_03_9: 2170182080563987593
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

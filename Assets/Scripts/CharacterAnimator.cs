@@ -26,6 +26,9 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     [SerializeField]
     private string swimCategoryName = "Swim"; // Catégorie pour la nage
 
+    // private string SwimCategoryName = "Swim_Up"; // Catégorie pour la nage vers le haut 
+    
+
     [SerializeField]
     private string deepSwimCategoryName = "deep_swim"; // Catégorie pour la nage profonde
 
@@ -43,6 +46,8 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
 
     [SerializeField]
     private string walkDownCategoryName = "Walk_Down"; // Catégorie pour la descente
+
+
 
     [SerializeField]
     private string[] walkUpFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de montée (3 frames)
