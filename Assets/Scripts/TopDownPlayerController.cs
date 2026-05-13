@@ -20,7 +20,33 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
     // Inventaire
     private GameObject equippedItem;
     private bool hasItem = false;
-    private Vector3 itemOffset = new Vector3(0.3f, 0.2f, 0); // Position relative par rapport au joueur
+    
+    [SerializeField]
+    private Vector3 itemOffsetRight = new Vector3(-0.33f, 0.03f, 0); // Position quand regarde à droite
+    
+    [SerializeField]
+    private Vector3 itemOffsetLeft = new Vector3(0.32f, 0.03f, 0); // Position quand regarde à gauche
+    
+    [SerializeField]
+    private Vector3 itemOffsetUp = new Vector3(0.0f, 1f, 0); // Position quand regarde vers le haut
+    
+    [SerializeField]
+    private Vector3 itemOffsetDown = new Vector3(-0.2f, -0.7f, 0); // Position quand regarde vers le bas
+    
+    [SerializeField]
+    private float itemRotationRight = 142.7f; // Rotation Z quand regarde à droite
+    
+    [SerializeField]
+    private float itemRotationLeft = 936.2f; // Rotation Z quand regarde à gauche
+    
+    [SerializeField]
+    private float itemRotationUp = -114.6f; // Rotation Z quand regarde vers le haut
+    
+    [SerializeField]
+    private float itemRotationDown = 86.2f; // Rotation Z quand regarde vers le bas
+    
+    private int defaultSortOrder = 0; // Stocke le sort order initial du personnage
+    private Vector2 lastMovementDirection = Vector2.down; // Dernière direction mémorisée
 
     // Détection de zones - centralisée
     private ZoneDetectionManager zoneManager;
@@ -39,6 +65,12 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
         
         spriteRenderer = GetComponent<SpriteRenderer>();
         
+        // Stocke le sort order initial
+        if (spriteRenderer != null)
+        {
+            defaultSortOrder = spriteRenderer.sortingOrder;
+        }
+        
         // Initialise le gestionnaire de zones
         zoneManager = new ZoneDetectionManager(this);
         
@@ -48,6 +80,12 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
     protected override void Update()
     {
         base.Update(); // Appelle Update du PlayerController (lecture des entrées)
+        
+        // Mémorise la dernière direction de mouvement
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            lastMovementDirection = moveInput.normalized;
+        }
         
         // Ajoute la gestion du sprite selon la direction
         if (spriteRenderer != null)
@@ -68,12 +106,67 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
         // L'item équippé suit le joueur avec offset adapté selon la direction
         if (equippedItem != null)
         {
-            Vector3 adjustedOffset = itemOffset;
-            if (spriteRenderer.flipX)
+            // Utilise la dernière direction mémorisée (même quand immobile)
+            Vector3 adjustedOffset;
+            float rotation;
+            
+            float absX = Mathf.Abs(lastMovementDirection.x);
+            float absY = Mathf.Abs(lastMovementDirection.y);
+            
+            if (absY > absX)
             {
-                adjustedOffset.x = -itemOffset.x;
+                // Mouvement principalement vertical
+                if (lastMovementDirection.y > 0)
+                {
+                    // Vers le haut
+                    adjustedOffset = itemOffsetUp;
+                    rotation = itemRotationUp;
+                    // Change le sort order du personnage quand walk up
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.sortingOrder = 22;
+                    }
+                }
+                else
+                {
+                    // Vers le bas
+                    adjustedOffset = itemOffsetDown;
+                    rotation = itemRotationDown;
+                    // Restaure le sort order original
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.sortingOrder = defaultSortOrder;
+                    }
+                }
             }
+            else
+            {
+                // Mouvement horizontal
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.sortingOrder = defaultSortOrder;
+                }
+                
+                if (spriteRenderer.flipX)
+                {
+                    // Vers la droite
+                    adjustedOffset = itemOffsetRight;
+                    rotation = itemRotationRight;
+                }
+                else
+                {
+                    // Vers la gauche
+                    adjustedOffset = itemOffsetLeft;
+                    rotation = itemRotationLeft;
+                }
+            }
+            
             equippedItem.transform.localPosition = adjustedOffset;
+            
+            // Applique la rotation Z
+            Vector3 eulerAngles = equippedItem.transform.localEulerAngles;
+            eulerAngles.z = rotation;
+            equippedItem.transform.localEulerAngles = eulerAngles;
 
             // Faire miroir le sprite de l'item selon la direction du joueur
             SpriteRenderer itemSpriteRenderer = equippedItem.GetComponent<SpriteRenderer>();
@@ -113,7 +206,47 @@ public class TopDownPlayerController : PlayerController, IZoneDetectable
         
         // Parente l'item au joueur
         item.transform.SetParent(transform);
-        item.transform.localPosition = itemOffset;
+        
+        // Détermine la direction actuelle et applique l'offset/rotation approprié
+        Vector3 currentOffset;
+        float currentRotation;
+        
+        float absX = Mathf.Abs(lastMovementDirection.x);
+        float absY = Mathf.Abs(lastMovementDirection.y);
+        
+        if (absY > absX)
+        {
+            // Mouvement principalement vertical
+            if (lastMovementDirection.y > 0)
+            {
+                currentOffset = itemOffsetUp;
+                currentRotation = itemRotationUp;
+            }
+            else
+            {
+                currentOffset = itemOffsetDown;
+                currentRotation = itemRotationDown;
+            }
+        }
+        else
+        {
+            // Mouvement horizontal
+            if (spriteRenderer.flipX)
+            {
+                currentOffset = itemOffsetRight;
+                currentRotation = itemRotationRight;
+            }
+            else
+            {
+                currentOffset = itemOffsetLeft;
+                currentRotation = itemRotationLeft;
+            }
+        }
+        
+        item.transform.localPosition = currentOffset;
+        Vector3 eulerAngles = item.transform.localEulerAngles;
+        eulerAngles.z = currentRotation;
+        item.transform.localEulerAngles = eulerAngles;
         Debug.Log($"[TopDownPlayerController] Item parenté et positionné - Pas de changement d'animation");
         
         return true;
