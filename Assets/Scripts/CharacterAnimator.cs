@@ -24,13 +24,22 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     private string walkCategoryName = "Walk"; // Catégorie pour la marche
 
     [SerializeField]
-    private string swimCategoryName = "Swim"; // Catégorie pour la nage
-
-    // private string SwimCategoryName = "Swim_Up"; // Catégorie pour la nage vers le haut 
-    
+    private string swimCategoryName = "Swim"; // Catégorie pour la nage horizontale/diagonale
 
     [SerializeField]
-    private string deepSwimCategoryName = "deep_swim"; // Catégorie pour la nage profonde
+    private string swimUpCategoryName = "Swim_Up"; // Catégorie pour la nage vers le haut
+
+    [SerializeField]
+    private string swimDownCategoryName = "Swim_Down"; // Catégorie pour la nage vers le bas
+
+    [SerializeField]
+    private string deepSwimCategoryName = "deep_swim"; // Catégorie pour la nage profonde horizontale/diagonale
+
+    [SerializeField]
+    private string deepSwimUpCategoryName = "deep_swim_Up"; // Catégorie pour la nage profonde vers le haut
+
+    [SerializeField]
+    private string deepSwimDownCategoryName = "deep_swim_Down"; // Catégorie pour la nage profonde vers le bas
 
     [SerializeField]
     private string[] walkFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de marche (3 frames)
@@ -39,7 +48,19 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     private string[] swimFrameNames = { "Frame1", "Frame2" }; // Frames de nage (2 frames)
 
     [SerializeField]
+    private string[] swimUpFrameNames = { "Frame1", "Frame2" }; // Frames de nage vers le haut (2 frames)
+
+    [SerializeField]
+    private string[] swimDownFrameNames = { "Frame1", "Frame2" }; // Frames de nage vers le bas (2 frames)
+
+    [SerializeField]
     private string[] deepSwimFrameNames = { "Frame1", "Frame2" }; // Frames de nage profonde (2 frames)
+
+    [SerializeField]
+    private string[] deepSwimUpFrameNames = { "Frame1", "Frame2" }; // Frames de nage profonde vers le haut (2 frames)
+
+    [SerializeField]
+    private string[] deepSwimDownFrameNames = { "Frame1", "Frame2" }; // Frames de nage profonde vers le bas (2 frames)
 
     [SerializeField]
     private string walkUpCategoryName = "Walk_Up"; // Catégorie pour la montée
@@ -47,7 +68,20 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     [SerializeField]
     private string walkDownCategoryName = "Walk_Down"; // Catégorie pour la descente
 
+    [SerializeField]
+    private string diveCategoryName = "Dive"; // Catégorie pour le plongeon (walk → swim)
 
+    [SerializeField]
+    private string[] diveFrameNames = { "Frame1" }; // Frames de plongeon (1 frame)
+
+    [SerializeField]
+    private string diveExitCategoryName = "DiveExit"; // Catégorie pour la sortie d'eau (swim → walk)
+
+    [SerializeField]
+    private string[] diveExitFrameNames = { "Frame1" }; // Frames de sortie d'eau (1 frame)
+
+    [SerializeField]
+    private float transitionAnimationDuration = 0.4f; // Durée totale de la transition (en secondes)
 
     [SerializeField]
     private string[] walkUpFrameNames = { "Frame1", "Frame2", "Frame3" }; // Frames de montée (3 frames)
@@ -62,6 +96,9 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     private bool isSwimming = false;
     private bool isSwimmingDeep = false;
     private bool isMoving = false;
+    private bool isDiving = false; // Animation de plongeon en cours
+    private bool isDivingExit = false; // Animation de sortie d'eau en cours
+    private float transitionTimeRemaining = 0f; // Temps restant pour la transition
     private Vector2 lastMovementDirection = Vector2.down; // Dernière direction de mouvement
     private Vector2 smoothedMovementDirection = Vector2.down; // Direction lissée pour éviter les saccades
     private string currentCategoryName = "Walk"; // Catégorie actuellement utilisée
@@ -87,6 +124,29 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         if (spriteResolver == null || rb == null)
             return;
 
+        // Gère le décompte des animations de transition
+        if (isDiving || isDivingExit)
+        {
+            transitionTimeRemaining -= Time.deltaTime;
+            if (transitionTimeRemaining <= 0f)
+            {
+                // Transition terminée
+                if (isDiving)
+                {
+                    isDiving = false;
+                    StartSwimming(); // Passe à la nage
+                    Debug.Log("[CharacterAnimator] Plongeon terminé → Mode NAGE");
+                }
+                else if (isDivingExit)
+                {
+                    isDivingExit = false;
+                    currentFrameIndex = 0;
+                    timeSinceLastSwitch = 0f;
+                    Debug.Log("[CharacterAnimator] Sortie d'eau terminée → Mode MARCHE");
+                }
+            }
+        }
+
         // Vérifie si le personnage se déplace
         isMoving = rb.linearVelocity.sqrMagnitude > 0.01f;
 
@@ -103,9 +163,9 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
             directionSmoothingSpeed * Time.deltaTime
         );
 
-        // En nage : animer peu importe la vitesse
+        // En nage/transitions : animer peu importe la vitesse
         // En marche : animer seulement si on bouge
-        bool shouldAnimate = isSwimming || isSwimmingDeep || isMoving;
+        bool shouldAnimate = isSwimming || isSwimmingDeep || isDiving || isDivingExit || isMoving;
 
         if (!shouldAnimate)
         {
@@ -139,16 +199,44 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     /// </summary>
     private string GetCurrentCategory()
     {
-        if (isSwimmingDeep)
-            return deepSwimCategoryName;
+        // Transitions de plongeon/sortie d'eau (toujours avant les autres états)
+        if (isDiving)
+            return diveCategoryName;
         
-        if (isSwimming)
-            return swimCategoryName;
-        
+        if (isDivingExit)
+            return diveExitCategoryName;
+
         // Détecte si le mouvement est plus vertical que horizontal
         float absX = Mathf.Abs(smoothedMovementDirection.x);
         float absY = Mathf.Abs(smoothedMovementDirection.y);
         
+        if (isSwimmingDeep)
+        {
+            // En nage profonde: détermine la direction
+            if (absY > absX)
+            {
+                if (smoothedMovementDirection.y > 0)
+                    return deepSwimUpCategoryName;
+                else
+                    return deepSwimDownCategoryName;
+            }
+            return deepSwimCategoryName;
+        }
+        
+        if (isSwimming)
+        {
+            // En nage: détermine la direction
+            if (absY > absX)
+            {
+                if (smoothedMovementDirection.y > 0)
+                    return swimUpCategoryName;
+                else
+                    return swimDownCategoryName;
+            }
+            return swimCategoryName;
+        }
+        
+        // En marche: détermine la direction
         if (absY > absX)
         {
             // Mouvement principalement vertical
@@ -185,14 +273,34 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     /// </summary>
     private string[] GetFrameNamesForCategory(string categoryName)
     {
+        // Transitions
+        if (categoryName == diveCategoryName)
+            return diveFrameNames;
+        if (categoryName == diveExitCategoryName)
+            return diveExitFrameNames;
+        
+        // Nage profonde
+        if (categoryName == deepSwimUpCategoryName)
+            return deepSwimUpFrameNames;
+        if (categoryName == deepSwimDownCategoryName)
+            return deepSwimDownFrameNames;
         if (categoryName == deepSwimCategoryName)
             return deepSwimFrameNames;
+        
+        // Nage normale
+        if (categoryName == swimUpCategoryName)
+            return swimUpFrameNames;
+        if (categoryName == swimDownCategoryName)
+            return swimDownFrameNames;
         if (categoryName == swimCategoryName)
             return swimFrameNames;
+        
+        // Marche
         if (categoryName == walkUpCategoryName)
             return walkUpFrameNames;
         if (categoryName == walkDownCategoryName)
             return walkDownFrameNames;
+        
         return walkFrameNames; // Par défaut
     }
 
@@ -264,6 +372,40 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     }
 
     /// <summary>
+    /// Démarre l'animation de plongeon (walk → swim)
+    /// </summary>
+    public void StartDive()
+    {
+        if (!isDiving)
+        {
+            isDiving = true;
+            isDivingExit = false;
+            transitionTimeRemaining = transitionAnimationDuration;
+            currentFrameIndex = 0;
+            timeSinceLastSwitch = 0f;
+            currentCategoryName = diveCategoryName;
+            Debug.Log($"[CharacterAnimator] Animation PLONGEON démarrée");
+        }
+    }
+
+    /// <summary>
+    /// Démarre l'animation de sortie d'eau (swim → walk)
+    /// </summary>
+    public void StartDiveExit()
+    {
+        if (!isDivingExit)
+        {
+            isDivingExit = true;
+            isDiving = false;
+            transitionTimeRemaining = transitionAnimationDuration;
+            currentFrameIndex = 0;
+            timeSinceLastSwitch = 0f;
+            currentCategoryName = diveExitCategoryName;
+            Debug.Log($"[CharacterAnimator] Animation SORTIE D'EAU démarrée");
+        }
+    }
+
+    /// <summary>
     /// Implémentation de IZoneDetectable - Appelé quand le perso entre dans une zone
     /// </summary>
     public void OnEnterZone(ZoneType zoneType)
@@ -273,6 +415,18 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         if (zoneType == ZoneType.Water)
         {
             StartSwimming();
+        }
+        else if (zoneType == ZoneType.EntRiviere)
+        {
+            // Décide si on plonge ou on sort selon l'état actuel
+            if (isSwimming)
+            {
+                StartDiveExit(); // On est en train de nager, on sort
+            }
+            else
+            {
+                StartDive(); // On est en train de marcher, on plonge
+            }
         }
     }
 

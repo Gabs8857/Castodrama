@@ -26,8 +26,9 @@ public interface IZoneDetectable
 /// </summary>
 public enum ZoneType
 {
-    Water,    // Zone d'eau - Active la nage
-    Lava,     // Zone de lave - Dégâts/Destruction (futur)
-    Fire,     // Zone de feu - Dégâts (futur)
-    Ice,      // Zone de glace - Ralentissement (futur)
+    Water,        // Zone d'eau - Active la nage
+    EntRiviere,   // Zone de transition rivière - Active les animations Dive/DiveExit
+    Lava,         // Zone de lave - Dégâts/Destruction (futur)
+    Fire,         // Zone de feu - Dégâts (futur)
+    Ice,          // Zone de glace - Ralentissement (futur)
 }

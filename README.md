@@ -124,7 +124,7 @@ Tous les scripts sont localisés dans le dossier `Assets/Scripts/` (structure pl
 
 | Script | Classe | Utilité |
 |--------|--------|---------|
-| `CharacterAnimator.cs` | `CharacterAnimator` | Gère les animations du personnage (marche 3 frames, nage 2 frames, nage profonde) avec commutation dynamique |
+| `CharacterAnimator.cs` | `CharacterAnimator` | Gère les animations du personnage (marche 3 frames, nage 2 frames, nage profonde) avec commutation dynamique selon la direction |
 | `SpriteLibrarySwitcher.cs` | `SpriteLibrarySwitcher` | Bascule les assets de la sprite library au runtime pour changer l'apparence du personnage |
 | `ATHController.cs` | `ATHController` | Contrôle les animations du décor ATH avec lecture unique sans scintillement |
 | `AdaptiveHUDWidth.cs` | `AdaptiveHUDWidth` | Ajuste dynamiquement les éléments HUD selon le ratio d'aspect de l'écran tout en conservant les proportions |
@@ -187,6 +187,97 @@ Tous les scripts sont localisés dans le dossier `Assets/Scripts/` (structure pl
 | Script | Classe | Utilité |
 |--------|--------|---------|
 | `TopDownBootstrap.cs` | `TopDownBootstrap` | Système d'initialisation de scène qui crée/configure le joueur et les éléments UI au runtime |
+
+---
+
+## 🎬 Système d'Animation (CharacterAnimator)
+
+Le système d'animation gère dynamiquement le changement de sprites selon le mouvement du joueur et son état (marche/nage). Les animations changent en temps réel en fonction de la **direction du mouvement**.
+
+### 📋 Catégories d'Animation
+
+#### 🚶 Marche (3 sprites - 3 frames)
+| Catégorie | Description |
+|-----------|-------------|
+| `Walk` | Mouvement horizontal ou diagonal |
+| `Walk_Up` | Mouvement vers le haut (vertical) |
+| `Walk_Down` | Mouvement vers le bas (vertical) |
+
+#### 🌊 Nage (2 sprites - 2 frames)
+| Catégorie | Description |
+|-----------|-------------|
+| `Swim` | Nage en eau normale, mouvement horizontal ou diagonal |
+| `Swim_Up` | Nage vers le haut en eau normale (vertical) |
+| `Swim_Down` | Nage vers le bas en eau normale (vertical) |
+
+#### 🏊 Nage Profonde (2 sprites - 2 frames)
+| Catégorie | Description |
+|-----------|-------------|
+| `deep_swim` | Nage profonde (rivière), mouvement horizontal ou diagonal |
+| `deep_swim_Up` | Nage profonde vers le haut en rivière (vertical) |
+| `deep_swim_Down` | Nage profonde vers le bas en rivière (vertical) |
+
+### 🔀 Système de Commutation
+
+```
+╔═══════════════════════════════════════════════════════╗
+║         Détection du Mouvement & État du Joueur      ║
+╠═══════════════════════════════════════════════════════╣
+║                                                       ║
+║  Vérifie: isSwimmingDeep ? isSwimming ? isWalking    ║
+║              ↓                ↓              ↓         ║
+║         Deep Swim Category   Swim Category   Walk Cat. ║
+║              ↓                ↓              ↓         ║
+║  Puis analyse la direction (mouvement vertical?)      ║
+║              ↓                                        ║
+║  Si vertical: _Up ou _Down sinon version standard    ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
+```
+
+**Exemple de flux:**
+1. Joueur entre dans l'eau → `isSwimming = true`
+2. Joueur bouge vers le bas → Direction verticale détectée
+3. Catégorie sélectionnée: `Swim_Down`
+4. Frames animées: `Swim_Down/Frame1` → `Swim_Down/Frame2` → `Swim_Down/Frame1` → ...
+
+### 📊 Configuration dans le Sprite Resolver
+
+Assurez-vous que votre **Sprite Library Asset** contient les catégories suivantes:
+
+```
+Sprite Library
+├─ Walk
+│  ├─ Frame1
+│  ├─ Frame2
+│  └─ Frame3
+├─ Walk_Up
+│  ├─ Frame1
+│  ├─ Frame2
+│  └─ Frame3
+├─ Walk_Down
+│  ├─ Frame1
+│  ├─ Frame2
+│  └─ Frame3
+├─ Swim
+│  ├─ Frame1
+│  └─ Frame2
+├─ Swim_Up
+│  ├─ Frame1
+│  └─ Frame2
+├─ Swim_Down
+│  ├─ Frame1
+│  └─ Frame2
+├─ deep_swim
+│  ├─ Frame1
+│  └─ Frame2
+├─ deep_swim_Up
+│  ├─ Frame1
+│  └─ Frame2
+└─ deep_swim_Down
+   ├─ Frame1
+   └─ Frame2
+```
 
 ---
 

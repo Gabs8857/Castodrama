@@ -67,5 +67,10 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Castodrama.slnx"
+    "dotnet.defaultSolution": "Castodrama.slnx",
+    "discord.detailsEditing": "Working on {file_name}",
+    "discord.lowerDetailsEditing": "Developing: {workspace}",
+    "discord.detailsIdling": "Taking a break",
+    "discord.lowerDetailsIdling": "Away from Castodrama",
+    "discord.largeImage": "Working on a C# file"
 }
