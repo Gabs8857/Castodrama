@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
@@ -16,36 +17,43 @@ public class FoodItem : MonoBehaviour
     private static Material unlitSpriteMaterial;
 
     [SerializeField]
-    private float hungerRestoreAmount = 20f;
+    protected float hungerRestoreAmount = 20f;
 
     [SerializeField]
-    private Sprite foodSprite;
+    protected Sprite foodSprite;
 
     [SerializeField]
-    private bool useUnlitMaterial = true;
+    protected bool useUnlitMaterial = true;
 
     [SerializeField]
-    private Color visibleTint = new Color(1f, 0.55f, 0.2f, 1f);
+    protected Color visibleTint = new Color(1f, 0.55f, 0.2f, 1f);
 
     [SerializeField]
-    private float minVisibleWorldDiameter = 0.9f;
+    protected float minVisibleWorldDiameter = 0.9f;
 
     [SerializeField]
-    private bool addGlowLight = true;
+    protected bool addGlowLight = true;
 
     [SerializeField]
-    private float glowOuterRadius = 1.1f;
+    protected float glowOuterRadius = 1.1f;
 
     [SerializeField]
-    private float glowIntensity = 0.9f;
+    protected float glowIntensity = 0.9f;
 
-    private void Awake()
+    [SerializeField]
+    protected Sprite[] eatProgressionSprites = new Sprite[2]; // Frame 2 and Frame 3
+
+    protected bool isPlayerNearby = false;
+    protected Collider2D currentPlayerCollider;
+    protected int eatCount = 0; // Tracks how many times this item has been eaten (0, 1, or 2)
+
+    protected virtual void Awake()
     {
         SetupVisuals();
         SetupPhysics();
     }
 
-    private void SetupVisuals()
+    protected virtual void SetupVisuals()
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         
@@ -117,7 +125,7 @@ public class FoodItem : MonoBehaviour
         light2D.falloffIntensity = 0.75f;
     }
 
-    private void SetupPhysics()
+    protected virtual void SetupPhysics()
     {
         // Configure collider as trigger
         Collider2D collider = GetComponent<Collider2D>();
@@ -131,26 +139,61 @@ public class FoodItem : MonoBehaviour
         rigidbody.simulated = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void Update()
     {
-        // Try to feed the player
-        if (TryFeedPlayer(collision))
+        // Check if player presses F while nearby
+        if (isPlayerNearby && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
         {
-            Destroy(gameObject);
+            // Try to feed the player
+            TryFeedPlayer(currentPlayerCollider);
         }
     }
 
-    private bool TryFeedPlayer(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Check if this is the player
+        if (collision.GetComponentInParent<TopDownHunger>() != null)
+        {
+            isPlayerNearby = true;
+            currentPlayerCollider = collision;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // Check if player is leaving
+        if (collision.GetComponentInParent<TopDownHunger>() != null)
+        {
+            isPlayerNearby = false;
+            currentPlayerCollider = null;
+        }
+    }
+
+    private void TryFeedPlayer(Collider2D collision)
     {
         // Feed the player using TopDownHunger system
         TopDownHunger hungerSystem = collision.GetComponentInParent<TopDownHunger>();
         if (hungerSystem != null)
         {
             hungerSystem.AddHunger(hungerRestoreAmount);
-            return true;
+            
+            // Handle progression: frame 2 -> frame 3 -> disappear
+            if (eatCount < 2)
+            {
+                // Change sprite to next progression stage
+                if (eatProgressionSprites[eatCount] != null)
+                {
+                    SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+                    spriteRenderer.sprite = eatProgressionSprites[eatCount];
+                }
+                eatCount++;
+            }
+            else
+            {
+                // Third interaction - destroy the object
+                Destroy(gameObject);
+            }
         }
-
-        return false;
     }
 
     private static Sprite GetDefaultVisualSprite()
