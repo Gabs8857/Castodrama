@@ -9,5 +9,8 @@ EditorBuildSettings:
     path: "Assets/Scenes/Rivi\xE8re.unity"
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
+    com.unity.adaptivePerformance.basic.provider_settings: {fileID: 11400000, guid: bf47123cf010ddf4c9f1816f0ad18768, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 777856ad7fc91a34eaca3b4147e4956a, type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 34569a5504944fd4e932a7e5e9b5bb97, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
