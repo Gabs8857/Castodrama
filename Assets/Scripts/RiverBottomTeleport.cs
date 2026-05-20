@@ -5,7 +5,58 @@ public class RiverBottomTeleport : MonoBehaviour
 {
     [SerializeField] private Transform riverBottom; // La Tilemap/GameObject du fond de rivière
     [SerializeField] private Transform riverSurface; // La Tilemap/GameObject de la rivière surface
+    private GameObject fondRivière;
+    private GameObject rivièreUpdate;
+    private GameObject tilemapGeneral;
     private bool isInRiverBottomZone = false;
+
+    private void Start()
+    {
+        // Récupère automatiquement les références à partir des Transforms assignés
+        if (riverBottom != null)
+            fondRivière = riverBottom.gameObject;
+        
+        if (riverSurface != null)
+            rivièreUpdate = riverSurface.gameObject;
+        
+        // Cherche la tilemap générale (arbres, herbe) dans la scène
+        if (tilemapGeneral == null)
+        {
+            // Cherche "Tilemap update" dans la scène
+            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.name.Contains("Tilemap") && obj.name.Contains("update"))
+                {
+                    tilemapGeneral = obj;
+                    break;
+                }
+            }
+        }
+
+        // État initial: rivièreUpdate visible, fondRivière invisible
+        if (rivièreUpdate != null)
+        {
+            foreach (SpriteRenderer renderer in rivièreUpdate.GetComponentsInChildren<SpriteRenderer>())
+                renderer.enabled = true;
+            foreach (Collider2D collider in rivièreUpdate.GetComponentsInChildren<Collider2D>())
+                if (!collider.isTrigger) collider.enabled = true;
+        }
+        
+        if (fondRivière != null)
+        {
+            foreach (SpriteRenderer renderer in fondRivière.GetComponentsInChildren<SpriteRenderer>())
+                renderer.enabled = false;
+            foreach (Collider2D collider in fondRivière.GetComponentsInChildren<Collider2D>())
+                if (!collider.isTrigger) collider.enabled = false;
+        }
+        
+        if (tilemapGeneral != null)
+        {
+            foreach (SpriteRenderer renderer in tilemapGeneral.GetComponentsInChildren<SpriteRenderer>())
+                renderer.enabled = true;
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -97,5 +148,60 @@ public class RiverBottomTeleport : MonoBehaviour
         
         player.position = newPosition;
         Debug.Log("[RiverBottomTeleport] ✓ TÉLÉPORTÉ À LA SURFACE!");
+
+        // Gère les transitions de visibilité
+        HandleWaterSceneTransition();
+    }
+
+    private void HandleWaterSceneTransition()
+    {
+        // FondRivière: désactive juste le rendu et les colliders non-trigger
+        if (fondRivière != null)
+        {
+            // Désactive tous les SpriteRenderers
+            foreach (SpriteRenderer renderer in fondRivière.GetComponentsInChildren<SpriteRenderer>())
+            {
+                renderer.enabled = false;
+            }
+            
+            // Désactive les colliders qui ne sont pas des triggers
+            foreach (Collider2D collider in fondRivière.GetComponentsInChildren<Collider2D>())
+            {
+                if (!collider.isTrigger)
+                {
+                    collider.enabled = false;
+                }
+            }
+        }
+
+        // Rivière update: réactive le rendu et les colliders
+        if (rivièreUpdate != null)
+        {
+            // Réactive tous les SpriteRenderers
+            foreach (SpriteRenderer renderer in rivièreUpdate.GetComponentsInChildren<SpriteRenderer>())
+            {
+                renderer.enabled = true;
+            }
+            
+            // Réactive les colliders qui ne sont pas des triggers
+            foreach (Collider2D collider in rivièreUpdate.GetComponentsInChildren<Collider2D>())
+            {
+                if (!collider.isTrigger)
+                {
+                    collider.enabled = true;
+                }
+            }
+        }
+
+        // Tilemap: réactive le rendu
+        if (tilemapGeneral != null)
+        {
+            foreach (SpriteRenderer renderer in tilemapGeneral.GetComponentsInChildren<SpriteRenderer>())
+            {
+                renderer.enabled = true;
+            }
+        }
+
+        Debug.Log("[RiverBottomTeleport] ✓ Transitions de visibilité appliquées");
     }
 }

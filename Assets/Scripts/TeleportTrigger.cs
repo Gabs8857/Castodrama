@@ -187,6 +187,7 @@ public class TeleportTrigger : MonoBehaviour
             target.SetPositionAndRotation(destinationPosition, copyDestinationRotation ? destination.rotation : target.rotation);
 
             cc.enabled = true;
+            HandleSceneTransition();
             return;
         }
 
@@ -202,9 +203,21 @@ public class TeleportTrigger : MonoBehaviour
             rb2d.simulated = true;
             Physics2D.SyncTransforms();
 
+            HandleSceneTransition();
             return;
         }
 
         target.SetPositionAndRotation(destinationPosition, copyDestinationRotation ? destination.rotation : target.rotation);
+        HandleSceneTransition();
+    }
+
+    private void HandleSceneTransition()
+    {
+        // Gère les transitions de visibilité (rivière, tilemap, etc.)
+        WaterSceneTransition sceneTransition = FindObjectOfType<WaterSceneTransition>();
+        if (sceneTransition != null)
+        {
+            sceneTransition.HandleTeleportToDestination(destination);
+        }
     }
 }
