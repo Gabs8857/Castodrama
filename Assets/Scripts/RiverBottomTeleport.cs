@@ -3,43 +3,37 @@ using UnityEngine.InputSystem;
 
 public class RiverBottomTeleport : MonoBehaviour
 {
-    [SerializeField] private Transform riverBottom;
-    [SerializeField] private Transform riverSurface;
-    private GameObject fondRivière;
-    private GameObject rivièreUpdate;
-    private GameObject tilemapGeneral;
+    [SerializeField] private GameObject fondRivièreObject;
+    [SerializeField] private GameObject rivièreUpdateObject;
+    [SerializeField] private GameObject tilemapGeneralObject;
     private bool isInRiverBottomZone = false;
+    private bool eKeyPressedLastFrame = false;
 
     private void Start()
     {
-        if (riverBottom != null)
-            fondRivière = riverBottom.gameObject;
-        
-        if (riverSurface != null)
-            rivièreUpdate = riverSurface.gameObject;
-        
-        if (tilemapGeneral == null)
+        // Auto-find if not assigned
+        if (tilemapGeneralObject == null)
         {
             GameObject[] allObjects = FindObjectsOfType<GameObject>();
             foreach (GameObject obj in allObjects)
             {
                 if (obj.name.Contains("Tilemap") && obj.name.Contains("update"))
                 {
-                    tilemapGeneral = obj;
+                    tilemapGeneralObject = obj;
                     break;
                 }
             }
         }
 
-        if (rivièreUpdate != null)
-            rivièreUpdate.SetActive(true);
+        if (rivièreUpdateObject != null)
+            rivièreUpdateObject.SetActive(true);
         
-        if (fondRivière != null)
-            fondRivière.SetActive(false);
+        if (fondRivièreObject != null)
+            fondRivièreObject.SetActive(false);
         
-        if (tilemapGeneral != null)
+        if (tilemapGeneralObject != null)
         {
-            foreach (SpriteRenderer renderer in tilemapGeneral.GetComponentsInChildren<SpriteRenderer>())
+            foreach (SpriteRenderer renderer in tilemapGeneralObject.GetComponentsInChildren<SpriteRenderer>())
                 renderer.enabled = true;
         }
     }
@@ -50,7 +44,7 @@ public class RiverBottomTeleport : MonoBehaviour
         if (controller != null)
         {
             isInRiverBottomZone = true;
-            Debug.Log("[RiverBottomTeleport] ✓ JOUEUR AU FOND!");
+            Debug.Log("[RiverBottomTeleport] Entered zone");
         }
     }
 
@@ -60,51 +54,57 @@ public class RiverBottomTeleport : MonoBehaviour
         if (controller != null)
         {
             isInRiverBottomZone = false;
+            Debug.Log("[RiverBottomTeleport] Exited zone");
         }
     }
 
     private void Update()
     {
-        if (isInRiverBottomZone && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (isInRiverBottomZone && Keyboard.current != null)
         {
-            TeleportToRiverSurface();
+            bool eKeyPressed = Keyboard.current.eKey.isPressed;
+            if (eKeyPressed && !eKeyPressedLastFrame)
+            {
+                Debug.Log("[RiverBottomTeleport] ✓ E pressed - rising to surface!");
+                HandleWaterSceneTransition();
+            }
+            eKeyPressedLastFrame = eKeyPressed;
         }
-    }
-
-    private void TeleportToRiverSurface()
-    {
-        TopDownPlayerController playerController = FindObjectOfType<TopDownPlayerController>();
-        Transform player = playerController != null ? playerController.transform : null;
-        
-        if (player == null)
-            return;
-
-        if (riverSurface == null || riverBottom == null)
-            return;
-
-        // Déplacer le joueur
-        Vector3 relativePosition = player.position - riverBottom.position;
-        Vector3 newPosition = riverSurface.position + relativePosition;
-        player.position = newPosition;
-
-        // Puis gérer les transitions de visibilité
-        HandleWaterSceneTransition();
-        
-        isInRiverBottomZone = false;
+        else
+        {
+            eKeyPressedLastFrame = false;
+        }
     }
 
     public void HandleWaterSceneTransition()
     {
-        if (fondRivière != null)
-            fondRivière.SetActive(false);
+        Debug.Log("[RiverBottomTeleport] HandleWaterSceneTransition called - returning to surface");
 
-        if (rivièreUpdate != null)
-            rivièreUpdate.SetActive(true);
-
-        if (tilemapGeneral != null)
+        // Désactiver le deep swim
+        CharacterAnimator animator = FindObjectOfType<CharacterAnimator>();
+        if (animator != null)
         {
-            foreach (SpriteRenderer renderer in tilemapGeneral.GetComponentsInChildren<SpriteRenderer>())
+            animator.StopSwimmingDeep();
+            Debug.Log("[RiverBottomTeleport] ✓ Stopped deep swimming animation");
+        }
+
+        if (fondRivièreObject != null)
+        {
+            fondRivièreObject.SetActive(false);
+            Debug.Log("[RiverBottomTeleport] ✓ Deactivated fondRivièreObject");
+        }
+
+        if (rivièreUpdateObject != null)
+        {
+            rivièreUpdateObject.SetActive(true);
+            Debug.Log("[RiverBottomTeleport] ✓ Activated rivièreUpdateObject");
+        }
+
+        if (tilemapGeneralObject != null)
+        {
+            foreach (SpriteRenderer renderer in tilemapGeneralObject.GetComponentsInChildren<SpriteRenderer>())
                 renderer.enabled = true;
+            Debug.Log("[RiverBottomTeleport] ✓ Enabled tilemapGeneralObject renderers");
         }
     }
 }
