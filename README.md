@@ -126,3 +126,5 @@ Le système de nage profonde permet au joueur de :
 - Dialogues Ink compilés en JSON
 - Animations gérées par Sprite Resolver
 - Bootstrap crée automatiquement joueur et UI au runtime
+
+Attention tout vas changer
