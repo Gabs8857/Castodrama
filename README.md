@@ -1,367 +1,128 @@
 # Castodrama
 
-Base Unity du projet collaboratif Castodrama.
+Jeu 2D coopératif en Unity 6 LTS.
 
-## Démarrage
+## Démarrage rapide
 
-1. Ouvre le projet avec la version de Unity indiquée dans [ProjectSettings/ProjectVersion.txt](ProjectSettings/ProjectVersion.txt).
-2. Laisse Unity régénérer les fichiers nécessaires si besoin.
-3. Travaille sur une branche dédiée avant d'ouvrir une pull request.
+1. Ouvre le projet avec **Unity 6 LTS** (voir [ProjectSettings/ProjectVersion.txt](ProjectSettings/ProjectVersion.txt))
+2. Laisse Unity régénérer les fichiers nécessaires
+3. Travaille sur une branche dédiée avant de faire une PR
 
 ## Collaboration
 
-- Crée une issue avant de commencer une fonctionnalité importante.
-- Garde les commits petits et descriptifs.
-- Ouvre une pull request pour toute modification partagée.
+- ✅ Crée une issue avant de commencer une fonctionnalité importante
+- ✅ Garde les commits petits et descriptifs
+- ✅ Ouvre une PR pour toute modification partagée
 
-## Structure
 
-- [Assets/](Assets/)
-- [Packages/](Packages/)
-- [ProjectSettings/](ProjectSettings/)
-
-## Architecture des Scripts
-
-### �️ Architecture Générale
+## Architecture générale
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      JOUEUR                              │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  PlayerController (base)                                │
-│    • Mouvement simple (clavier + gamepad)               │
-│    • Configuration Rigidbody2D                          │
-│    • À la base de tout                                  │
-│                   ▲                                      │
-│                   │ hérité par                           │
-│                   │                                      │
-│  TopDownPlayerController (spécialisé)                   │
-│    • Hérite du mouvement de PlayerController            │
-│    • Inventaire (ramassage/dépôt d'items)              │
-│    • Détection centralisée de zones (eau, etc.)        │
-│    • Gestion des animations selon la direction         │
-│    • Centre névralgique du jeu                         │
-│                   ▼                                      │
-│    ┌─────────────┬──────────────┬─────────────┐         │
-│    │             │              │             │         │
-│    ▼             ▼              ▼             ▼         │
-│ Zones      Animations       Inventaire       ...        │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+HUB CENTRAL: TopDownPlayerController
+├─ Mouvement (hérité de PlayerController)
+├─ Inventaire & ramassage d'items
+├─ Animations (CharacterAnimator)
+├─ Détection de zones (eau, lave, feu, glace)
+├─ Gestion de la faim
+├─ Gestion du danger
+└─ Suivi de la caméra (TopDownCameraFollow)
 ```
 
----
+## Systèmes clés
 
-### 🎮 Système de Détection de Zones
+### 🎮 Mouvement & Contrôle
+- **PlayerController** : Base réutilisable (clavier + gamepad)
+- **TopDownPlayerController** : Centre du jeu, gère tout ce qui touche au joueur
+- **TopDownCameraFollow** : Suit le joueur avec zoom gamepad
 
-L'architecture utilise un système d'interfaces pour gérer la détection de zones (eau, lave, feu, glace, etc.). Cela permet une gestion centralisée et extensible des interactions environnementales.
+### 🎨 Animations
+- **CharacterAnimator** : Gère les sprites (marche, nage, nage profonde) avec direction dynamique
+- **SpriteLibrarySwitcher** : Change l'apparence du personnage au runtime
 
-#### 📊 Diagramme Détaillé des Zones
+### 📊 État du joueur
+- **TopDownHunger** : Système de faim
+- **TopDownDanger** : Suivi du danger environnemental
+- **DayAndNightCycle** : Cycle jour/nuit avec effets visuels
 
-```
-WaterZoneTrigger (détecte collision)
-        │
-        │ collision détectée
-        ▼
-TopDownPlayerController.OnEnterZone()
-        │
-        ├─ Enregistre dans ZoneDetectionManager
-        │
-        └─ Notifie les composants:
-           ├─ CharacterAnimator (nage/marche)
-           ├─ EquippableItem (réagit aux zones)
-           └─ Autres composants IZoneDetectable
-```
+### 🎒 Inventaire
+- **EquippableItem** : Items interactifs (ramassage/dépôt)
+- **FoodItem** : Items alimentaires qui restaurent la faim
 
-#### 🔄 Flux de Détection
+### 🗺️ Zones & Environnement
+- **ZoneDetectionManager** : Suivi centralisé des zones
+- **WaterZoneTrigger / DangerZoneTrigger** : Détection des zones spéciales
+- **RiverTeleport / RiverBottomTeleport** : Système de nage profonde à la rivière
 
-1. **WaterZoneTrigger** détecte une collision (`OnTriggerEnter2D`)
-2. Il appelle `TopDownPlayerController.OnEnterZone(ZoneType.Water)`
-3. Le PlayerController enregistre la zone dans son **ZoneDetectionManager**
-4. Le PlayerController notifie tous ses autres composants (`CharacterAnimator`, `EquippableItem`)
-5. Chaque composant réagit selon ses besoins
+### 💬 Dialogue & NPCs
+- **DialogueManager** : Gestion narrative avec Ink
+- **NPCInteraction** : Détection et dialogue des PNJs
 
----
-
-### 📊 Systèmes d'Interface Utilisateur
-
-#### Barres d'État Unifiées (StatusBarUI)
-
-```
-StatusBarUI (unique script pour 2 barres)
-    │
-    ├─ Connexion: TopDownHunger
-    │   └─ Affiche barre de faim circulaire (haut centre)
-    │
-    └─ Connexion: TopDownDanger
-        └─ Affiche barre de danger circulaire (bas gauche)
-```
-
-**Avantages:**
-- ✅ Un seul script au lieu de 3
-- ✅ Gestion unifiée des 2 barres
-- ✅ Plus facile à maintenir
-- ✅ Configuration cohérente
-
----
-
----
-
-## 📚 Inventaire Complet des Scripts (31 fichiers)
-
-Tous les scripts sont localisés dans le dossier `Assets/Scripts/` (structure plate, pas de sous-dossiers).
-
-### 🎮 Système de Joueur & Mouvement (3 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `PlayerController.cs` | `PlayerController` | Base réutilisable avec mouvement simple (clavier + gamepad), configuration Rigidbody2D - À la base de tout |
-| `TopDownPlayerController.cs` | `TopDownPlayerController` | Contrôle du joueur principal (hérite de PlayerController). Gère l'inventaire, détection de zones, animations selon la direction. **Hub central du jeu** |
-| `TopDownCameraFollow.cs` | `TopDownCameraFollow` | Système de caméra qui suit le joueur en douceur avec contrôle du zoom au gamepad et modes d'affichage multiples |
-
-### 🎨 Animations & Visuels (4 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `CharacterAnimator.cs` | `CharacterAnimator` | Gère les animations du personnage (marche 3 frames, nage 2 frames, nage profonde) avec commutation dynamique selon la direction |
-| `SpriteLibrarySwitcher.cs` | `SpriteLibrarySwitcher` | Bascule les assets de la sprite library au runtime pour changer l'apparence du personnage |
-| `ATHController.cs` | `ATHController` | Contrôle les animations du décor ATH avec lecture unique sans scintillement |
-| `AdaptiveHUDWidth.cs` | `AdaptiveHUDWidth` | Ajuste dynamiquement les éléments HUD selon le ratio d'aspect de l'écran tout en conservant les proportions |
-
-### 📊 État du Jeu & Mécaniques (3 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `TopDownHunger.cs` | `TopDownHunger` | Système de faim du joueur avec taux de vidage et mécaniques de restauration |
-| `TopDownDanger.cs` | `TopDownDanger` | Suivi du niveau de danger qui augmente dans les zones dangereuses et diminue ailleurs |
-| `DayAndNightCycle.cs` | `DayAndNightCycle` | Implémente le cycle jour/nuit avec rayon de vision ajustable et effets de flash UI |
-
-### 🎒 Inventaire & Items (2 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `EquippableItem.cs` | `EquippableItem` | Items interactifs que le joueur peut ramasser/déposer avec détection de proximité et réactions aux zones |
-| `FoodItem.cs` | `FoodItem` | Items alimentaires qui restaurent la faim au ramassage avec teinte visuelle et montant customizable |
-
-### 🗺️ Systèmes de Zones & Triggers (4 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `IZoneDetectable.cs` | `IZoneDetectable` / `ZoneType` | Interface et enum pour le système de détection de zones. Permet aux objets de réagir aux changements de zones (Eau, Lave, Feu, Glace) |
-| `ZoneDetectionManager.cs` | `ZoneDetectionManager` | Système centralisé de suivi des zones qui notifie les objets zone-aware lors de l'entrée/sortie |
-| `DangerZoneTrigger.cs` | `DangerZoneTrigger` | Trigger qui augmente le niveau de danger à l'entrée, le diminue à la sortie |
-| `WaterZoneTrigger.cs` | `WaterZoneTrigger` | Trigger qui détecte quand le joueur entre/sort des zones d'eau |
-
-### 🌊 Téléportation & Navigation (3 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `TeleportTrigger.cs` | `TeleportTrigger` | Système de téléportation générique avec cooldown, rotation de destination et logging de débogage |
-| `RiverTeleport.cs` | `RiverTeleport` | Permet au joueur de se téléporter de la surface à la rivière profonde en pressant 'E' |
-| `RiverBottomTeleport.cs` | `RiverBottomTeleport` | Gère la téléportation de la rivière profonde vers la surface et active l'animation de nage profonde |
-
-### 🖼️ Interface Utilisateur (3 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `StatusBarUI.cs` | `StatusBarUI` | Gestionnaire unifié pour les 2 barres circulaires (faim + danger) avec positionnement adaptatif |
-| `DangerUI.cs` | `DangerUI` | Met à jour le remplissage de la barre de danger selon le niveau de danger du joueur |
-| `Danger.cs` | `Danger` | Système de danger hérité (probablement remplacé par TopDownDanger) avec détection de zones forestières |
-
-### 💬 Dialogue & Interaction (2 scripts)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `DialogueManager.cs` | `DialogueManager` | Gère le système narratif Ink avec progression de l'histoire et interface de dialogue UI |
-| `NPCInteraction.cs` | `NPCInteraction` | Détecte la proximité du joueur aux PNJs et déclenche des dialogues multi-parties avec touche 'E' |
-
-### 🌐 Systèmes Externes (1 script)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `ContacteWebPage.cs` | `ContacteWebPage` | Envoie les messages de formulaire à un endpoint web avec animation UI glissante |
-
-### 🚀 Initialisation & Bootstrap (1 script)
-
-| Script | Classe | Utilité |
-|--------|--------|---------|
-| `TopDownBootstrap.cs` | `TopDownBootstrap` | Système d'initialisation de scène qui crée/configure le joueur et les éléments UI au runtime |
-
----
+### 🌐 UI & Autres
+- **StatusBarUI** : Barres de faim et danger
+- **AdaptiveHUDWidth** : Adaptation HUD au ratio d'écran
+- **ATHController** : Animations du décor
+- **ContacteWebPage** : Envoi de messages web
+- **TopDownBootstrap** : Initialisation de scène
 
 ## 🎬 Système d'Animation (CharacterAnimator)
 
-Le système d'animation gère dynamiquement le changement de sprites selon le mouvement du joueur et son état (marche/nage). Les animations changent en temps réel en fonction de la **direction du mouvement**.
+L'animation change en temps réel selon la **direction du mouvement** et l'état du joueur.
 
-### 📋 Catégories d'Animation
+### Catégories disponibles
 
-#### 🚶 Marche (3 sprites - 3 frames)
-| Catégorie | Description |
-|-----------|-------------|
-| `Walk` | Mouvement horizontal ou diagonal |
-| `Walk_Up` | Mouvement vers le haut (vertical) |
-| `Walk_Down` | Mouvement vers le bas (vertical) |
+**Marche** (3 frames): `Walk`, `Walk_Up`, `Walk_Down`
+**Nage** (2 frames): `Swim`, `Swim_Up`, `Swim_Down`
+**Nage Profonde** (2 frames): `deep_swim`, `deep_swim_Up`, `deep_swim_Down`
 
-#### 🌊 Nage (2 sprites - 2 frames)
-| Catégorie | Description |
-|-----------|-------------|
-| `Swim` | Nage en eau normale, mouvement horizontal ou diagonal |
-| `Swim_Up` | Nage vers le haut en eau normale (vertical) |
-| `Swim_Down` | Nage vers le bas en eau normale (vertical) |
-
-#### 🏊 Nage Profonde (2 sprites - 2 frames)
-| Catégorie | Description |
-|-----------|-------------|
-| `deep_swim` | Nage profonde (rivière), mouvement horizontal ou diagonal |
-| `deep_swim_Up` | Nage profonde vers le haut en rivière (vertical) |
-| `deep_swim_Down` | Nage profonde vers le bas en rivière (vertical) |
-
-### 🔀 Système de Commutation
+### Logique de sélection
 
 ```
-╔═══════════════════════════════════════════════════════╗
-║         Détection du Mouvement & État du Joueur      ║
-╠═══════════════════════════════════════════════════════╣
-║                                                       ║
-║  Vérifie: isSwimmingDeep ? isSwimming ? isWalking    ║
-║              ↓                ↓              ↓         ║
-║         Deep Swim Category   Swim Category   Walk Cat. ║
-║              ↓                ↓              ↓         ║
-║  Puis analyse la direction (mouvement vertical?)      ║
-║              ↓                                        ║
-║  Si vertical: _Up ou _Down sinon version standard    ║
-║                                                       ║
-╚═══════════════════════════════════════════════════════╝
+Si isSwimmingDeep → utilise catégories deep_swim
+Sinon si isSwimming → utilise catégories Swim
+Sinon → utilise catégories Walk
+
+Puis selon la direction:
+Si mouvement vertical → ajoute _Up ou _Down
+Sinon → version standard
 ```
 
-**Exemple de flux:**
-1. Joueur entre dans l'eau → `isSwimming = true`
-2. Joueur bouge vers le bas → Direction verticale détectée
-3. Catégorie sélectionnée: `Swim_Down`
-4. Frames animées: `Swim_Down/Frame1` → `Swim_Down/Frame2` → `Swim_Down/Frame1` → ...
-
-### 📊 Configuration dans le Sprite Resolver
-
-Assurez-vous que votre **Sprite Library Asset** contient les catégories suivantes:
+## 📁 Structure du projet
 
 ```
-Sprite Library
-├─ Walk
-│  ├─ Frame1
-│  ├─ Frame2
-│  └─ Frame3
-├─ Walk_Up
-│  ├─ Frame1
-│  ├─ Frame2
-│  └─ Frame3
-├─ Walk_Down
-│  ├─ Frame1
-│  ├─ Frame2
-│  └─ Frame3
-├─ Swim
-│  ├─ Frame1
-│  └─ Frame2
-├─ Swim_Up
-│  ├─ Frame1
-│  └─ Frame2
-├─ Swim_Down
-│  ├─ Frame1
-│  └─ Frame2
-├─ deep_swim
-│  ├─ Frame1
-│  └─ Frame2
-├─ deep_swim_Up
-│  ├─ Frame1
-│  └─ Frame2
-└─ deep_swim_Down
-   ├─ Frame1
-   └─ Frame2
+Assets/
+├─ Scripts/           (31 scripts, structure plate)
+├─ Scenes/
+├─ Resources/
+├─ Ink/              (Fichiers Ink pour dialogues)
+└─ Settings/
+
+ProjectSettings/     (Config Unity)
+Packages/           (Dépendances)
 ```
 
----
+## ⚙️ Configuration
 
-## 🏗️ Architecture et Hiérarchie
+- **Input System** : New InputSystem activé
+- **Render Pipeline** : Universal Render Pipeline
+- **Version Unity** : 6 LTS
 
-### Hiérarchie d'Héritage
+## 🎯 River Deep Swim System
 
-```
-MonoBehaviour
-├─ PlayerController (base réutilisable)
-│  └─ TopDownPlayerController (centre névralgique) ← HUB CENTRAL
-│     ├─ CharacterAnimator
-│     ├─ TopDownHunger
-│     ├─ TopDownDanger
-│     ├─ ZoneDetectionManager
-│     └─ ...autres composants
+Le système de nage profonde permet au joueur de :
+1. Presser **E** à la surface du fleuve pour descendre en nage profonde
+2. Voir la forêt, la rive et les arbres disparaître
+3. Voir la nage profonde s'activer automatiquement
+4. Presser **E** en profondeur pour remonter à la surface
 
-├─ TopDownCameraFollow
-├─ DayAndNightCycle
-├─ DialogueManager
-├─ TopDownBootstrap
-└─ ...autres systèmes autonomes
-```
+**Éléments contrôlés:**
+- FondRivière (apparaît en profondeur)
+- Tilemap update (forêt, disparaît)
+- Bouleau, Peuplier, Saule (arbres, disparaissent)
+- Animation deep swim (activée automatiquement)
 
-### Pattern de Communication
+## Notes de développement
 
-```
-Triggers (eau, danger, etc.)
-         │
-         │ détectent collisions
-         ▼
-TopDownPlayerController.OnEnterZone()
-         │
-         ├─ Enregistre dans ZoneDetectionManager
-         │
-         └─ Notifie les composants:
-            ├─ CharacterAnimator (change animations)
-            ├─ EquippableItem (réactions aux zones)
-            ├─ TopDownDanger (ajuste danger)
-            └─ Autres composants IZoneDetectable
-```
-
-### Patterns de Conception Utilisés
-
-- ✅ **Héritage** : PlayerController → TopDownPlayerController (DRY)
-- ✅ **Interface Pattern** : `IZoneDetectable` pour extensibilité
-- ✅ **Manager Pattern** : `ZoneDetectionManager` centralisé
-- ✅ **Bootstrap Pattern** : `TopDownBootstrap` pour initialisation
-- ✅ **Component Pattern** : Architecture basée sur les composants Unity
-- ✅ **Observer Pattern** : Systèmes notifient les observateurs des changements
-
----
-
-### 📝 Exemple d'Utilisation
-
-```csharp
-// Accéder au gestionnaire de zones
-TopDownPlayerController playerController = GetComponent<TopDownPlayerController>();
-
-// Vérifier si le joueur est dans l'eau
-if (playerController.ZoneManager.IsInZone(ZoneType.Water))
-{
-    // Faire quelque chose dans l'eau
-}
-
-// Récupérer toutes les zones actuelles
-var currentZones = playerController.ZoneManager.GetCurrentZones();
-foreach (var zone in currentZones)
-{
-    Debug.Log($"Le joueur est dans la zone: {zone}");
-}
-
-// Accéder aux systèmes connexes
-var hunger = playerController.GetComponent<TopDownHunger>();
-var danger = playerController.GetComponent<TopDownDanger>();
-```
-
----
-
-### ✨ Principes d'Architecture
-
-- **Centralisation** : `TopDownPlayerController` est le hub central
-- **Interfaces** : `IZoneDetectable` permet une extensibilité facile
-- **Découplage** : Les scripts ne dépendent pas directement les uns des autres
-- **Réutilisabilité** : `PlayerController` peut servir de base pour NPJ, ennemis, etc.
-- **Maintenabilité** : Code organisé, bien documenté et facile à modifier
-- **Extensibilité** : Nouveaux systèmes peuvent être ajoutés sans modification des existants
+- Système de zones extensible avec interfaces `IZoneDetectable`
+- Dialogues Ink compilés en JSON
+- Animations gérées par Sprite Resolver
+- Bootstrap crée automatiquement joueur et UI au runtime

@@ -6,6 +6,10 @@ public class RiverTeleport : MonoBehaviour
     [SerializeField] private GameObject fondRivièreObject;
     [SerializeField] private GameObject rivièreUpdateObject;
     [SerializeField] private GameObject tilemapGeneralObject;
+    [SerializeField] private GameObject bouléauObject;
+    [SerializeField] private GameObject peuplierObject;
+    [SerializeField] private GameObject sauleObject;
+    [SerializeField] private GameObject rivRivière1Object;
     private bool isInRiverZone = false;
     private bool eKeyPressedLastFrame = false;
 
@@ -24,6 +28,43 @@ public class RiverTeleport : MonoBehaviour
                 }
             }
         }
+
+        // Auto-find trees if not assigned
+        if (bouléauObject == null)
+            bouléauObject = GameObject.Find("Bouleau");
+        if (peuplierObject == null)
+        {
+            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.name.ToLower().Contains("peuptree"))
+                {
+                    peuplierObject = obj;
+                    break;
+                }
+            }
+        }
+        if (sauleObject == null)
+            sauleObject = GameObject.Find("Saule");
+
+        // Auto-find surface river if not assigned
+        if (rivRivière1Object == null)
+        {
+            rivRivière1Object = GameObject.Find("RivRivière update (1)");
+            if (rivRivière1Object != null)
+                Debug.Log("[RiverTeleport] ✓ Found RivRivière update (1)");
+            else
+                Debug.Log("[RiverTeleport] ⚠ Could not find RivRivière update (1)");
+        }
+
+        // Activer RivRivière update (1) au démarrage (surface)
+        if (rivRivière1Object != null)
+        {
+            rivRivière1Object.SetActive(true);
+            Debug.Log("[RiverTeleport] ✓ Activated RivRivière update (1) at start");
+        }
+        else
+            Debug.Log("[RiverTeleport] ⚠ RivRivière update (1) is NULL at start");
 
         if (rivièreUpdateObject != null)
             rivièreUpdateObject.SetActive(true);
@@ -100,11 +141,46 @@ public class RiverTeleport : MonoBehaviour
             Debug.Log("[RiverTeleport] ✓ Deactivated rivièreUpdateObject");
         }
 
+        // Désactiver RivRivière update (1) en descendant (fin de la surface)
+        if (rivRivière1Object != null)
+        {
+            rivRivière1Object.SetActive(false);
+            Debug.Log("[RiverTeleport] ✓ Deactivated RivRivière update (1)");
+        }
+        else
+            Debug.Log("[RiverTeleport] ⚠ Could not deactivate RivRivière update (1) - NULL");
+
         if (tilemapGeneralObject != null)
         {
-            foreach (SpriteRenderer renderer in tilemapGeneralObject.GetComponentsInChildren<SpriteRenderer>())
+            tilemapGeneralObject.SetActive(false);
+            Debug.Log("[RiverTeleport] ✓ Deactivated tilemapGeneralObject (Tilemap update)");
+        }
+
+        // Rendre invisibles les arbres (désactiver les SpriteRenderers)
+        if (bouléauObject != null)
+        {
+            foreach (SpriteRenderer renderer in bouléauObject.GetComponentsInChildren<SpriteRenderer>())
                 renderer.enabled = false;
-            Debug.Log("[RiverTeleport] ✓ Disabled tilemapGeneralObject renderers");
+            Debug.Log("[RiverTeleport] ✓ Disabled Bouleau sprites");
+        }
+
+        // Désactiver TOUS les peuptree
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.name.ToLower().Contains("peuptree"))
+            {
+                foreach (SpriteRenderer renderer in obj.GetComponentsInChildren<SpriteRenderer>())
+                    renderer.enabled = false;
+                Debug.Log($"[RiverTeleport] ✓ Disabled {obj.name} sprites");
+            }
+        }
+
+        if (sauleObject != null)
+        {
+            foreach (SpriteRenderer renderer in sauleObject.GetComponentsInChildren<SpriteRenderer>())
+                renderer.enabled = false;
+            Debug.Log("[RiverTeleport] ✓ Disabled Saule sprites");
         }
     }
 }
