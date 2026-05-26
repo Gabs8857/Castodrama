@@ -26,6 +26,8 @@ public class TopDownDanger : MonoBehaviour
 
     private void Update()
     {
+        // DISABLED: Danger system deactivated
+        /*
         if (maxDanger <= 0f)
         {
             currentDanger = 0f;
@@ -34,6 +36,7 @@ public class TopDownDanger : MonoBehaviour
 
         float delta = IsInDangerZone ? increasePerSecond : -decreasePerSecond;
         currentDanger = Mathf.Clamp(currentDanger + delta * Time.deltaTime, 0f, maxDanger);
+        */
     }
 
     public void EnterDangerZone()

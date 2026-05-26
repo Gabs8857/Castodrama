@@ -44,10 +44,11 @@ public static class TopDownBootstrap
         }
 
         TopDownDanger danger = playerObject.GetComponent<TopDownDanger>();
-        if (danger == null)
-        {
-            danger = playerObject.AddComponent<TopDownDanger>();
-        }
+        // DISABLED: Danger system completely removed
+        // if (danger == null)
+        // {
+        //     danger = playerObject.AddComponent<TopDownDanger>();
+        // }
 
         Rigidbody2D playerRigidbody = playerObject.GetComponent<Rigidbody2D>();
         if (playerRigidbody == null)
@@ -103,7 +104,8 @@ public static class TopDownBootstrap
         cameraObject.transform.rotation = Quaternion.identity;
 
         EnsureDangerZoneIsConfigured();
-        EnsureDangerBarUiExists();
+        // DISABLED: Danger bar UI completely removed
+        // EnsureDangerBarUiExists();
 
     }
 
@@ -111,7 +113,8 @@ public static class TopDownBootstrap
     [InitializeOnLoadMethod]
     private static void InitializeInEditor()
     {
-        EditorApplication.delayCall += EnsureDangerBarInEditorHierarchy;
+        // DISABLED: Danger bar in editor completely removed
+        // EditorApplication.delayCall += EnsureDangerBarInEditorHierarchy;
     }
 
     private static void EnsureDangerBarInEditorHierarchy()

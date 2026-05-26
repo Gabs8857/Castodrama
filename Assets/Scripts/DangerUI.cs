@@ -8,6 +8,7 @@ public class DangerUI : MonoBehaviour
 
     void Update()
     {
-        bar.fillAmount = playerDanger.currentDanger / playerDanger.maxDanger;
+        // DISABLED: Danger UI deactivated
+        // bar.fillAmount = playerDanger.currentDanger / playerDanger.maxDanger;
     }
 }

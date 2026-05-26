@@ -12,6 +12,22 @@ public class RiverBottomTeleport : MonoBehaviour
     [SerializeField] private GameObject rivRivière1Object;
     private bool isInRiverBottomZone = false;
     private bool eKeyPressedLastFrame = false;
+    private float teleportCooldownUntil = 0f;
+    private const float TELEPORT_COOLDOWN = 0.5f;
+    private float forceZoneEntryUntil = 0f;
+    private const float FORCE_ZONE_ENTRY_DURATION = 1f;
+    private bool shouldInitializeSurfaceState = true; // Flag pour éviter que Start() réactive les arbres
+
+    private void Awake()
+    {
+        // Early initialization for tree objects to ensure they're found
+        if (bouléauObject == null)
+            bouléauObject = GameObject.Find("Bouleau");
+        if (sauleObject == null)
+            sauleObject = GameObject.Find("Saule");
+        
+        Debug.Log($"[RiverBottomTeleport.Awake] Found Bouleau: {(bouléauObject != null ? "YES" : "NO")}, Saule: {(sauleObject != null ? "YES" : "NO")}");
+    }
 
     private void Start()
     {
@@ -57,6 +73,13 @@ public class RiverBottomTeleport : MonoBehaviour
                 Debug.Log("[RiverBottomTeleport] ⚠ Could not find RivRivière update (1)");
         }
 
+        // Only initialize surface state on first Start() call (actual initialization)
+        if (!shouldInitializeSurfaceState)
+        {
+            Debug.Log("[RiverBottomTeleport] Skipping surface state initialization (already in deep swim mode)");
+            return;
+        }
+
         // Activer RivRivière update (1) au démarrage (surface)
         if (rivRivière1Object != null)
         {
@@ -85,36 +108,91 @@ public class RiverBottomTeleport : MonoBehaviour
         if (controller != null)
         {
             isInRiverBottomZone = true;
-            Debug.Log("[RiverBottomTeleport] Entered zone");
+            Debug.Log("[RiverBottomTeleport] ✓✓ ENTERED zone - E-key should now work!");
+        }
+        else
+        {
+            Debug.Log($"[RiverBottomTeleport] OnTriggerEnter2D: {collision.name} (no TopDownPlayerController)");
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        // Ignore exits pendant FORCE_ZONE_ENTRY_DURATION après un ForceZoneEntry
+        if (Time.time < forceZoneEntryUntil)
+        {
+            Debug.Log($"[RiverBottomTeleport] Exit ignored (forceZoneEntry active for {forceZoneEntryUntil - Time.time:F2}s more)");
+            return;
+        }
+
         TopDownPlayerController controller = collision.GetComponent<TopDownPlayerController>();
         if (controller != null)
         {
             isInRiverBottomZone = false;
-            Debug.Log("[RiverBottomTeleport] Exited zone");
+            Debug.Log("[RiverBottomTeleport] ✓✓ EXITED zone");
         }
+    }
+
+    /// <summary>
+    /// Force la reconnaissance que le joueur est dans la zone
+    /// (utilisé quand on revient du terrier et OnTriggerEnter2D n'a pas été appelé)
+    /// </summary>
+    public void ForceZoneEntry()
+    {
+        isInRiverBottomZone = true;
+        teleportCooldownUntil = 0f; // Réinitialiser le cooldown pour permettre E-key immédiatement
+        forceZoneEntryUntil = Time.time + FORCE_ZONE_ENTRY_DURATION; // Ignorer les exits pendant 1s
+        shouldInitializeSurfaceState = false; // Ne pas réactiver les arbres au Start()
+        Debug.Log("[RiverBottomTeleport] ✓✓ Forced zone entry - ignoring exits for 1s, E-key should work now!");
     }
 
     private void Update()
     {
-        if (isInRiverBottomZone && Keyboard.current != null)
+        // Forcer la zone entry pendant la durée spécifiée
+        if (Time.time < forceZoneEntryUntil)
         {
-            bool eKeyPressed = Keyboard.current.eKey.isPressed;
-            if (eKeyPressed && !eKeyPressedLastFrame)
+            isInRiverBottomZone = true;
+            Debug.Log($"[RiverBottomTeleport] Force zone active ({forceZoneEntryUntil - Time.time:F2}s remaining)");
+        }
+
+        // Cooldown debug
+        if (Time.time < teleportCooldownUntil)
+        {
+            if (isInRiverBottomZone)
             {
-                Debug.Log("[RiverBottomTeleport] ✓ E pressed - rising to surface!");
-                HandleWaterSceneTransition();
+                float remainingCooldown = teleportCooldownUntil - Time.time;
+                Debug.Log($"[RiverBottomTeleport] E-key blocked by cooldown ({remainingCooldown:F2}s remaining)");
             }
-            eKeyPressedLastFrame = eKeyPressed;
-        }
-        else
-        {
             eKeyPressedLastFrame = false;
+            return;
         }
+
+        // Zone detection debug
+        if (Keyboard.current == null)
+        {
+            Debug.LogWarning("[RiverBottomTeleport] Keyboard.current is NULL!");
+            return;
+        }
+
+        if (!isInRiverBottomZone)
+        {
+            // Silently skip if not in zone
+            eKeyPressedLastFrame = false;
+            return;
+        }
+
+        Debug.Log("[RiverBottomTeleport] ✓ In zone, checking E-key...");
+        
+        bool eKeyPressed = Keyboard.current.eKey.isPressed;
+        Debug.Log($"[RiverBottomTeleport] E-key state: pressed={eKeyPressed}, lastFrame={eKeyPressedLastFrame}");
+        
+        if (eKeyPressed && !eKeyPressedLastFrame)
+        {
+            Debug.Log("[RiverBottomTeleport] ✓✓ E pressed - rising to surface!");
+            HandleWaterSceneTransition();
+            teleportCooldownUntil = Time.time + TELEPORT_COOLDOWN;
+        }
+        eKeyPressedLastFrame = eKeyPressed;
     }
 
     public void HandleWaterSceneTransition()

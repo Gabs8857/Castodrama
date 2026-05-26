@@ -84,8 +84,8 @@ public class StatusBarUI : MonoBehaviour
     private float hungerMaxRingDiameterPixels = 400f;
 
     // ==================== DANGER ====================
-    [SerializeField]
-    private TopDownDanger dangerSystem;
+    // DISABLED: Danger system deactivated
+    // private TopDownDanger dangerSystem;
 
     [SerializeField]
     private Image dangerBarFill;
@@ -163,7 +163,10 @@ public class StatusBarUI : MonoBehaviour
 
         hungerRectTransform = hungerBarFill != null ? hungerBarFill.rectTransform : GetComponent<RectTransform>();
         hungerParentRectTransform = GetComponent<RectTransform>(); // Parent that has StatusBarUI
-        dangerRectTransform = dangerBarFill != null ? dangerBarFill.GetComponent<RectTransform>() : null;
+        dangerRectTransform = null; // DISABLED: Danger bar deactivated
+        // DISABLED: Hide danger bar UI
+        if (dangerBarFill != null)
+            dangerBarFill.enabled = false;
 
         EnsureCanvasReferences();
         EnsureHungerBarIsRenderable();
@@ -202,23 +205,23 @@ public class StatusBarUI : MonoBehaviour
             }
         }
 
-        if (dangerSystem == null)
-        {
-            GameObject playerObject = GameObject.Find("Castor");
-            if (playerObject == null)
-            {
-                playerObject = GameObject.Find("Player");
-            }
+        // if (dangerSystem == null)
+        // {
+        //     GameObject playerObject = GameObject.Find("Castor");
+        //     if (playerObject == null)
+        //     {
+        //         playerObject = GameObject.Find("Player");
+        //     }
 
-            if (playerObject != null)
-            {
-                dangerSystem = playerObject.GetComponent<TopDownDanger>();
-            }
-            else
-            {
-                Debug.LogError("[StatusBarUI.Start] Player object not found for danger system!");
-            }
-        }
+        //     if (playerObject != null)
+        //     {
+        //         dangerSystem = playerObject.GetComponent<TopDownDanger>();
+        //     }
+        //     else
+        //     {
+        //         Debug.LogError("[StatusBarUI.Start] Player object not found for danger system!");
+        //     }
+        // }
 
         // Résout la cible de hunger
         Transform resolvedTarget = FindTargetByName(PrimaryTargetName);
@@ -239,11 +242,11 @@ public class StatusBarUI : MonoBehaviour
         }
 
         // Configure danger bar
-        if (dangerRectTransform != null)
-        {
-            dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
-            dangerRectTransform.sizeDelta = dangerBarSize;
-        }
+        // if (dangerRectTransform != null)
+        // {
+        //     dangerRectTransform.anchoredPosition = dangerAnchoredPosition;
+        //     dangerRectTransform.sizeDelta = dangerBarSize;
+        // }
         
         Debug.Log($"[StatusBarUI.Start] Complete - hungerSystem: {(hungerSystem != null ? "OK" : "NULL")}, hungerBarFill: {(hungerBarFill != null ? "OK" : "NULL")}, hungerFollowTarget: {(hungerFollowTarget != null ? "OK" : "NULL")}");
     }
@@ -279,11 +282,11 @@ public class StatusBarUI : MonoBehaviour
             debugLogged = true;
         }
 
-        // Mets à jour la barre de danger
-        if (dangerSystem != null && dangerBarFill != null)
-        {
-            UpdateDangerBarVisuals();
-        }
+        // DISABLED: Mets à jour la barre de danger
+        // if (dangerSystem != null && dangerBarFill != null)
+        // {
+        //     UpdateDangerBarVisuals();
+        // }
     }
 
     private void LateUpdate()
@@ -693,17 +696,7 @@ public class StatusBarUI : MonoBehaviour
 
     void UpdateDangerBarVisuals()
     {
-        if (dangerBarFill == null || dangerSystem == null)
-        {
-            return;
-        }
-
-        float normalized = dangerSystem.NormalizedDanger;
-        dangerBarFill.fillAmount = normalized;
-
-        Color lowColor = new Color(0.95f, 0.9f, 0.2f, 1f);
-        Color highColor = new Color(0.95f, 0.2f, 0.2f, 1f);
-        dangerBarFill.color = Color.Lerp(lowColor, highColor, normalized);
+        // DISABLED: Danger system completely removed
     }
 
     /// <summary>
@@ -723,10 +716,7 @@ public class StatusBarUI : MonoBehaviour
     /// </summary>
     public float GetDangerValue()
     {
-        if (dangerSystem != null)
-        {
-            return dangerSystem.NormalizedDanger;
-        }
+        // DISABLED: Danger system completely removed
         return 0f;
     }
 }

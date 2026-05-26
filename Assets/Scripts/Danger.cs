@@ -12,6 +12,8 @@ public class Danger : MonoBehaviour
 
     void Update()
     {
+        // DISABLED: Danger system deactivated
+        /*
         if (inForest)
         {
             currentDanger += increaseSpeed * Time.deltaTime;
@@ -22,6 +24,7 @@ public class Danger : MonoBehaviour
         }
 
         currentDanger = Mathf.Clamp(currentDanger, 0f, maxDanger);
+        */
     }
 
     private void OnTriggerEnter(Collider other)
