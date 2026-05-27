@@ -15,7 +15,6 @@ public class NPCInteraction : MonoBehaviour
 
     void Update()
     {
-        // 🔥 interaction
         if (playerNearby &&
             Keyboard.current.eKey.wasPressedThisFrame &&
             !isTalking)
@@ -27,30 +26,33 @@ public class NPCInteraction : MonoBehaviour
                 isTalking = true;
 
                 dialogueManager.StartDialogue(npcDialogues[dialogueIndex]);
+
+                // Si le dialogue était bloqué (quiz en cours), on annule isTalking
+                // pour que le joueur puisse réessayer après le quiz
+                if (dialogueManager.dialogueBlocked)
+                {
+                    isTalking = false;
+                }
             }
         }
 
-        // 🔥 détecte fin dialogue proprement
+        // Détecte fin dialogue proprement
         if (isTalking && dialogueManager.dialogueFinished)
         {
-            dialogueIndex++;        // passe au suivant
-            isTalking = false;      // reset état
+            dialogueIndex++;
+            isTalking = false;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-        {
             playerNearby = true;
-        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-        {
             playerNearby = false;
-        }
     }
 }

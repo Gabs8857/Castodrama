@@ -7,8 +7,10 @@ public class CarAnimator : MonoBehaviour
     [SerializeField] private float frameDelay = 0.1f;
     [SerializeField] private int frameCount = 4;
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float ReverseMoveSpeed = 5f;
 
     private bool isClone = false;
+    private bool movingRight = true; // Détermine la direction du mouvement
 
     private void Start()
     {
@@ -25,6 +27,17 @@ public class CarAnimator : MonoBehaviour
             GetComponent<SpriteRenderer>().enabled = true;
         }
 
+        // Déterminer la direction selon la position de spawn
+        if (transform.position.x < -50f) // Spawn de gauche → bouge vers la droite
+        {
+            movingRight = true;
+        }
+        else // Spawn de droite → bouge vers la gauche
+        {
+            movingRight = false;
+            FlipSprite();
+        }
+
         if (carAnimator == null)
             carAnimator = GetComponent<Animator>();
         
@@ -36,14 +49,31 @@ public class CarAnimator : MonoBehaviour
         // Mouvement seulement pour les clones
         if (isClone)
         {
-            transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
+            if (movingRight)
+            {
+                transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                transform.Translate(Vector3.left * ReverseMoveSpeed * Time.deltaTime);
+            }
 
             // Détruire le clone après qu'il ait voyagé une certaine distance
-            if (transform.position.x >= 29f)
+            if (transform.position.x >= 20f || transform.position.x <= -120f)
             {
                 Destroy(gameObject);
             }
         }
+    }
+
+    /// <summary>
+    /// Retourne le sprite horizontalement pour changer la direction
+    /// </summary>
+    private void FlipSprite()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
 
     private IEnumerator PlayCarAnimation()
