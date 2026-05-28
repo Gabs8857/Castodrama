@@ -52,6 +52,9 @@ HUB CENTRAL: TopDownPlayerController
 - **ZoneDetectionManager** : Suivi centralisé des zones
 - **WaterZoneTrigger / DangerZoneTrigger** : Détection des zones spéciales
 - **RiverTeleport / RiverBottomTeleport** : Système de nage profonde à la rivière
+  - Gère la transition visuelle entre le monde supérieur et le fond
+  - Activation/désactivation de FondRivière, Rivière et Tilemap au passage sous l'eau
+  - Utilise E pour entrer/sortir de la nage profonde
 
 ### 💬 Dialogue & NPCs
 - **DialogueManager** : Gestion narrative avec Ink
@@ -61,7 +64,7 @@ HUB CENTRAL: TopDownPlayerController
 - **StatusBarUI** : Barres de faim et danger
 - **AdaptiveHUDWidth** : Adaptation HUD au ratio d'écran
 - **ATHController** : Animations du décor
-- **ContacteWebPage** : Envoi de messages web
+- **ContacteWebPage** : Système de contact web (voir section "Système de Contact Web")
 - **TopDownBootstrap** : Initialisation de scène
 
 ## 🎬 Système d'Animation (CharacterAnimator)
@@ -120,11 +123,18 @@ Le système de nage profonde permet au joueur de :
 - Bouleau, Peuplier, Saule (arbres, disparaissent)
 - Animation deep swim (activée automatiquement)
 
+## 🌐 Système de Contact Web
+
+**ContacteWebPage** : Système de contact intégré au jeu
+- Crée un panneau UI bas-glissant au runtime avec InputField + Button
+- Envoie les messages via GET requête avec le paramètre `message`
+- Utilise `UnityWebRequest.result` pour les vérifications d'erreur (pas `isNetworkError`)
+- Attention : Les URLs doivent inclure le schéma complet (ex: `https://domain/path`)
+
 ## Notes de développement
 
 - Système de zones extensible avec interfaces `IZoneDetectable`
 - Dialogues Ink compilés en JSON
 - Animations gérées par Sprite Resolver
 - Bootstrap crée automatiquement joueur et UI au runtime
-
-Attention tout vas changer
+- Système de transition d'eau (mai 2026) gère l'activation/désactivation des éléments visuels
