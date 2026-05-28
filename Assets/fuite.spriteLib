@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Fuite
+    m_Hash: 1023267792
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Frame1
+      m_Hash: 554740912
+      m_Sprite: {fileID: -3548885481864062329, guid: 576ce37eabaeb3743b5dad4dae9a4dd7, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3548885481864062329, guid: 576ce37eabaeb3743b5dad4dae9a4dd7, type: 3}
+    - m_Name: Frame2
+      m_Hash: 941227274
+      m_Sprite: {fileID: -8078243976421030190, guid: 07db830d57fcde34bb8ec169de710a53, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8078243976421030190, guid: 07db830d57fcde34bb8ec169de710a53, type: 3}
+    - m_Name: Frame3
+      m_Hash: 253676956
+      m_Sprite: {fileID: -9024673388920088841, guid: 8ed5a07096ff7d54ea605125b37a8b06, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -9024673388920088841, guid: 8ed5a07096ff7d54ea605125b37a8b06, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 3
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639155770737123490
+  m_Version: 1
