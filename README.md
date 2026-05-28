@@ -11,7 +11,6 @@ Jeu 2D coopératif en Unity 6 LTS.
 ## Collaboration
 
 - ✅ Crée une issue avant de commencer une fonctionnalité importante
-- ✅ Garde les commits petits et descriptifs
 - ✅ Ouvre une PR pour toute modification partagée
 
 
@@ -123,18 +122,8 @@ Le système de nage profonde permet au joueur de :
 - Bouleau, Peuplier, Saule (arbres, disparaissent)
 - Animation deep swim (activée automatiquement)
 
-## 🌐 Système de Contact Web
-
-**ContacteWebPage** : Système de contact intégré au jeu
-- Crée un panneau UI bas-glissant au runtime avec InputField + Button
-- Envoie les messages via GET requête avec le paramètre `message`
-- Utilise `UnityWebRequest.result` pour les vérifications d'erreur (pas `isNetworkError`)
-- Attention : Les URLs doivent inclure le schéma complet (ex: `https://domain/path`)
-
 ## Notes de développement
 
 - Système de zones extensible avec interfaces `IZoneDetectable`
-- Dialogues Ink compilés en JSON
-- Animations gérées par Sprite Resolver
 - Bootstrap crée automatiquement joueur et UI au runtime
 - Système de transition d'eau (mai 2026) gère l'activation/désactivation des éléments visuels
