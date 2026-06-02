@@ -159,6 +159,7 @@ public class EquippableItem : MonoBehaviour, IZoneDetectable
         }
 
         isPickedUp = false;
+        player = null;
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)

@@ -169,7 +169,7 @@ public class FoodItem : MonoBehaviour
         }
     }
 
-    private void TryFeedPlayer(Collider2D collision)
+    protected virtual void TryFeedPlayer(Collider2D collision)
     {
         // Feed the player using TopDownHunger system
         TopDownHunger hungerSystem = collision.GetComponentInParent<TopDownHunger>();

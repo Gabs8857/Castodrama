@@ -59,7 +59,7 @@ public class CarAnimator : MonoBehaviour
             }
 
             // Détruire le clone après qu'il ait voyagé une certaine distance
-            if (transform.position.x >= 20f || transform.position.x <= -120f)
+            if (transform.position.x >= 15f || transform.position.x <= -120f)
             {
                 Destroy(gameObject);
             }

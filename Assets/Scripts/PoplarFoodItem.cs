@@ -5,11 +5,12 @@ using UnityEngine.Rendering.Universal;
 /// <summary>
 /// Peuplier (Poplar) - Comestible food item with progression system.
 /// First eat: frame 2 -> Second eat: frame 3 -> Third eat: disappears
+/// Also spawns branches when the dam reaches 2 cracks
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class PoplarFoodItem : MonoBehaviour
+public class PoplarFoodItem : MonoBehaviour, IBranchSpawner
 {
     [SerializeField]
     private float hungerRestoreAmount = 22f;
@@ -34,6 +35,14 @@ public class PoplarFoodItem : MonoBehaviour
 
     [SerializeField]
     private Sprite[] eatProgressionSprites = new Sprite[2];
+
+    [Header("Branch Spawning")]
+    [SerializeField]
+    private GameObject poplarBranchPrefab;
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool debugLogs = true;
 
     private bool isPlayerNearby = false;
     private Collider2D currentPlayerCollider;
@@ -126,11 +135,46 @@ public class PoplarFoodItem : MonoBehaviour
                     spriteRenderer.sprite = eatProgressionSprites[eatCount];
                 }
                 eatCount++;
+
+                // Spawne les branches quand on passe en sprite 2 (eatCount == 1)
+                if (eatCount == 1)
+                {
+                    SpawnBranches(2, 1.5f);
+                }
             }
             else
             {
                 Destroy(gameObject);
             }
+        }
+    }
+
+    /// <summary>
+    /// Spawne des branches de peuplier autour de cet arbre
+    /// Implémentation de IBranchSpawner
+    /// </summary>
+    public void SpawnBranches(int count = 3, float radius = 2f)
+    {
+        if (poplarBranchPrefab == null)
+        {
+            if (debugLogs)
+                Debug.LogWarning($"[PoplarFoodItem] No poplar branch prefab assigned for {gameObject.name}!");
+            return;
+        }
+
+        if (debugLogs)
+            Debug.Log($"[PoplarFoodItem] ✓ Spawning {count} Poplar branches around {gameObject.name}");
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 randomOffset = Random.insideUnitCircle * radius;
+            Vector3 spawnPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
+
+            GameObject branchInstance = Instantiate(poplarBranchPrefab, spawnPosition, Quaternion.identity);
+            branchInstance.name = $"PoplarBranch_{i + 1}";
+
+            if (debugLogs)
+                Debug.Log($"[PoplarFoodItem] Branch #{i + 1} spawned at {spawnPosition}");
         }
     }
 }

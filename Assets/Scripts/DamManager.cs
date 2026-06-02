@@ -106,10 +106,15 @@ public class DamManager : MonoBehaviour
         DamCrack newCrack = cracks[cracksCreated];
         newCrack.Appear();
 
-        if (debugLogs)
-            Debug.Log($"[DamManager] Crack #{cracksCreated + 1} appeared at position {cracksCreated}");
-
         cracksCreated++;
+
+        if (debugLogs)
+        {
+            Debug.Log($"═══════════════════════════════════════");
+            Debug.Log($"[DamManager] ✓✓✓ CRACK #{cracksCreated} APPEARED ✓✓✓");
+            Debug.Log($"[DamManager] Total cracks now: {cracksCreated}/{MAX_CRACKS}");
+            Debug.Log($"═══════════════════════════════════════");
+        }
     }
 
     /// <summary>
@@ -170,8 +175,16 @@ public class DamManager : MonoBehaviour
         lastCrack.Disappear();
         cracksCreated--;
 
-        // Détruire ou déposer la branche
-        Destroy(branchItem.gameObject);
+        // Déséquipper la branche du joueur AVANT de la désactiver
+        if (branchItem != null)
+        {
+            branchItem.Drop();
+            if (debugLogs)
+                Debug.Log($"[DamManager] Branch dropped from player");
+        }
+
+        // Désactiver la branche au lieu de la détruire (permet la réutilisation)
+        branchItem.gameObject.SetActive(false);
 
         lastRepairTime = Time.time;
 
@@ -191,8 +204,17 @@ public class DamManager : MonoBehaviour
         lastCrack.Disappear();
         cracksCreated--;
 
-        // Détruire la branche
-        Destroy(branchItem.gameObject);
+        // Déséquipper la branche du joueur AVANT de la désactiver
+        EquippableItem equippableItem = branchItem.gameObject.GetComponent<EquippableItem>();
+        if (equippableItem != null)
+        {
+            equippableItem.Drop();
+            if (debugLogs)
+                Debug.Log($"[DamManager] Branch dropped from player");
+        }
+
+        // Désactiver la branche au lieu de la détruire (permet la réutilisation)
+        branchItem.gameObject.SetActive(false);
 
         lastRepairTime = Time.time;
 
