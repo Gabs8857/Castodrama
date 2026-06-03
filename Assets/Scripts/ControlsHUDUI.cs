@@ -26,8 +26,9 @@ public class ControlsHUDUI : MonoBehaviour
     private void SetupControlsText()
     {
         string controlsInfo = "<b>CONTRÔLES</b>\n" +
-                             "<color=yellow>F</color> - Manger les arbres\n" +
-                             "<color=yellow>G</color> - Ramasser les branches\n" +
+                             "<color=yellow>F</color> - Manger (Food)\n" +
+                             "<color=yellow>C</color> - Casser les arbres\n" +
+                             "<color=yellow>G</color> - Ramasser / Déposer\n" +
                              "<color=yellow>E</color> - Téléporter/Interagir\n" +
                              "<color=yellow>WASD</color> - Se déplacer";
 

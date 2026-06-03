@@ -9,6 +9,9 @@ public class BranchRepairItem : MonoBehaviour
 {
     [SerializeField] private DamManager damManager;
     
+    [Tooltip("Distance maximum pour valider la réparation si le trigger physique échoue au lâcher")]
+    [SerializeField] private float repairDistanceThreshold = 5f;
+    
     [Header("Debug")]
     [SerializeField] private bool debugLogs = true;
 
@@ -40,21 +43,34 @@ public class BranchRepairItem : MonoBehaviour
     private void Update()
     {
         // Détecte quand on dépose une branche
-        // Si la branche n'a pas de parent (ou son parent n'a pas TopDownPlayerController), elle est déposée
-        bool isCurrentlyEquipped = transform.parent != null && 
-                                   transform.parent.GetComponent<TopDownPlayerController>() != null;
+        // On vérifie si un PlayerController existe dans les parents pour savoir si elle est tenue
+        bool isCurrentlyEquipped = GetComponentInParent<TopDownPlayerController>() != null;
         
-        if (wasPickedUpLastFrame && !isCurrentlyEquipped && isInRepairZone)
+        if (wasPickedUpLastFrame && !isCurrentlyEquipped)
         {
-            if (debugLogs)
-                Debug.Log($"[BranchRepairItem] ✓ Branch dropped in repair zone!");
-            // La branche vient d'être déposée dans la zone de réparation
-            OnRepairZoneDeposit();
-        }
-        
-        if (debugLogs && wasPickedUpLastFrame && !isCurrentlyEquipped)
-        {
-            Debug.Log($"[BranchRepairItem] Branch dropped but isInRepairZone={isInRepairZone}");
+            // Sécurité : Si le trigger n'a pas détecté la zone (car le collider est souvent désactivé quand on porte l'objet)
+            // on force la détection par distance si on est proche du DamManager
+            if (!isInRepairZone && damManager != null)
+            {
+                float dist = Vector2.Distance(transform.position, damManager.transform.position);
+                if (dist <= repairDistanceThreshold)
+                {
+                    isInRepairZone = true;
+                    if (debugLogs) Debug.Log($"[BranchRepairItem] Zone validée par proximité ({dist:F1}m)");
+                }
+            }
+
+            if (isInRepairZone)
+            {
+                if (debugLogs)
+                    Debug.Log($"[BranchRepairItem] ✓ Réparation activée au lâcher : {gameObject.name}");
+                
+                OnRepairZoneDeposit();
+            }
+            else if (debugLogs)
+            {
+                Debug.Log($"[BranchRepairItem] ! Branche lâchée trop loin du barrage");
+            }
         }
         
         wasPickedUpLastFrame = isCurrentlyEquipped;
@@ -63,24 +79,26 @@ public class BranchRepairItem : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Vérifie si on entre en collision avec le DamManager/Barrage
-        if (collision.GetComponent<DamManager>() != null)
+        DamManager foundDam = collision.GetComponentInParent<DamManager>();
+        if (foundDam != null)
         {
+            damManager = foundDam;
             isInRepairZone = true;
             
             if (debugLogs)
-                Debug.Log($"[BranchRepairItem] Branch entered Barrage zone");
+                Debug.Log($"[BranchRepairItem] -> Entré dans la zone du barrage (Détecté via : {collision.gameObject.name})");
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         // Vérifie si on sort du DamManager/Barrage
-        if (collision.GetComponent<DamManager>() != null)
+        if (collision.GetComponentInParent<DamManager>() != null)
         {
             isInRepairZone = false;
             
             if (debugLogs)
-                Debug.Log($"[BranchRepairItem] Branch left Barrage zone");
+                Debug.Log($"[BranchRepairItem] <- Sorti de la zone du barrage");
         }
     }
 

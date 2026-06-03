@@ -106,37 +106,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: fuite_01_0
-      rect:
-        serializedVersion: 2
-        x: 37
-        y: 34
-        width: 14
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e131821b77fa7c210800000000000000
-      internalID: 1353243141656285982
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: fuite_01_1
       rect:
         serializedVersion: 2
-        x: 76
-        y: 12
-        width: 49
-        height: 80
+        x: 0
+        y: 0
+        width: 131
+        height: 105
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -149,33 +127,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: fuite_01_2
-      rect:
-        serializedVersion: 2
-        x: 24
-        y: 13
-        width: 17
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9cddccca77c348d20800000000000000
-      internalID: 3279812913330445769
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: eee3b1f2774535e4085e9b8bca1e2bff
     internalID: 0
     vertices: []
     indices: 

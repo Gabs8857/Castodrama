@@ -87,7 +87,7 @@ public class WillowFoodItem : MonoBehaviour
 
     private void Update()
     {
-        if (isPlayerNearby && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        if (isPlayerNearby && Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame)
         {
             TryFeedPlayer(currentPlayerCollider);
         }

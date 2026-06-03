@@ -8,11 +8,14 @@ Jeu 2D coopératif en Unity 6 LTS.
 2. Laisse Unity régénérer les fichiers nécessaires
 3. Travaille sur une branche dédiée avant de faire une PR
 
-## Collaboration
+## ⌨️ Contrôles
 
-- ✅ Crée une issue avant de commencer une fonctionnalité importante
-- ✅ Ouvre une PR pour toute modification partagée
-
+- **C** : **Casser** ou manger les arbres (Peuplier, Bouleau, Saule).
+- **F** : Manger les items de nourriture (**Food**) classiques.
+- **G** : Ramasser ou déposer les branches (**Grab**).
+- **E** : Interaction contextuelle (Parler aux PNJs, plonger en Nage Profonde).
+- **WASD / ZQSD** : Se déplacer.
+- **D-Pad (Manette)** : Zoom caméra.
 
 ## Architecture générale
 
@@ -23,7 +26,6 @@ HUB CENTRAL: TopDownPlayerController
 ├─ Animations (CharacterAnimator)
 ├─ Détection de zones (eau, lave, feu, glace)
 ├─ Gestion de la faim
-├─ Gestion du danger
 └─ Suivi de la caméra (TopDownCameraFollow)
 ```
 
@@ -40,12 +42,17 @@ HUB CENTRAL: TopDownPlayerController
 
 ### 📊 État du joueur
 - **TopDownHunger** : Système de faim
-- **TopDownDanger** : Suivi du danger environnemental
+- **TopDownDanger** : Suivi du danger environnemental (UI actuellement désactivée)
 - **DayAndNightCycle** : Cycle jour/nuit avec effets visuels
 
 ### 🎒 Inventaire
 - **EquippableItem** : Items interactifs (ramassage/dépôt)
 - **FoodItem** : Items alimentaires qui restaurent la faim
+- **BranchRepairItem** : Branches spécifiques (Peuplier/Bouleau) pour la réparation
+
+### 🏗️ Réparation du Barrage
+- **DamManager** : Gère l'intégrité du barrage et les points de rupture
+- **TreeFallManager** : Gère le spawn automatique des branches de réparation lors des dégâts
 
 ### 🗺️ Zones & Environnement
 - **ZoneDetectionManager** : Suivi centralisé des zones
@@ -60,7 +67,7 @@ HUB CENTRAL: TopDownPlayerController
 - **NPCInteraction** : Détection et dialogue des PNJs
 
 ### 🌐 UI & Autres
-- **StatusBarUI** : Barres de faim et danger
+- **StatusBarUI** : Gestionnaire unifié (Faim circulaire avec positionnement orbital, Danger désactivé)
 - **AdaptiveHUDWidth** : Adaptation HUD au ratio d'écran
 - **ATHController** : Animations du décor
 - **ContacteWebPage** : Système de contact web (voir section "Système de Contact Web")
@@ -121,6 +128,14 @@ Le système de nage profonde permet au joueur de :
 - Tilemap update (forêt, disparaît)
 - Bouleau, Peuplier, Saule (arbres, disparaissent)
 - Animation deep swim (activée automatiquement)
+
+## 🪵 Système de Réparation du Barrage
+
+Le maintien du barrage est vital et utilise une logique de ressources distincte :
+1. **Différenciation** : Les branches de réparation ne sont PAS de la nourriture (`FoodItem`).
+2. **Types de bois** : Supporte le Peuplier (*Poplar*) et le Bouleau (*Birch*).
+3. **Composants requis** : Une branche de réparation doit posséder les scripts `EquippableItem`, `BranchRepairItem` et son script de type spécifique.
+4. **Flux** : `DamManager` détecte une cassure -> `TreeFallManager` génère les branches nécessaires dans la scène.
 
 ## Notes de développement
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Bouleau (Birch) - Comestible food item with progression system.
@@ -20,6 +21,14 @@ public class BirchFoodItem : FoodItem, IBranchSpawner
         visibleTint = new Color(0.8f, 0.7f, 0.5f, 1f); // Birch light color
         glowIntensity = 0.8f;
         base.Awake();
+    }
+
+    private void Update()
+    {
+        if (isPlayerNearby && Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame)
+        {
+            TryFeedPlayer(currentPlayerCollider);
+        }
     }
 
     /// <summary>

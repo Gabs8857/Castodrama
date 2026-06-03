@@ -112,59 +112,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: fuite_03_0
-      rect:
-        serializedVersion: 2
-        x: 30
-        y: 43
-        width: 25
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 280c8d877a6072600800000000000000
-      internalID: 443330404676059266
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: fuite_03_1
-      rect:
-        serializedVersion: 2
-        x: 43
-        y: 60
-        width: 13
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9aad518a2ff9650d0800000000000000
-      internalID: -3434381801272517975
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: fuite_03_2
       rect:
         serializedVersion: 2
-        x: 70
-        y: 12
-        width: 55
-        height: 80
+        x: 0
+        y: 0
+        width: 131
+        height: 105
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -177,55 +133,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: fuite_03_3
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 26
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 71ed07ed45402d030800000000000000
-      internalID: 3517879021485481495
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: fuite_03_4
-      rect:
-        serializedVersion: 2
-        x: 56
-        y: 34
-        width: 8
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cafc1c80ff8a37910800000000000000
-      internalID: 1833995286586970028
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 26a0313a56e867340bae0fae72ebd977
     internalID: 0
     vertices: []
     indices: 

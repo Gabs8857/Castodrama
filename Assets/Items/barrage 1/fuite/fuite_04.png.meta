@@ -109,59 +109,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: fuite_04_0
-      rect:
-        serializedVersion: 2
-        x: 12
-        y: 22
-        width: 14
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 711f27aede8e8e640800000000000000
-      internalID: 5109589885790122263
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: fuite_04_1
-      rect:
-        serializedVersion: 2
-        x: 23
-        y: 30
-        width: 6
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 78a93f00573dfbec0800000000000000
-      internalID: -3548885481864062329
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: fuite_04_2
       rect:
         serializedVersion: 2
-        x: 41
-        y: 12
-        width: 84
-        height: 80
+        x: 0
+        y: 0
+        width: 131
+        height: 105
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -174,33 +130,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: fuite_04_3
-      rect:
-        serializedVersion: 2
-        x: 36
-        y: 14
-        width: 14
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d418a09a2add22460800000000000000
-      internalID: 7215573243691434317
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 4650ca2285ae028459af62847ea1eeb5
     internalID: 0
     vertices: []
     indices: 
