@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c69d8ff5173512d4f867453edddc9d31
+guid: 06e1c09e7505d004983cccea7867a687
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6682169413007807111
-    second: saule_tree_int_00_0
+      213: -4680425269359614732
+    second: ui_signature_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: saule_tree_int_00_0
+      name: ui_signature_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 536
-        height: 646
-      alignment: 9
-      pivot: {x: 0.5148463, y: 0.049150012}
+        width: 91
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7829f4f6da5dbbc50800000000000000
-      internalID: 6682169413007807111
+      spriteID: 4f4ee06f30acb0fb0800000000000000
+      internalID: -4680425269359614732
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 607318d263363d745be12cf908dc4e72
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      saule_tree_int_00_0: 6682169413007807111
+      ui_signature_0: -4680425269359614732
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

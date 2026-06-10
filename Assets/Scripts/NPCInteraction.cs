@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class NPCInteraction : MonoBehaviour
 {
@@ -7,10 +8,11 @@ public class NPCInteraction : MonoBehaviour
 
     public TextAsset[] npcDialogues;
 
+    [Header("Crédits")]
+    public string creditsSceneName = "Credits"; // nom exact de ta scène crédits
+
     private bool playerNearby = false;
-
     private int dialogueIndex = 0;
-
     private bool isTalking = false;
 
     void Update()
@@ -22,37 +24,36 @@ public class NPCInteraction : MonoBehaviour
             if (dialogueIndex < npcDialogues.Length)
             {
                 Debug.Log("Dialogue index = " + dialogueIndex);
-
                 isTalking = true;
-
                 dialogueManager.StartDialogue(npcDialogues[dialogueIndex]);
 
-                // Si le dialogue était bloqué (quiz en cours), on annule isTalking
-                // pour que le joueur puisse réessayer après le quiz
                 if (dialogueManager.dialogueBlocked)
-                {
                     isTalking = false;
-                }
             }
         }
 
-        // Détecte fin dialogue proprement
+        // Détecte fin dialogue
         if (isTalking && dialogueManager.dialogueFinished)
         {
             dialogueIndex++;
             isTalking = false;
+
+            // Si tous les dialogues sont terminés → scène crédits
+            if (dialogueIndex >= npcDialogues.Length)
+            {
+                Debug.Log("[NPCInteraction] Fin du dernier dialogue → Crédits");
+                SceneManager.LoadScene(creditsSceneName);
+            }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerNearby = true;
+        if (other.CompareTag("Player")) playerNearby = true;
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerNearby = false;
+        if (other.CompareTag("Player")) playerNearby = false;
     }
 }

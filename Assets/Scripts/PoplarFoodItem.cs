@@ -139,7 +139,7 @@ public class PoplarFoodItem : MonoBehaviour, IBranchSpawner
                 // Spawne les branches quand on passe en sprite 2 (eatCount == 1)
                 if (eatCount == 1)
                 {
-                    SpawnBranches(2, 1.5f);
+                    SpawnBranches(5, 2.5f);
                 }
             }
             else

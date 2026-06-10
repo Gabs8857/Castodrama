@@ -10,8 +10,8 @@ public class TreeFallManager : MonoBehaviour
     [Header("Branch Spawning")]
     [SerializeField] private GameObject poplarBranchPrefab;
     [SerializeField] private GameObject birchBranchPrefab;
-    [SerializeField] private int poplarBranchCount = 2;
-    [SerializeField] private int birchBranchCount = 1;
+    [SerializeField] private int poplarBranchCount = 4;
+    [SerializeField] private int birchBranchCount = 4;
     [SerializeField] private float spawnRadius = 2f;
     [SerializeField] private Vector2 spawnCenterOffset = new Vector2(0, -3f);
     

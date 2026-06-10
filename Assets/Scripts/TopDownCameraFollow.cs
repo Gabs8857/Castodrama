@@ -22,6 +22,10 @@ public class TopDownCameraFollow : MonoBehaviour
     [SerializeField]
     private Vector3 offset = new Vector3(0f, 0f, -10f);
 
+    [Tooltip("Décalage horizontal (X) de la caméra par rapport à la cible")]
+    [SerializeField]
+    private float xOffset = 2f;
+
     [SerializeField]
     private float followHeight = 6f;
 
@@ -136,7 +140,7 @@ public class TopDownCameraFollow : MonoBehaviour
 
     private void FollowTargetTopDown()
     {
-        Vector3 desiredPosition = target.position + offset;
+        Vector3 desiredPosition = target.position + offset + Vector3.right * xOffset;
         transform.position = Vector3.SmoothDamp(
             transform.position,
             desiredPosition,
@@ -151,7 +155,7 @@ public class TopDownCameraFollow : MonoBehaviour
     {
         Quaternion desiredRotation = Quaternion.Euler(pitchAngle, yawAngle, 0f);
         Vector3 backward = desiredRotation * Vector3.back;
-        Vector3 desiredPosition = target.position + Vector3.up * Mathf.Max(0f, followHeight) + backward * Mathf.Max(0f, followDistance);
+        Vector3 desiredPosition = target.position + Vector3.up * Mathf.Max(0f, followHeight) + backward * Mathf.Max(0f, followDistance) + Vector3.right * xOffset;
 
         transform.position = Vector3.SmoothDamp(
             transform.position,

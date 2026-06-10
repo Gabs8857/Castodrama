@@ -161,8 +161,10 @@ public class StatusBarUI : MonoBehaviour
             Debug.LogError("[StatusBarUI.Awake] Could not find Image component!");
         }
 
-        hungerRectTransform = hungerBarFill != null ? hungerBarFill.rectTransform : GetComponent<RectTransform>();
-        hungerParentRectTransform = GetComponent<RectTransform>(); // Parent that has StatusBarUI
+        hungerParentRectTransform = GetComponent<RectTransform>();
+        // IMPORTANT: On utilise le parent pour le positionnement pour que le fond et la barre suivent ensemble
+        hungerRectTransform = hungerParentRectTransform; 
+        
         dangerRectTransform = null; // DISABLED: Danger bar deactivated
         // DISABLED: Hide danger bar UI
         if (dangerBarFill != null)
@@ -173,6 +175,13 @@ public class StatusBarUI : MonoBehaviour
         EnsureHungerBackgroundImageExists();
         EnsureHungerBackgroundRenderable();
         
+        // Force la visibilité initiale si on est en mode Free
+        if (!GameState.IsBlockingUI())
+        {
+            if (hungerBarFill != null) hungerBarFill.enabled = true;
+            if (hungerBarBackground != null) hungerBarBackground.enabled = true;
+        }
+
         Debug.Log("[StatusBarUI.Awake] Awake complete");
     }
 
@@ -253,6 +262,16 @@ public class StatusBarUI : MonoBehaviour
 
     private void Update()
     {
+        // Gère la visibilité selon l'état du jeu (masque pendant les questions/bilan, visible par défaut)
+        bool shouldBeVisible = !GameState.IsBlockingUI();
+
+        // Force l'activation/désactivation des composants visuels
+        if (hungerBarFill != null && hungerBarFill.enabled != shouldBeVisible)
+            hungerBarFill.enabled = shouldBeVisible;
+
+        if (hungerBarBackground != null && hungerBarBackground.enabled != shouldBeVisible)
+            hungerBarBackground.enabled = shouldBeVisible;
+
         // Try to find hunger system if not already found (handles timing issues)
         if (hungerSystem == null)
         {
@@ -267,6 +286,10 @@ public class StatusBarUI : MonoBehaviour
                 }
             }
         }
+
+        // Si l'interface est masquée, on ne met pas à jour les visuels
+        if (!shouldBeVisible)
+            return;
 
         // Mets à jour la barre de faim
         if (hungerSystem != null && hungerBarFill != null)
@@ -291,6 +314,15 @@ public class StatusBarUI : MonoBehaviour
 
     private void LateUpdate()
     {
+        // Ne pas calculer la position orbitale si la barre est masquée
+        // Mais on laisse passer si shouldBeVisible vient de repasser à true pour éviter un saut d'image
+        bool isBlocking = GameState.IsBlockingUI();
+        
+        if (isBlocking)
+        {
+            return;
+        }
+
         if (parentCanvas == null || canvasRectTransform == null)
         {
             EnsureCanvasReferences();
@@ -440,6 +472,7 @@ public class StatusBarUI : MonoBehaviour
         hungerBarFill.fillOrigin = (int)Image.Origin360.Top;
         hungerBarFill.fillClockwise = true;
         hungerBarFill.preserveAspect = true;
+        hungerBarFill.enabled = true;
         hungerBarFill.color = new Color(0.32f, 0.85f, 0.35f, 1f);
         
         Debug.Log($"[StatusBarUI.EnsureHungerBarIsRenderable] Complete - sprite: {hungerBarFill.sprite}, color: {hungerBarFill.color}");
@@ -472,10 +505,8 @@ public class StatusBarUI : MonoBehaviour
             }
             else
             {
-                // If we can't load the sprite, disable the background
-                hungerBarBackground.enabled = false;
+                // Si on ne trouve pas le sprite, on laisse quand même l'objet actif (il sera blanc au pire)
                 Debug.LogWarning("[StatusBarUI] Could not load FoodCircle sprite, disabling background");
-                return;
             }
         }
 

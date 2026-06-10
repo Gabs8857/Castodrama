@@ -53,7 +53,7 @@ public class BirchFoodItem : FoodItem, IBranchSpawner
                 // Spawne les branches quand on passe en sprite 2 (eatCount == 1)
                 if (eatCount == 1)
                 {
-                    SpawnBranches(1, 1.5f);
+                    SpawnBranches(3, 1.5f);
                 }
             }
             else

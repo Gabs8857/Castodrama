@@ -301,6 +301,11 @@ public class DamManager : MonoBehaviour
         {
             if (visual != null)
             {
+                // Ajustement de la position X : se déplace à -17.1 quand la fuite s'active
+                Vector3 pos = visual.transform.position;
+                pos.x = -16.5f;
+                visual.transform.position = pos;
+
                 if (noneSprite != null)
                     visual.sprite = noneSprite;
 
@@ -327,6 +332,11 @@ public class DamManager : MonoBehaviour
         {
             if (visual != null)
             {
+                // Retour à la position X de base (-17) quand la fuite s'arrête
+                Vector3 pos = visual.transform.position;
+                pos.x = -17f;
+                visual.transform.position = pos;
+
                 if (noneSprite != null)
                     visual.sprite = noneSprite;
 

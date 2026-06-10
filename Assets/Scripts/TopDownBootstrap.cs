@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,6 +16,16 @@ public static class TopDownBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
     {
+        // S'abonne pour que le setup s'exécute à chaque nouveau chargement de scène
+        SceneManager.sceneLoaded += (scene, mode) => PerformSetup();
+        
+        // Exécute le setup immédiatement pour la scène actuelle (le menu au démarrage)
+        PerformSetup();
+    }
+
+    private static void PerformSetup()
+    {
+        Debug.Log($"[TopDownBootstrap] Configuration de la scène : {SceneManager.GetActiveScene().name}");
         GameObject playerObject = GameObject.Find(PlayerName);
         if (playerObject == null)
         {

@@ -9,7 +9,7 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class WillowFoodItem : MonoBehaviour
+public class WillowFoodItem : MonoBehaviour, IBranchSpawner
 {
     [SerializeField]
     private float hungerRestoreAmount = 18f;
@@ -34,6 +34,14 @@ public class WillowFoodItem : MonoBehaviour
 
     [SerializeField]
     private Sprite[] eatProgressionSprites = new Sprite[2];
+
+    [Header("Branch Spawning")]
+    [SerializeField]
+    private GameObject willowBranchPrefab;
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool debugLogs = true;
 
     private bool isPlayerNearby = false;
     private Collider2D currentPlayerCollider;
@@ -126,11 +134,46 @@ public class WillowFoodItem : MonoBehaviour
                     spriteRenderer.sprite = eatProgressionSprites[eatCount];
                 }
                 eatCount++;
+
+                // Spawne les branches quand on passe en sprite 2 (eatCount == 1)
+                if (eatCount == 1)
+                {
+                    SpawnBranches(5, 2.5f);
+                }
             }
             else
             {
                 Destroy(gameObject);
             }
+        }
+    }
+
+    /// <summary>
+    /// Spawne des branches de saule autour de cet arbre
+    /// Implémentation de IBranchSpawner
+    /// </summary>
+    public void SpawnBranches(int count = 3, float radius = 2f)
+    {
+        if (willowBranchPrefab == null)
+        {
+            if (debugLogs)
+                Debug.LogWarning($"[WillowFoodItem] No willow branch prefab assigned for {gameObject.name}!");
+            return;
+        }
+
+        if (debugLogs)
+            Debug.Log($"[WillowFoodItem] ✓ Spawning {count} Willow branches around {gameObject.name}");
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 randomOffset = Random.insideUnitCircle * radius;
+            Vector3 spawnPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
+
+            GameObject branchInstance = Instantiate(willowBranchPrefab, spawnPosition, Quaternion.identity);
+            branchInstance.name = $"WillowBranch_{i + 1}";
+
+            if (debugLogs)
+                Debug.Log($"[WillowFoodItem] Branch #{i + 1} spawned at {spawnPosition}");
         }
     }
 }

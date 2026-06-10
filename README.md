@@ -14,6 +14,7 @@ Jeu 2D coopératif en Unity 6 LTS.
 - **F** : Manger les items de nourriture (**Food**) classiques.
 - **G** : Ramasser ou déposer les branches (**Grab**).
 - **E** : Interaction contextuelle (Parler aux PNJs, plonger en Nage Profonde).
+- **Echap** : Ouvrir/Fermer le menu pause.
 - **WASD / ZQSD** : Se déplacer.
 - **D-Pad (Manette)** : Zoom caméra.
 
@@ -43,7 +44,10 @@ HUB CENTRAL: TopDownPlayerController
 ### 📊 État du joueur
 - **TopDownHunger** : Système de faim
 - **TopDownDanger** : Suivi du danger environnemental (UI actuellement désactivée)
-- **DayAndNightCycle** : Cycle jour/nuit avec effets visuels
+- **DayAndNightCycle** : Gère la progression du temps.
+  - Réduit progressivement le champ de vision du joueur (Light2D) à mesure que la nuit avance.
+  - Déclenche un effet visuel de flash et un message de fin de nuit.
+  - Paramétrable via la durée du cycle et les rayons de lumière (Inner/Outer radius).
 
 ### 🎒 Inventaire
 - **EquippableItem** : Items interactifs (ramassage/dépôt)
@@ -69,6 +73,8 @@ HUB CENTRAL: TopDownPlayerController
 ### 🌐 UI & Autres
 - **StatusBarUI** : Gestionnaire unifié (Faim circulaire avec positionnement orbital, Danger désactivé)
 - **AdaptiveHUDWidth** : Adaptation HUD au ratio d'écran
+- **ControlsHUDUI** : Affichage dynamique des raccourcis clavier en haut de l'écran.
+- **PauseMenu** : Gère la mise en pause globale (bloqué durant les dialogues ou questions).
 - **ATHController** : Animations du décor
 - **ContacteWebPage** : Système de contact web (voir section "Système de Contact Web")
 - **TopDownBootstrap** : Initialisation de scène

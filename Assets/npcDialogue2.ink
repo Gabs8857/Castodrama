@@ -1,39 +1,38 @@
 VAR score = 0
-VAR firstAnswer = ""
-VAR secondAnswer = ""
-VAR q1_explanation = ""
-VAR q2_explanation = ""
+
+VAR question_1 = ""
+VAR reponse_1 = ""
+VAR explication_q1 = ""
 
 -> start
 
 === start ===
 
-Castor : Salut, alors t'en as pensé quoi du stream ?
-Laura Musqué : C'était super.
-Laura Musqué : Tu veux voir ton bilan ?
+Castor : Salut, alors t'en as pensé quoi du stream ? # speaker:Castor
+Laura Musqué : C'était super. # speaker:LauraMusque
+Laura Musqué : Tu veux voir ton bilan ? # speaker:LauraMusque
 
 + Oui
     -> bilan
 
 + Non
-    Laura Musqué : Ok, on continue.
+    Laura Musqué : Ok, on continue. # speaker:LauraMusque
     -> END
 
 
 === bilan ===
 
-Laura Musqué : ton score est de {score} / 2
+Laura Musqué : Ton score est de {score} / 1 # speaker:LauraMusque
 
-Laura Musqué : Pour la question une tu as répondu {firstAnswer}
-Laura Musqué : {q1_explanation}
+Laura Musqué : Pour la question "{question_1}" tu as répondu {reponse_1} # speaker:LauraMusque
+Laura Musqué : {explication_q1} # speaker:LauraMusque
 
-Laura Musqué : Pour la question deux tu as répondu {secondAnswer}
-Laura Musqué : {q2_explanation}
-
-{score == 2:
-    Laura Musqué : Parfait.
+{score == 1:
+    Laura Musqué : Incroyable, sans faute ! # speaker:LauraMusque
 - else:
-    Laura Musqué : Pas mal, continue.
-}
+    {score > 1:
 
+        Laura Musqué : Pas mal, mais il reste encore des choses à apprendre. # speaker:LauraMusque
+    }
+}
 -> END
