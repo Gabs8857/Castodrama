@@ -11,25 +11,23 @@ public class DangerZoneTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // DISABLED: Danger system deactivated
-        /*
+
         TopDownDanger danger = collision.GetComponentInParent<TopDownDanger>();
         if (danger != null)
         {
             danger.EnterDangerZone();
         }
-        */
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        // DISABLED: Danger system deactivated
-        /*
+
         TopDownDanger danger = collision.GetComponentInParent<TopDownDanger>();
         if (danger != null)
         {
             danger.ExitDangerZone();
         }
-        */
+
     }
 }

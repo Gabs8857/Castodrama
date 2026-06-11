@@ -55,11 +55,10 @@ public static class TopDownBootstrap
         }
 
         TopDownDanger danger = playerObject.GetComponent<TopDownDanger>();
-        // DISABLED: Danger system completely removed
-        // if (danger == null)
-        // {
-        //     danger = playerObject.AddComponent<TopDownDanger>();
-        // }
+        if (danger == null)
+        {
+            danger = playerObject.AddComponent<TopDownDanger>();
+        }
 
         Rigidbody2D playerRigidbody = playerObject.GetComponent<Rigidbody2D>();
         if (playerRigidbody == null)
@@ -115,17 +114,14 @@ public static class TopDownBootstrap
         cameraObject.transform.rotation = Quaternion.identity;
 
         EnsureDangerZoneIsConfigured();
-        // DISABLED: Danger bar UI completely removed
-        // EnsureDangerBarUiExists();
-
+        EnsureDangerBarUiExists();
     }
 
 #if UNITY_EDITOR
     [InitializeOnLoadMethod]
     private static void InitializeInEditor()
     {
-        // DISABLED: Danger bar in editor completely removed
-        // EditorApplication.delayCall += EnsureDangerBarInEditorHierarchy;
+        EditorApplication.delayCall += EnsureDangerBarInEditorHierarchy;
     }
 
     private static void EnsureDangerBarInEditorHierarchy()
@@ -154,11 +150,15 @@ public static class TopDownBootstrap
             barObject = new GameObject(DangerBarName);
             barObject.transform.SetParent(athRect, false);
             barObject.AddComponent<RectTransform>();
-            barObject.AddComponent<StatusBarUI>();
+            barObject.AddComponent<DangerBarUI>();
+            barObject.AddComponent<HungerBarUI>();
         }
-        else if (barObject.GetComponent<StatusBarUI>() == null)
+        else
         {
-            barObject.AddComponent<StatusBarUI>();
+            if (barObject.GetComponent<DangerBarUI>() == null)
+                barObject.AddComponent<DangerBarUI>();
+            if (barObject.GetComponent<HungerBarUI>() == null)
+                barObject.AddComponent<HungerBarUI>();
         }
     }
 #endif
@@ -223,9 +223,14 @@ public static class TopDownBootstrap
             barRect.sizeDelta = new Vector2(150f, 150f);
         }
 
-        if (barObject.GetComponent<StatusBarUI>() == null)
+        if (barObject.GetComponent<DangerBarUI>() == null)
         {
-            barObject.AddComponent<StatusBarUI>();
+            barObject.AddComponent<DangerBarUI>();
+        }
+
+        if (barObject.GetComponent<HungerBarUI>() == null)
+        {
+            barObject.AddComponent<HungerBarUI>();
         }
     }
 

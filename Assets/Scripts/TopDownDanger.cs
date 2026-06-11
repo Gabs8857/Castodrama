@@ -9,7 +9,7 @@ public class TopDownDanger : MonoBehaviour
     private float currentDanger = 0f;
 
     [SerializeField]
-    private float increasePerSecond = 20f;
+    private float increasePerSecond = 14f;
 
     [SerializeField]
     private float decreasePerSecond = 12f;
@@ -26,8 +26,6 @@ public class TopDownDanger : MonoBehaviour
 
     private void Update()
     {
-        // DISABLED: Danger system deactivated
-        /*
         if (maxDanger <= 0f)
         {
             currentDanger = 0f;
@@ -36,7 +34,6 @@ public class TopDownDanger : MonoBehaviour
 
         float delta = IsInDangerZone ? increasePerSecond : -decreasePerSecond;
         currentDanger = Mathf.Clamp(currentDanger + delta * Time.deltaTime, 0f, maxDanger);
-        */
     }
 
     public void EnterDangerZone()

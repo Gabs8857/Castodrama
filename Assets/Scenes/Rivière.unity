@@ -3164,6 +3164,7 @@ GameObject:
   - component: {fileID: 36948806}
   - component: {fileID: 36948805}
   - component: {fileID: 36948804}
+  - component: {fileID: 36948807}
   m_Layer: 0
   m_Name: ZoneDanger_Sud
   m_TagString: Untagged
@@ -3291,6 +3292,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1312370340}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &36948807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 36948803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dfc05d1ff2056548b7fc8f142fd3531, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DangerZoneTrigger
 --- !u!1 &41252309
 GameObject:
   m_ObjectHideFlags: 0
@@ -11974,6 +11987,7 @@ GameObject:
   - component: {fileID: 159262499}
   - component: {fileID: 159262501}
   - component: {fileID: 159262500}
+  - component: {fileID: 159262503}
   - component: {fileID: 159262502}
   m_Layer: 5
   m_Name: HungerBar
@@ -12041,6 +12055,39 @@ CanvasRenderer:
   m_GameObject: {fileID: 159262498}
   m_CullTransparentMesh: 1
 --- !u!114 &159262502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159262498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26a3793f13c440043870b8bf97078662, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HungerBarUI
+  hungerSystem: {fileID: 0}
+  hungerBarFill: {fileID: 0}
+  hungerBarBackground: {fileID: 0}
+  defaultBackgroundSprite: {fileID: 8631193243204677833, guid: 6716fa244d55c344db4a0abbb6349252, type: 3}
+  followFixedCanvasPoint: 1
+  fixedCanvasPoint: {fileID: 0}
+  useCameraViewportPointWhenFixed: 1
+  fixedViewportPoint: {x: 0.5, y: 0.12}
+  fixedPointOffset: {x: 0, y: 0}
+  followTarget: {fileID: 0}
+  followOffset: {x: 0, y: 0}
+  autoPlaceAroundImage: 1
+  wrapAroundImage: 1
+  matchTargetImageSize: 1
+  usePointOnTargetSprite: 1
+  targetPointNormalized: {x: 0.5, y: 0.5}
+  orbitAngleDegrees: 130
+  imagePaddingPixels: 14
+  ringScaleMultiplier: 1.1
+  minRingDiameterPixels: 200
+  maxRingDiameterPixels: 400
+--- !u!114 &159262503
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54223,6 +54270,7 @@ GameObject:
   - component: {fileID: 579248676}
   - component: {fileID: 579248675}
   - component: {fileID: 579248674}
+  - component: {fileID: 579248677}
   m_Layer: 0
   m_Name: ZoneDanger_Nord
   m_TagString: Untagged
@@ -54350,6 +54398,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1312370340}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &579248677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579248673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dfc05d1ff2056548b7fc8f142fd3531, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DangerZoneTrigger
 --- !u!1 &579868537
 GameObject:
   m_ObjectHideFlags: 0
@@ -70985,6 +71045,101 @@ Transform:
   - {fileID: 1637681576}
   m_Father: {fileID: 928484845}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &782805738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 782805739}
+  - component: {fileID: 782805741}
+  - component: {fileID: 782805743}
+  - component: {fileID: 782805742}
+  m_Layer: 0
+  m_Name: DangerBar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &782805739
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782805738}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1890992478}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &782805741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782805738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6b6c11db711ca1499418d2309933845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DangerBarUI
+  dangerSystem: {fileID: 0}
+  dangerBarFill: {fileID: 0}
+  dangerBarBackground: {fileID: 782805742}
+  fixedOnScreen: 1
+  anchor: {x: 3.99, y: 4.68}
+  anchoredPosition: {x: 132, y: 124}
+  barSize: {x: 96, y: 96}
+--- !u!114 &782805742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782805738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -5643269261783169685, guid: 6058e0db5899bef43911b28718ca1e72, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &782805743
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782805738}
+  m_CullTransparentMesh: 1
 --- !u!1 &790356369
 GameObject:
   m_ObjectHideFlags: 0
@@ -265338,12 +265493,13 @@ RectTransform:
   m_Children:
   - {fileID: 159262499}
   - {fileID: 1402337849}
+  - {fileID: 782805739}
   m_Father: {fileID: 509976790}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 400, y: 1063.269}
-  m_SizeDelta: {x: 1920, y: 5103.6904}
+  m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1891170841
 GameObject:
