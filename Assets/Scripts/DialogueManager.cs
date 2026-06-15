@@ -58,14 +58,39 @@ public class DialogueManager : MonoBehaviour
         GameState.Set(GameMode.Dialogue);
         story = new Story(inkJSON.text);
 
-        // Injection avec toutes les variables question
-        story.variablesState["score"]          = GameState.quizScore;
-        story.variablesState["question_1"]     = GameState.question_1;
-        story.variablesState["reponse_1"]      = GameState.reponse_1;
-        story.variablesState["explication_q1"] = GameState.explication_q1;
+        // Injection variables génériques
+        InjectVar("score",          GameState.quizScore);
+        InjectVar("question_1",     GameState.question_1);
+        InjectVar("reponse_1",      GameState.reponse_1);
+        InjectVar("explication_q1", GameState.explication_q1);
+        InjectVar("question_2",     GameState.question_2);
+        InjectVar("reponse_2",      GameState.reponse_2);
+        InjectVar("explication_q2", GameState.explication_q2);
+        InjectVar("question_3",     GameState.question_3);
+        InjectVar("reponse_3",      GameState.reponse_3);
+        InjectVar("explication_q3", GameState.explication_q3);
+        InjectVar("question_4",     GameState.question_4);
+        InjectVar("reponse_4",      GameState.reponse_4);
+        InjectVar("explication_q4", GameState.explication_q4);
+        InjectVar("question_5",     GameState.question_5);
+        InjectVar("reponse_5",      GameState.reponse_5);
+        InjectVar("explication_q5", GameState.explication_q5);
+        InjectVar("question_6",     GameState.question_6);
+        InjectVar("reponse_6",      GameState.reponse_6);
+        InjectVar("explication_q6", GameState.explication_q6);
+
+        // Jour 3 : injecter les signatures totales
+        InjectVar("signatures_total", GameState.signatures);
 
         dialoguePanel.SetActive(true);
         LoadNextLines();
+    }
+
+    // Injection sécurisée — ignore si la variable n'existe pas dans ce ink
+    void InjectVar(string varName, object value)
+    {
+        try { story.variablesState[varName] = value; }
+        catch { /* variable absente du ink, on ignore */ }
     }
 
     void LoadNextLines()

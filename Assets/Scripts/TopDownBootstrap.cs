@@ -11,21 +11,21 @@ public static class TopDownBootstrap
     private const string GroundName = "Ground";
     private const string DangerZoneName = "ZoneDanger";
     private const string DangerBarName = "DangerBar";
+    private const string HungerBarName = "HungerBar";
     private static readonly Color PlayerBrown = new Color(0.45f, 0.25f, 0.1f, 1f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
     {
-        // S'abonne pour que le setup s'exécute à chaque nouveau chargement de scène
         SceneManager.sceneLoaded += (scene, mode) => PerformSetup();
-        
-        // Exécute le setup immédiatement pour la scène actuelle (le menu au démarrage)
         PerformSetup();
     }
 
     private static void PerformSetup()
     {
         Debug.Log($"[TopDownBootstrap] Configuration de la scène : {SceneManager.GetActiveScene().name}");
+
+        // --- Joueur ---
         GameObject playerObject = GameObject.Find(PlayerName);
         if (playerObject == null)
         {
@@ -43,34 +43,22 @@ public static class TopDownBootstrap
             playerObject.AddComponent<TopDownPlayerController>();
         }
 
-        // Castor a déjà son SpriteRenderer et Sprite Library
-        SpriteRenderer spriteRenderer = playerObject.GetComponent<SpriteRenderer>();
-        // Si Castor n'a pas de SpriteRenderer (qui ne devrait pas arriver), ne pas en créer un
-        // car Castor a déjà le bon avec Sprite Library
+        if (playerObject.GetComponent<TopDownHunger>() == null)
+            playerObject.AddComponent<TopDownHunger>();
 
-        TopDownHunger hunger = playerObject.GetComponent<TopDownHunger>();
-        if (hunger == null)
-        {
-            hunger = playerObject.AddComponent<TopDownHunger>();
-        }
-
-        TopDownDanger danger = playerObject.GetComponent<TopDownDanger>();
-        if (danger == null)
-        {
-            danger = playerObject.AddComponent<TopDownDanger>();
-        }
+        if (playerObject.GetComponent<TopDownDanger>() == null)
+            playerObject.AddComponent<TopDownDanger>();
 
         Rigidbody2D playerRigidbody = playerObject.GetComponent<Rigidbody2D>();
         if (playerRigidbody == null)
-        {
             playerRigidbody = playerObject.AddComponent<Rigidbody2D>();
-        }
 
         playerRigidbody.bodyType = RigidbodyType2D.Dynamic;
         playerRigidbody.gravityScale = 0f;
         playerRigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
         playerRigidbody.simulated = true;
 
+        // --- Sol ---
         GameObject groundObject = GameObject.Find(GroundName);
         if (groundObject == null)
         {
@@ -83,6 +71,7 @@ public static class TopDownBootstrap
             groundRenderer.sortingOrder = 0;
         }
 
+        // --- Caméra ---
         Camera camera = Camera.main;
         GameObject cameraObject = camera != null ? camera.gameObject : null;
         if (cameraObject == null)
@@ -103,9 +92,7 @@ public static class TopDownBootstrap
 
         TopDownCameraFollow follow = cameraObject.GetComponent<TopDownCameraFollow>();
         if (follow == null)
-        {
             follow = cameraObject.AddComponent<TopDownCameraFollow>();
-        }
 
         follow.Target = playerObject.transform;
         follow.Offset = new Vector3(0f, 0f, -10f);
@@ -114,79 +101,78 @@ public static class TopDownBootstrap
         cameraObject.transform.rotation = Quaternion.identity;
 
         EnsureDangerZoneIsConfigured();
-        EnsureDangerBarUiExists();
+        EnsureHudUiExists();
     }
 
 #if UNITY_EDITOR
     [InitializeOnLoadMethod]
     private static void InitializeInEditor()
     {
-        EditorApplication.delayCall += EnsureDangerBarInEditorHierarchy;
+        EditorApplication.delayCall += EnsureHudInEditorHierarchy;
     }
 
-    private static void EnsureDangerBarInEditorHierarchy()
+    private static void EnsureHudInEditorHierarchy()
     {
-        if (Application.isPlaying)
-        {
-            return;
-        }
+        if (Application.isPlaying) return;
 
         GameObject athObject = GameObject.Find("ATH");
-        if (athObject == null)
-        {
-            return;
-        }
+        if (athObject == null) return;
 
         RectTransform athRect = athObject.GetComponent<RectTransform>();
-        if (athRect == null)
-        {
-            return;
-        }
+        if (athRect == null) return;
 
-        Transform existing = athRect.Find(DangerBarName);
-        GameObject barObject = existing != null ? existing.gameObject : null;
-        if (barObject == null)
+        // --- DangerBar ---
+        Transform existingDanger = athRect.Find(DangerBarName);
+        GameObject dangerBarObject = existingDanger != null ? existingDanger.gameObject : null;
+        if (dangerBarObject == null)
         {
-            barObject = new GameObject(DangerBarName);
-            barObject.transform.SetParent(athRect, false);
-            barObject.AddComponent<RectTransform>();
-            barObject.AddComponent<DangerBarUI>();
-            barObject.AddComponent<HungerBarUI>();
+            dangerBarObject = new GameObject(DangerBarName);
+            dangerBarObject.transform.SetParent(athRect, false);
+            dangerBarObject.AddComponent<RectTransform>();
         }
-        else
+        if (dangerBarObject.GetComponent<DangerBarUI>() == null)
+            dangerBarObject.AddComponent<DangerBarUI>();
+        // Sécurité : retirer HungerBarUI s'il traîne ici par erreur
+        HungerBarUI wrongHunger = dangerBarObject.GetComponent<HungerBarUI>();
+        if (wrongHunger != null)
+            Object.DestroyImmediate(wrongHunger);
+
+        // --- HungerBar (objet séparé) ---
+        Transform existingHunger = athRect.Find(HungerBarName);
+        GameObject hungerBarObject = existingHunger != null ? existingHunger.gameObject : null;
+        if (hungerBarObject == null)
         {
-            if (barObject.GetComponent<DangerBarUI>() == null)
-                barObject.AddComponent<DangerBarUI>();
-            if (barObject.GetComponent<HungerBarUI>() == null)
-                barObject.AddComponent<HungerBarUI>();
+            hungerBarObject = new GameObject(HungerBarName);
+            hungerBarObject.transform.SetParent(athRect, false);
+            hungerBarObject.AddComponent<RectTransform>();
         }
+        if (hungerBarObject.GetComponent<HungerBarUI>() == null)
+            hungerBarObject.AddComponent<HungerBarUI>();
+        // Sécurité : retirer DangerBarUI s'il traîne ici par erreur
+        DangerBarUI wrongDanger = hungerBarObject.GetComponent<DangerBarUI>();
+        if (wrongDanger != null)
+            Object.DestroyImmediate(wrongDanger);
     }
 #endif
 
     private static void EnsureDangerZoneIsConfigured()
     {
         GameObject zoneObject = GameObject.Find(DangerZoneName);
-        if (zoneObject == null)
-        {
-            return;
-        }
+        if (zoneObject == null) return;
 
         Collider2D zoneCollider = zoneObject.GetComponent<Collider2D>();
         if (zoneCollider == null)
-        {
             zoneCollider = zoneObject.AddComponent<BoxCollider2D>();
-        }
 
         zoneCollider.isTrigger = true;
 
         if (zoneObject.GetComponent<DangerZoneTrigger>() == null)
-        {
             zoneObject.AddComponent<DangerZoneTrigger>();
-        }
     }
 
-    private static void EnsureDangerBarUiExists()
+    private static void EnsureHudUiExists()
     {
+        // Trouve ou crée le Canvas
         Canvas canvas = Object.FindObjectOfType<Canvas>();
         if (canvas == null)
         {
@@ -197,41 +183,47 @@ public static class TopDownBootstrap
             canvasObject.AddComponent<GraphicRaycaster>();
         }
 
-        Transform parentForDangerBar = canvas.transform;
+        // Préfère ATH comme parent si disponible
+        Transform parentForBars = canvas.transform;
         GameObject athObject = GameObject.Find("ATH");
         if (athObject != null)
         {
             RectTransform athRect = athObject.GetComponent<RectTransform>();
-            if (athRect != null)
-            {
-                Canvas athCanvas = athObject.GetComponentInParent<Canvas>();
-                if (athCanvas != null)
-                {
-                    parentForDangerBar = athRect;
-                }
-            }
+            if (athRect != null && athObject.GetComponentInParent<Canvas>() != null)
+                parentForBars = athRect;
         }
 
-        Transform existing = parentForDangerBar.Find(DangerBarName);
-        GameObject barObject = existing != null ? existing.gameObject : null;
-        if (barObject == null)
+        // --- DangerBar ---
+        Transform existingDanger = parentForBars.Find(DangerBarName);
+        GameObject dangerBarObject = existingDanger != null ? existingDanger.gameObject : null;
+        if (dangerBarObject == null)
         {
-            barObject = new GameObject(DangerBarName);
-            barObject.transform.SetParent(parentForDangerBar, false);
-            RectTransform barRect = barObject.AddComponent<RectTransform>();
-            // Set initial size so the bar is visible
-            barRect.sizeDelta = new Vector2(150f, 150f);
+            dangerBarObject = new GameObject(DangerBarName);
+            dangerBarObject.transform.SetParent(parentForBars, false);
+            dangerBarObject.AddComponent<RectTransform>().sizeDelta = new Vector2(150f, 150f);
         }
+        if (dangerBarObject.GetComponent<DangerBarUI>() == null)
+            dangerBarObject.AddComponent<DangerBarUI>();
+        // Sécurité : retirer HungerBarUI s'il traîne ici par erreur
+        HungerBarUI wrongHunger = dangerBarObject.GetComponent<HungerBarUI>();
+        if (wrongHunger != null)
+            Object.Destroy(wrongHunger);
 
-        if (barObject.GetComponent<DangerBarUI>() == null)
+        // --- HungerBar (objet séparé) ---
+        Transform existingHunger = parentForBars.Find(HungerBarName);
+        GameObject hungerBarObject = existingHunger != null ? existingHunger.gameObject : null;
+        if (hungerBarObject == null)
         {
-            barObject.AddComponent<DangerBarUI>();
+            hungerBarObject = new GameObject(HungerBarName);
+            hungerBarObject.transform.SetParent(parentForBars, false);
+            hungerBarObject.AddComponent<RectTransform>().sizeDelta = new Vector2(150f, 150f);
         }
-
-        if (barObject.GetComponent<HungerBarUI>() == null)
-        {
-            barObject.AddComponent<HungerBarUI>();
-        }
+        if (hungerBarObject.GetComponent<HungerBarUI>() == null)
+            hungerBarObject.AddComponent<HungerBarUI>();
+        // Sécurité : retirer DangerBarUI s'il traîne ici par erreur
+        DangerBarUI wrongDanger = hungerBarObject.GetComponent<DangerBarUI>();
+        if (wrongDanger != null)
+            Object.Destroy(wrongDanger);
     }
 
     private static Sprite CreateWhiteSprite()

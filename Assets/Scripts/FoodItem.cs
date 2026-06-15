@@ -196,6 +196,20 @@ public class FoodItem : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Consomme entièrement cet aliment d'un coup : restaure la faim et fait disparaître l'objet.
+    /// Utilisé par exemple lors de la téléportation automatique en cas de famine.
+    /// </summary>
+    public void ConsumeAndRemove(TopDownHunger hungerSystem)
+    {
+        if (hungerSystem != null)
+        {
+            hungerSystem.AddHunger(hungerRestoreAmount);
+        }
+
+        Destroy(gameObject);
+    }
+
     private static Sprite GetDefaultVisualSprite()
     {
         if (defaultVisualSprite != null)

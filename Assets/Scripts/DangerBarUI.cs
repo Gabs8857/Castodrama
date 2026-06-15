@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Gestionnaire de la barre de danger UI.
+/// Le cercle reste toujours visible à 100% et se teinte progressivement
+/// du jaune vers le rouge selon le niveau de danger.
 /// </summary>
 public class DangerBarUI : MonoBehaviour
 {
@@ -10,45 +12,33 @@ public class DangerBarUI : MonoBehaviour
     [SerializeField] private Image dangerBarFill;
     [SerializeField] private Image dangerBarBackground;
 
-    [Header("Positioning")]
-    [SerializeField] private bool fixedOnScreen = true;
-    [SerializeField] private Vector2 anchor = new Vector2(0f, 0f);
-    [SerializeField] private Vector2 anchoredPosition = new Vector2(132f, 124f);
-    [SerializeField] private Vector2 barSize = new Vector2(96f, 96f);
-
-    private RectTransform rectTransform;
+    [Header("Couleurs")]
+    [SerializeField] private Color lowDangerColor = Color.yellow;
+    [SerializeField] private Color highDangerColor = Color.red;
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
-        
-        // Tente de trouver l'image si elle n'est pas assignée
         if (dangerBarFill == null)
             dangerBarFill = GetComponentInChildren<Image>();
 
-        if (dangerBarFill != null) 
+        if (dangerBarFill != null)
         {
             Debug.Log($"[DangerBarUI] Image liée sur : {dangerBarFill.gameObject.name}");
-            // Force le mode 'Filled' pour que la barre puisse se remplir
             if (dangerBarFill.type != Image.Type.Filled)
             {
                 Debug.LogWarning("[DangerBarUI] L'image n'était pas en mode 'Filled'. Correction appliquée.");
                 dangerBarFill.type = Image.Type.Filled;
                 dangerBarFill.fillMethod = Image.FillMethod.Radial360;
             }
+
+            // Le cercle est toujours plein, seule la couleur change
+            dangerBarFill.fillAmount = 1f;
         }
         else
         {
             Debug.LogError("[DangerBarUI] Image de remplissage manquante ! La barre ne s'affichera pas.");
         }
-        
-        if (rectTransform != null && fixedOnScreen)
-        {
-            rectTransform.anchorMin = anchor;
-            rectTransform.anchorMax = anchor;
-            rectTransform.anchoredPosition = anchoredPosition;
-            rectTransform.sizeDelta = barSize;
-        }
+        // Le positionnement est géré directement dans l'Inspector.
     }
 
     private void Start()
@@ -56,7 +46,7 @@ public class DangerBarUI : MonoBehaviour
         if (dangerSystem == null)
         {
             GameObject player = GameObject.Find("Castor") ?? GameObject.Find("Player");
-            if (player != null) 
+            if (player != null)
             {
                 dangerSystem = player.GetComponent<TopDownDanger>();
                 if (dangerSystem != null) Debug.Log("[DangerBarUI] ✓ Système TopDownDanger lié avec succès.");
@@ -64,43 +54,33 @@ public class DangerBarUI : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[DangerBarUI] ✗ Objet 'Castor' ou 'Player' introuvable dans la scène pour lier le danger.");
+                Debug.LogError("[DangerBarUI] ✗ Objet 'Castor' ou 'Player' introuvable dans la scène.");
             }
         }
     }
 
     private void Update()
     {
-        bool shouldBeVisible = !GameState.IsBlockingUI();
-        
-        if (dangerBarFill != null && dangerBarFill.enabled != shouldBeVisible) 
-            dangerBarFill.enabled = shouldBeVisible;
+        if (dangerBarFill != null && !dangerBarFill.enabled)
+            dangerBarFill.enabled = true;
 
-        if (dangerBarBackground != null) dangerBarBackground.enabled = shouldBeVisible;
-
-        if (!shouldBeVisible) return;
+        if (dangerBarBackground != null && !dangerBarBackground.enabled)
+            dangerBarBackground.enabled = true;
 
         if (dangerSystem != null && dangerBarFill != null)
         {
             bool inZone = dangerSystem.IsInDangerZone;
             float normalized = dangerSystem.NormalizedDanger;
-            
-            // Mise à jour visuelle
-            dangerBarFill.fillAmount = normalized;
-            dangerBarFill.color = Color.Lerp(Color.yellow, Color.red, normalized);
-            
-            // Debug toutes les 100 frames pour vérifier que la valeur bouge bien
+
+            // Toujours plein, seule la teinte évolue vers le rouge
+            dangerBarFill.fillAmount = 1f;
+            dangerBarFill.color = Color.Lerp(lowDangerColor, highDangerColor, normalized);
+
             if (Time.frameCount % 100 == 0 && normalized > 0.001f)
-                Debug.Log($"[DangerBarUI] Valeur Danger: {normalized * 100:F1}% | FillAmount: {dangerBarFill.fillAmount}");
-            
-            // Log forcé si le danger est actif pour confirmer le fonctionnement
-            if (normalized > 0.01f)
-            {
-                if (Time.frameCount % 30 == 0) // Log toutes les 30 frames pour ne pas flood
-                {
-                    Debug.Log($"[DangerBarUI] État: {(inZone ? "DANGER" : "REPOS")} | Valeur: {normalized*100:F1}% | Fill: {dangerBarFill.fillAmount}");
-                }
-            }
+                Debug.Log($"[DangerBarUI] Valeur Danger: {normalized * 100:F1}%");
+
+            if (normalized > 0.01f && Time.frameCount % 30 == 0)
+                Debug.Log($"[DangerBarUI] État: {(inZone ? "DANGER" : "REPOS")} | Valeur: {normalized * 100:F1}%");
         }
         else if (Time.frameCount % 200 == 0)
         {

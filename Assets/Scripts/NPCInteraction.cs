@@ -6,44 +6,57 @@ public class NPCInteraction : MonoBehaviour
 {
     public DialogueManager dialogueManager;
 
-    public TextAsset[] npcDialogues;
+    [Header("Dialogues par jour")]
+    public TextAsset dialogueJour1;
+    public TextAsset dialogueJour2;
+    public TextAsset dialogueJour3;
 
     [Header("Crédits")]
-    public string creditsSceneName = "Credits"; // nom exact de ta scène crédits
+    public string creditsSceneName = "Credits";
 
     private bool playerNearby = false;
-    private int dialogueIndex = 0;
     private bool isTalking = false;
+    private TextAsset currentDialogue;
+
+    void Start()
+    {
+        // Charger le bon dialogue selon le jour actuel au démarrage
+        SetDayDialogue(GameState.currentDay);
+    }
+
+    public void SetDayDialogue(int day)
+    {
+        switch (day)
+        {
+            case 1: currentDialogue = dialogueJour1; break;
+            case 2: currentDialogue = dialogueJour2; break;
+            case 3: currentDialogue = dialogueJour3; break;
+            default: currentDialogue = dialogueJour1; break;
+        }
+        Debug.Log("[NPC] Dialogue chargé pour le jour " + day);
+    }
 
     void Update()
     {
         if (playerNearby &&
             Keyboard.current.eKey.wasPressedThisFrame &&
-            !isTalking)
+            !isTalking &&
+            currentDialogue != null)
         {
-            if (dialogueIndex < npcDialogues.Length)
-            {
-                Debug.Log("Dialogue index = " + dialogueIndex);
-                isTalking = true;
-                dialogueManager.StartDialogue(npcDialogues[dialogueIndex]);
+            isTalking = true;
+            dialogueManager.StartDialogue(currentDialogue);
 
-                if (dialogueManager.dialogueBlocked)
-                    isTalking = false;
-            }
+            if (dialogueManager.dialogueBlocked)
+                isTalking = false;
         }
 
-        // Détecte fin dialogue
         if (isTalking && dialogueManager.dialogueFinished)
         {
-            dialogueIndex++;
             isTalking = false;
 
-            // Si tous les dialogues sont terminés → scène crédits
-            if (dialogueIndex >= npcDialogues.Length)
-            {
-                Debug.Log("[NPCInteraction] Fin du dernier dialogue → Crédits");
-                SceneManager.LoadScene(creditsSceneName);
-            }
+            // Notifier le DayManager que le bilan est fait
+            DayManager dm = FindObjectOfType<DayManager>();
+            if (dm != null) dm.OnBilanDone();
         }
     }
 
