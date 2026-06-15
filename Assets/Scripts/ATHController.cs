@@ -38,6 +38,8 @@ public class ATHController : MonoBehaviour
         isAnimationPlaying = true;
         animator.enabled = true;
         animator.SetTrigger("Play");
+        
+        Debug.Log("[ATHController] Animation 'Play' déclenchée.");
     }
 
     /// <summary>
@@ -56,6 +58,8 @@ public class ATHController : MonoBehaviour
         {
             spriteRenderer.enabled = true;
         }
+        
+        Debug.Log("[ATHController] Animation arrêtée, retour au mode statique.");
     }
 
     /// <summary>

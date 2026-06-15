@@ -21,6 +21,8 @@ public class ControlsHUDUI : MonoBehaviour
 
         // Configure le texte
         SetupControlsText();
+        
+        Debug.Log("[ControlsHUDUI] ✓ HUD des contrôles initialisé.");
     }
 
     private void SetupControlsText()
@@ -35,5 +37,7 @@ public class ControlsHUDUI : MonoBehaviour
         controlsText.text = controlsInfo;
         controlsText.fontSize = 36;
         controlsText.alignment = TextAlignmentOptions.Top;
+        
+        Debug.Log("[ControlsHUDUI] Texte des contrôles mis à jour dans l'UI.");
     }
 }

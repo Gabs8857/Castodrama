@@ -15,6 +15,7 @@ public class DayManager : MonoBehaviour
     public StreamQuestionUI streamQuestionUI;
     public NPCInteraction npcInteraction;
     public DayAndNightCycle dayNightCycle;
+    public GrassSpawner grassSpawner; // Référence au GrassSpawner
 
     [Header("Scènes")]
     public string creditsSceneName = "Credits";
@@ -35,7 +36,6 @@ public class DayManager : MonoBehaviour
     {
         Debug.Log("[DayManager] Jour " + GameState.currentDay + " terminé → TP hutte");
 
-        // Couper le quiz en cours
         if (streamQuestionUI != null)
             streamQuestionUI.ForceFinish();
 
@@ -43,11 +43,9 @@ public class DayManager : MonoBehaviour
         GameState.isInHut = true;
         GameState.hasSeenBilan = false;
 
-        // Reset du timer — il est en pause interne, ne repartira que via ResumeTimer()
         DayAndNightCycle cycle = GetCycle();
         if (cycle != null) cycle.ResetCycle();
 
-        // TP hutte
         if (player != null && hutSpawnPoint != null)
             player.transform.position = hutSpawnPoint.position;
 
@@ -82,11 +80,19 @@ public class DayManager : MonoBehaviour
 
         Debug.Log("[DayManager] → Jour " + GameState.currentDay + " commence !");
 
-        // TP monde
         if (player != null && worldSpawnPoint != null)
             player.transform.position = worldSpawnPoint.position;
 
-        // Relancer le timer maintenant que tout est prêt
+        // Faire repousser les herbes via le GameState (plus fiable)
+        if (GameState.grassSpawner != null)
+        {
+            GameState.grassSpawner.RespawnAll();
+        }
+        else
+        {
+            Debug.LogError("[DayManager] GameState.grassSpawner est NULL ! Vérifie que l'objet GrassSpawner est bien dans la scène et actif.");
+        }
+
         DayAndNightCycle cycle = GetCycle();
         if (cycle != null) cycle.ResumeTimer();
 

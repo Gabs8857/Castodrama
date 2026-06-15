@@ -9,6 +9,7 @@ public static class GameState
     public static ChatManager chatManager;
     public static StatsUIManager statsUIManager;
     public static DayManager dayManager;
+    public static GrassSpawner grassSpawner;
 
     // =====================
     // JOUR ACTUEL

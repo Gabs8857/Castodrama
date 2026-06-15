@@ -45,7 +45,10 @@ public class FoodItem : MonoBehaviour
 
     protected bool isPlayerNearby = false;
     protected Collider2D currentPlayerCollider;
-    protected int eatCount = 0; // Tracks how many times this item has been eaten (0, 1, or 2)
+    protected int eatCount = 0;
+
+    // Sprite d'origine mémorisé pour le reset
+    private Sprite originalSprite;
 
     protected virtual void Awake()
     {
@@ -53,11 +56,17 @@ public class FoodItem : MonoBehaviour
         SetupPhysics();
     }
 
+    protected virtual void Start()
+    {
+        // Mémorise le sprite d'origine après SetupVisuals
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null) originalSprite = sr.sprite;
+    }
+
     protected virtual void SetupVisuals()
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         
-        // Use provided sprite, or create a default brown circular icon
         Sprite spriteToDisplay = foodSprite ?? GetDefaultVisualSprite();
         
         spriteRenderer.sprite = spriteToDisplay;
@@ -75,35 +84,22 @@ public class FoodItem : MonoBehaviour
         {
             Material material = GetUnlitSpriteMaterial();
             if (material != null)
-            {
                 spriteRenderer.sharedMaterial = material;
-            }
         }
         
-        // Ensure visibility (high sorting order)
         if (spriteRenderer.sortingOrder < MinVisibleSortingOrder)
-        {
             spriteRenderer.sortingOrder = MinVisibleSortingOrder;
-        }
 
         if (addGlowLight)
-        {
             EnsureGlowLight();
-        }
     }
 
     private void EnsureMinimumWorldDiameter(SpriteRenderer spriteRenderer)
     {
-        if (spriteRenderer == null || spriteRenderer.sprite == null)
-        {
-            return;
-        }
+        if (spriteRenderer == null || spriteRenderer.sprite == null) return;
 
         float currentDiameter = Mathf.Max(spriteRenderer.bounds.size.x, spriteRenderer.bounds.size.y);
-        if (currentDiameter >= minVisibleWorldDiameter)
-        {
-            return;
-        }
+        if (currentDiameter >= minVisibleWorldDiameter) return;
 
         float factor = minVisibleWorldDiameter / Mathf.Max(0.0001f, currentDiameter);
         transform.localScale = new Vector3(transform.localScale.x * factor, transform.localScale.y * factor, 1f);
@@ -113,9 +109,7 @@ public class FoodItem : MonoBehaviour
     {
         Light2D light2D = GetComponent<Light2D>();
         if (light2D == null)
-        {
             light2D = gameObject.AddComponent<Light2D>();
-        }
 
         light2D.lightType = Light2D.LightType.Point;
         light2D.color = new Color(1f, 0.72f, 0.32f, 1f);
@@ -127,11 +121,9 @@ public class FoodItem : MonoBehaviour
 
     protected virtual void SetupPhysics()
     {
-        // Configure collider as trigger
         Collider2D collider = GetComponent<Collider2D>();
         collider.isTrigger = true;
 
-        // Configure rigidbody for trigger interactions
         Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
         rigidbody.bodyType = RigidbodyType2D.Kinematic;
         rigidbody.gravityScale = 0f;
@@ -141,17 +133,12 @@ public class FoodItem : MonoBehaviour
 
     private void Update()
     {
-        // Check if player presses F while nearby
         if (isPlayerNearby && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            // Try to feed the player
             TryFeedPlayer(currentPlayerCollider);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Check if this is the player
         if (collision.GetComponentInParent<TopDownHunger>() != null)
         {
             isPlayerNearby = true;
@@ -161,7 +148,6 @@ public class FoodItem : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        // Check if player is leaving
         if (collision.GetComponentInParent<TopDownHunger>() != null)
         {
             isPlayerNearby = false;
@@ -171,16 +157,13 @@ public class FoodItem : MonoBehaviour
 
     protected virtual void TryFeedPlayer(Collider2D collision)
     {
-        // Feed the player using TopDownHunger system
         TopDownHunger hungerSystem = collision.GetComponentInParent<TopDownHunger>();
         if (hungerSystem != null)
         {
             hungerSystem.AddHunger(hungerRestoreAmount);
             
-            // Handle progression: frame 2 -> frame 3 -> disappear
             if (eatCount < 2)
             {
-                // Change sprite to next progression stage
                 if (eatProgressionSprites[eatCount] != null)
                 {
                     SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
@@ -190,34 +173,43 @@ public class FoodItem : MonoBehaviour
             }
             else
             {
-                // Third interaction - destroy the object
-                Destroy(gameObject);
+                // Désactive au lieu de détruire → permet la repousse au jour suivant
+                gameObject.SetActive(false);
             }
         }
     }
 
     /// <summary>
-    /// Consomme entièrement cet aliment d'un coup : restaure la faim et fait disparaître l'objet.
-    /// Utilisé par exemple lors de la téléportation automatique en cas de famine.
+    /// Consomme entièrement cet aliment d'un coup et le désactive.
+    /// Utilisé lors de la téléportation automatique en cas de famine.
     /// </summary>
     public void ConsumeAndRemove(TopDownHunger hungerSystem)
     {
         if (hungerSystem != null)
-        {
             hungerSystem.AddHunger(hungerRestoreAmount);
-        }
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Remet l'herbe dans son état initial (sprite d'origine, compteur à zéro).
+    /// Appelé par GrassSpawner au début de chaque nouveau jour.
+    /// </summary>
+    public virtual void ResetState()
+    {
+        eatCount = 0;
+        isPlayerNearby = false;
+        currentPlayerCollider = null;
+
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null && originalSprite != null)
+            sr.sprite = originalSprite;
     }
 
     private static Sprite GetDefaultVisualSprite()
     {
-        if (defaultVisualSprite != null)
-        {
-            return defaultVisualSprite;
-        }
+        if (defaultVisualSprite != null) return defaultVisualSprite;
 
-        // Create a visible 32x32 brown circle as placeholder (beaver-themed)
         Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
         Color[] pixels = new Color[32 * 32];
 
@@ -236,56 +228,27 @@ public class FoodItem : MonoBehaviour
                 float dist = Mathf.Sqrt(dx * dx + dy * dy);
                 int index = y * 32 + x;
 
-                if (dist <= innerRadius)
-                {
-                    pixels[index] = innerBrown;
-                }
-                else if (dist <= radius)
-                {
-                    pixels[index] = outerBrown;
-                }
-                else
-                {
-                    pixels[index] = new Color(0f, 0f, 0f, 0f);
-                }
+                if (dist <= innerRadius) pixels[index] = innerBrown;
+                else if (dist <= radius) pixels[index] = outerBrown;
+                else pixels[index] = new Color(0f, 0f, 0f, 0f);
             }
         }
 
         texture.SetPixels(pixels);
         texture.Apply();
 
-        defaultVisualSprite = Sprite.Create(
-            texture,
-            new Rect(0f, 0f, 32f, 32f),
-            new Vector2(0.5f, 0.5f),
-            32f
-        );
-
+        defaultVisualSprite = Sprite.Create(texture, new Rect(0f, 0f, 32f, 32f), new Vector2(0.5f, 0.5f), 32f);
         return defaultVisualSprite;
     }
 
     private static Material GetUnlitSpriteMaterial()
     {
-        if (unlitSpriteMaterial != null)
-        {
-            return unlitSpriteMaterial;
-        }
+        if (unlitSpriteMaterial != null) return unlitSpriteMaterial;
 
         Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
-        if (unlitShader == null)
-        {
-            unlitShader = Shader.Find("Sprites/Default");
-        }
-
-        if (unlitShader == null)
-        {
-            unlitShader = Shader.Find("Unlit/Transparent");
-        }
-
-        if (unlitShader == null)
-        {
-            return null;
-        }
+        if (unlitShader == null) unlitShader = Shader.Find("Sprites/Default");
+        if (unlitShader == null) unlitShader = Shader.Find("Unlit/Transparent");
+        if (unlitShader == null) return null;
 
         unlitSpriteMaterial = new Material(unlitShader);
         return unlitSpriteMaterial;

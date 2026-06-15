@@ -12,7 +12,7 @@ Jeu 2D coopératif en Unity 6 LTS.
 
 - **C** : **Casser** ou manger les arbres (Peuplier, Bouleau, Saule).
 - **F** : Manger les items de nourriture (**Food**) classiques.
-- **G** : Ramasser ou déposer les branches (**Grab**).
+- **G** : Ramasser ou déposer les branches (**Grab**) — ramasse aussi de la **boue** en nage profonde.
 - **E** : Interaction contextuelle (Parler aux PNJs, plonger en Nage Profonde).
 - **Echap** : Ouvrir/Fermer le menu pause.
 - **WASD / ZQSD** : Se déplacer.
@@ -52,11 +52,16 @@ HUB CENTRAL: TopDownPlayerController
 ### 🎒 Inventaire
 - **EquippableItem** : Items interactifs (ramassage/dépôt)
 - **FoodItem** : Items alimentaires qui restaurent la faim
-- **BranchRepairItem** : Branches spécifiques (Peuplier/Bouleau) pour la réparation
+- **BranchRepairItem** : Branches spécifiques (Peuplier/Bouleau) pour la réparation du barrage
 
 ### 🏗️ Réparation du Barrage
-- **DamManager** : Gère l'intégrité du barrage et les points de rupture
+- **DamManager** : Gère l'intégrité du barrage et les points de rupture. Accepte deux types de réparation : branches et boue.
 - **TreeFallManager** : Gère le spawn automatique des branches de réparation lors des dégâts
+- **CrackBarUI** : Barre circulaire bleue affichant le nombre de fissures actives en temps réel
+
+### 🟤 Système de Boue
+- **MudSystem** : Permet au joueur de ramasser une boue en nage profonde (touche **G**). Max 1 boue à la fois.
+- **MudUI** : Affiche l'icône de boue dans le HUD quand le joueur en possède une.
 
 ### 🗺️ Zones & Environnement
 - **ZoneDetectionManager** : Suivi centralisé des zones
@@ -73,10 +78,10 @@ HUB CENTRAL: TopDownPlayerController
 ### 🌐 UI & Autres
 - **StatusBarUI** : Gestionnaire unifié (Faim circulaire avec positionnement orbital, Danger désactivé)
 - **AdaptiveHUDWidth** : Adaptation HUD au ratio d'écran
-- **ControlsHUDUI** : Affichage dynamique des raccourcis clavier en haut de l'écran.
-- **PauseMenu** : Gère la mise en pause globale (bloqué durant les dialogues ou questions).
+- **ControlsHUDUI** : Affichage dynamique des raccourcis clavier en haut de l'écran
+- **PauseMenu** : Gère la mise en pause globale (bloqué durant les dialogues ou questions)
 - **ATHController** : Animations du décor
-- **ContacteWebPage** : Système de contact web (voir section "Système de Contact Web")
+- **ContacteWebPage** : Système de contact web
 - **TopDownBootstrap** : Initialisation de scène
 
 ## 🎬 Système d'Animation (CharacterAnimator)
@@ -105,7 +110,7 @@ Sinon → version standard
 
 ```
 Assets/
-├─ Scripts/           (31 scripts, structure plate)
+├─ Scripts/           (structure plate)
 ├─ Scenes/
 ├─ Resources/
 ├─ Ink/              (Fichiers Ink pour dialogues)
@@ -137,14 +142,29 @@ Le système de nage profonde permet au joueur de :
 
 ## 🪵 Système de Réparation du Barrage
 
-Le maintien du barrage est vital et utilise une logique de ressources distincte :
-1. **Différenciation** : Les branches de réparation ne sont PAS de la nourriture (`FoodItem`).
-2. **Types de bois** : Supporte le Peuplier (*Poplar*) et le Bouleau (*Birch*).
-3. **Composants requis** : Une branche de réparation doit posséder les scripts `EquippableItem`, `BranchRepairItem` et son script de type spécifique.
-4. **Flux** : `DamManager` détecte une cassure -> `TreeFallManager` génère les branches nécessaires dans la scène.
+Le barrage se détériore progressivement avec le temps. Il peut être réparé de deux façons :
+
+### Réparation par branche
+1. Couper un arbre (Peuplier ou Bouleau) avec **C**
+2. Ramasser la branche avec **G**
+3. La déposer sur ou près d'une fissure du barrage
+4. `BranchRepairItem` détecte la fissure active **la plus proche** de l'endroit du dépôt et la répare
+
+### Réparation par boue
+1. Plonger dans la rivière avec **E**
+2. Ramasser de la boue avec **G** (uniquement en nage profonde)
+3. Remonter à la surface avec **E**
+4. Marcher jusqu'à une fissure du barrage — la boue est consommée automatiquement au contact
+
+### Flux général
+- `DamManager` fait apparaître les fissures progressivement selon des timers configurables
+- `CrackBarUI` affiche en temps réel le nombre de fissures actives (barre circulaire bleue)
+- À 4/4 fissures : le barrage est en état critique
+- **Composants requis sur une branche** : `EquippableItem` + `BranchRepairItem` + script de type (`BirchBranch` ou `PoplarBranch`)
 
 ## Notes de développement
 
 - Système de zones extensible avec interfaces `IZoneDetectable`
 - Bootstrap crée automatiquement joueur et UI au runtime
 - Système de transition d'eau (mai 2026) gère l'activation/désactivation des éléments visuels
+- `UnderwaterCrackManager` supprimé (juin 2026) — les fissures sous-marines sont retirées du jeu, toute la logique de réparation est centralisée dans `DamManager`

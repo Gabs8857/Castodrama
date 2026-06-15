@@ -2,60 +2,73 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Gère le système du barrage avec ses fissures progressives
-/// - 4 emplacements de fissures potentielles
-/// - Les fissures apparaissent progressivement avec le temps
-/// - Peut être réparé en apportant une branche à l'emplacement de réparation
+/// Gère le système du barrage avec ses fissures progressives.
+/// Réparable avec des branches (via BranchRepairItem) OU avec de la boue (MudSystem).
+/// La boue répare au contact du BoxCollider2D de la fissure.
 /// </summary>
 public class DamManager : MonoBehaviour
 {
     [Header("Dam Crack Positions")]
     [SerializeField] private Transform[] crackPositions = new Transform[4];
-    
+
     [Header("Branch Detection")]
-    [Tooltip("Le nom (ou partie du nom) que l'objet doit avoir pour être accepté (ex: 'branch' ou 'Branche')")]
+    [Tooltip("Le nom (ou partie du nom) que l'objet doit avoir pour être accepté")]
     [SerializeField] private string branchNameFilter = "branch";
 
     [Header("Crack Settings")]
-    [SerializeField] private float[] crackAppearanceTime = { 10f, 15f, 20f, 25f }; // Temps d'apparition pour chaque fissure (en secondes)
-    [SerializeField] private float repairCooldown = 2f; // Temps avant de pouvoir réparer à nouveau
-    
+    [SerializeField] private float[] crackAppearanceTime = { 10f, 15f, 20f, 25f };
+    [SerializeField] private float repairCooldown = 2f;
+
+    [Header("Mud Repair")]
+    [Tooltip("BoxCollider2D de chaque fissure (dans l'ordre des crackPositions)")]
+    [SerializeField] private Collider2D[] crackColliders = new Collider2D[4];
+
     [Header("Visual")]
     [SerializeField] private Sprite crackSprite;
-    [Tooltip("Glissez ici le sprite 'fuite_none' (votre Frame1 seule)")]
     [SerializeField] private Sprite noneLeakSprite;
     [SerializeField] private SpriteRenderer[] crackVisuals = new SpriteRenderer[4];
     [SerializeField] private LeakAnimator[] leakAnimators = new LeakAnimator[4];
-    
+
+    [Header("UI")]
+    [Tooltip("Référence au CrackBarUI pour mettre à jour la barre de fissures")]
+    [SerializeField] private CrackBarUI crackBarUI;
+
     [Header("Time Reference")]
     [SerializeField] private DayAndNightCycle dayNightCycle;
-    
+
     [Header("Debug")]
     [SerializeField] private bool debugLogs = true;
 
     private List<DamCrack> cracks = new List<DamCrack>();
     private float elapsedTime = 0f;
-    private float timerToNextCrack = 0f; // Temps restant avant la prochaine fissure
+    private float timerToNextCrack = 0f;
     private int cracksCreated = 0;
     private float lastRepairTime = -10f;
     private const int MAX_CRACKS = 4;
     private Collider2D damCollider;
+    private MudSystem mudSystem;
 
     private void Start()
     {
-    Debug.Log($"[DamManager] Starting initialization... Barrage");
-        // Récupérer le collider du barrage lui-même
-        damCollider = GetComponent<Collider2D>();
-        if (damCollider == null)
-        {
-            if (debugLogs)
-                Debug.LogWarning("[DamManager] No Collider2D found on Barrage! Add a BoxCollider2D as trigger for repair zone.");
-        }
+        Debug.Log("[DamManager] Starting initialization... Barrage");
 
-        // Initialiser les fissures (même sans collider)
+        damCollider = GetComponent<Collider2D>();
+        if (damCollider == null && debugLogs)
+            Debug.LogWarning("[DamManager] No Collider2D found on Barrage!");
+
+        // Trouve le MudSystem sur le joueur
+        GameObject player = GameObject.Find("Castor") ?? GameObject.Find("Player");
+        if (player != null)
+            mudSystem = player.GetComponent<MudSystem>();
+
+        if (mudSystem == null)
+            Debug.LogWarning("[DamManager] ✗ MudSystem introuvable sur le joueur !");
+        else
+            Debug.Log("[DamManager] ✓ MudSystem lié avec succès.");
+
+        // Initialiser les fissures
         for (int i = 0; i < MAX_CRACKS; i++)
         {
-            // Initialiser le sprite par défaut si défini
             if (crackVisuals[i] != null && noneLeakSprite != null)
             {
                 crackVisuals[i].sprite = noneLeakSprite;
@@ -68,9 +81,12 @@ public class DamManager : MonoBehaviour
                 Debug.Log($"[DamManager] Crack {i + 1} initialized");
         }
 
-        // Initialise le timer avec le délai de la première fissure
         if (crackAppearanceTime.Length > 0)
             timerToNextCrack = crackAppearanceTime[0];
+
+        // Init UI
+        if (crackBarUI != null)
+            crackBarUI.UpdateBar(0, MAX_CRACKS);
 
         if (debugLogs)
             Debug.Log("[DamManager] Initialized with 4 empty crack positions");
@@ -80,85 +96,55 @@ public class DamManager : MonoBehaviour
     {
         elapsedTime += Time.deltaTime;
 
-        if (debugLogs && Mathf.FloorToInt(elapsedTime) > Mathf.FloorToInt(elapsedTime - Time.deltaTime))  // Log chaque seconde
+        if (debugLogs && Mathf.FloorToInt(elapsedTime) > Mathf.FloorToInt(elapsedTime - Time.deltaTime))
             Debug.Log($"[DamManager] Prochaine fissure dans: {timerToNextCrack:F1}s - État: {cracksCreated}/{MAX_CRACKS}");
 
-        // Ajouter des fissures progressivement
         UpdateCrackProgression();
-        
-        // Vérifier la réparation si une branche est dans la zone
         CheckRepairZone();
+        CheckMudRepair();
     }
 
-    /// <summary>
-    /// Gère la progression des fissures basée sur le temps
-    /// </summary>
     private void UpdateCrackProgression()
     {
-        // Vérifier si on doit ajouter une nouvelle fissure
         if (cracksCreated < MAX_CRACKS)
         {
             timerToNextCrack -= Time.deltaTime;
-
             if (timerToNextCrack <= 0)
             {
                 CreateNewCrack();
-                
-                // Prépare le délai pour la fissure suivante
                 if (cracksCreated < MAX_CRACKS)
                     timerToNextCrack = crackAppearanceTime[cracksCreated];
             }
         }
     }
 
-    /// <summary>
-    /// Crée une nouvelle fissure et l'affiche
-    /// </summary>
     private void CreateNewCrack()
     {
-        if (cracksCreated >= MAX_CRACKS) return;
+        if (cracksCreated >= MAX_CRACKS || cracksCreated >= cracks.Count) return;
 
-        if (cracksCreated >= cracks.Count)
-        {
-            if (debugLogs)
-                Debug.LogError($"[DamManager] Crack index {cracksCreated} out of range! Cracks list count: {cracks.Count}");
-            return;
-        }
-
-        DamCrack newCrack = cracks[cracksCreated];
-        newCrack.Appear();
-
+        cracks[cracksCreated].Appear();
         cracksCreated++;
+
+        UpdateCrackUI();
 
         if (debugLogs)
         {
-            Debug.Log($"═══════════════════════════════════════");
+            Debug.Log("═══════════════════════════════════════");
             Debug.Log($"[DamManager] ✓✓✓ CRACK #{cracksCreated} APPEARED ✓✓✓");
             Debug.Log($"[DamManager] Total cracks now: {cracksCreated}/{MAX_CRACKS}");
-            Debug.Log($"═══════════════════════════════════════");
+            Debug.Log("═══════════════════════════════════════");
         }
     }
 
     /// <summary>
-    /// Vérifie si une branche se trouve dans la zone de réparation (le Barrage lui-même)
+    /// Réparation par branche (détection via OverlapBox sur le collider du barrage)
     /// </summary>
     private void CheckRepairZone()
     {
-        if (damCollider == null || cracksCreated == 0)
-        {
-            if (debugLogs && damCollider == null && cracksCreated > 0)
-                Debug.LogWarning("[DamManager] No collider for repair detection!");
-            return;
-        }
-
-        // Cooldown de réparation
+        if (damCollider == null || cracksCreated == 0) return;
         if (Time.time - lastRepairTime < repairCooldown) return;
 
-        // Chercher les items dans le collider du Barrage
         Collider2D[] colliders = Physics2D.OverlapBoxAll(damCollider.bounds.center, damCollider.bounds.size, 0f);
-
-        if (debugLogs && colliders.Length > 0)
-            Debug.Log($"[DamManager] Found {colliders.Length} items in repair zone");
 
         foreach (Collider2D collider in colliders)
         {
@@ -167,17 +153,12 @@ public class DamManager : MonoBehaviour
             EquippableItem item = collider.GetComponent<EquippableItem>();
             if (item != null && IsBranch(item))
             {
-                // Skip branches with BranchRepairItem - they're handled by that component
                 BranchRepairItem branchRepairItem = collider.GetComponent<BranchRepairItem>();
                 if (branchRepairItem != null && branchRepairItem.isActiveAndEnabled)
-                {
-                    // On continue la boucle pour voir s'il y a d'autres items, 
-                    // car celui-ci gère sa propre logique au moment du lâcher.
                     continue;
-                }
-                
+
                 if (debugLogs)
-                    Debug.Log($"[DamManager] Branch detected! Repairing...");
+                    Debug.Log("[DamManager] Branch detected! Repairing...");
                 RepairDam(item);
                 return;
             }
@@ -185,98 +166,188 @@ public class DamManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Vérifie si un item est une branche
+    /// Réparation par boue : détecte si le joueur (avec mud) touche le collider d'une fissure active
     /// </summary>
-    private bool IsBranch(EquippableItem item)
+    private void CheckMudRepair()
     {
-        // Vérifier par type ou par nom
-        string nameLower = item.gameObject.name.ToLower();
-        string filterLower = branchNameFilter.ToLower();
-        
-        return nameLower.Contains(filterLower) || nameLower.Contains("baton");
-    }
-
-    /// <summary>
-    /// Répare le barrage en réduisant le nombre de fissures
-    /// </summary>
-    private void RepairDam(EquippableItem branchItem)
-    {
+        if (mudSystem == null || !mudSystem.HasMud) return;
         if (cracksCreated == 0) return;
+        if (Time.time - lastRepairTime < repairCooldown) return;
 
-        ApplyRepairLogic();
+        Vector2 playerPos = mudSystem.transform.position;
 
-        // Déséquipper la branche du joueur AVANT de la désactiver
-        if (branchItem != null)
+        // Vérifie chaque fissure active (dans l'ordre d'apparition, de la plus récente)
+        for (int i = cracksCreated - 1; i >= 0; i--)
         {
-            branchItem.Drop();
-            if (debugLogs)
-                Debug.Log($"[DamManager] Branch dropped from player");
-            
-            branchItem.gameObject.SetActive(false);
+            if (!cracks[i].IsActive) continue;
+
+            // Utilise le crackCollider assigné si disponible
+            if (crackColliders != null && i < crackColliders.Length && crackColliders[i] != null)
+            {
+                if (crackColliders[i].OverlapPoint(playerPos))
+                {
+                    if (debugLogs)
+                        Debug.Log($"[DamManager] 🟤 Joueur avec boue dans la zone fissure {i} → réparation !");
+                    RepairWithMud(i);
+                    return;
+                }
+            }
+            else
+            {
+                // Fallback : distance à la crackPosition
+                if (crackPositions[i] != null)
+                {
+                    float dist = Vector2.Distance(playerPos, crackPositions[i].position);
+                    if (dist <= 1.5f)
+                    {
+                        if (debugLogs)
+                            Debug.Log($"[DamManager] 🟤 Joueur avec boue proche fissure {i} (dist={dist:F2}) → réparation !");
+                        RepairWithMud(i);
+                        return;
+                    }
+                }
+            }
         }
     }
 
-    /// <summary>
-    /// Répare le barrage avec une branche (version publique pour BranchRepairItem)
-    /// </summary>
+    private void RepairWithMud(int crackIndex)
+    {
+        if (!mudSystem.UseMud()) return;
+
+        cracks[crackIndex].Disappear();
+
+        // Réorganise : décale les fissures actives pour combler le trou
+        // (on retire la fissure réparée et on réajuste cracksCreated)
+        cracksCreated--;
+
+        // Réinitialise le timer
+        if (cracksCreated < MAX_CRACKS)
+            timerToNextCrack = crackAppearanceTime[Mathf.Min(cracksCreated, crackAppearanceTime.Length - 1)];
+
+        lastRepairTime = Time.time;
+        UpdateCrackUI();
+
+        if (debugLogs)
+            Debug.Log($"[DamManager] ✓ Fissure {crackIndex} réparée avec boue ! Restantes : {cracksCreated}/{MAX_CRACKS}");
+    }
+
+    private bool IsBranch(EquippableItem item)
+    {
+        string nameLower = item.gameObject.name.ToLower();
+        string filterLower = branchNameFilter.ToLower();
+        return nameLower.Contains(filterLower) || nameLower.Contains("baton");
+    }
+
+    private void RepairDam(EquippableItem branchItem)
+    {
+        if (cracksCreated == 0) return;
+        ApplyRepairLogic();
+
+        if (branchItem != null)
+        {
+            branchItem.Drop();
+            branchItem.gameObject.SetActive(false);
+            if (debugLogs)
+                Debug.Log("[DamManager] Branch used and destroyed");
+        }
+    }
+
     public void RepairDamWithBranch(BranchRepairItem branchItem)
     {
         if (cracksCreated == 0) return;
-
         ApplyRepairLogic();
 
-        // Déséquipper la branche du joueur AVANT de la désactiver
-        EquippableItem equippableItem = branchItem.gameObject.GetComponent<EquippableItem>();
+        EquippableItem equippableItem = branchItem.GetComponent<EquippableItem>();
         if (equippableItem != null)
         {
             equippableItem.Drop();
             if (debugLogs)
-                Debug.Log($"[DamManager] Branch dropped from player");
+                Debug.Log("[DamManager] Branch dropped from player");
         }
 
-        // Désactiver la branche
         branchItem.gameObject.SetActive(false);
     }
 
-    /// <summary>
-    /// Logique interne de réparation : retire la fissure et réinitialise le timer
-    /// </summary>
     private void ApplyRepairLogic()
     {
         DamCrack lastCrack = cracks[cracksCreated - 1];
         lastCrack.Disappear();
         cracksCreated--;
 
-        // Réinitialise le timer pour le niveau actuel
-        // Cela donne au joueur tout l'intervalle de temps avant que ça ne recasse
         if (cracksCreated < MAX_CRACKS)
             timerToNextCrack = crackAppearanceTime[cracksCreated];
 
         lastRepairTime = Time.time;
+        UpdateCrackUI();
 
         if (debugLogs)
             Debug.Log($"[DamManager] Dam repaired! Cracks remaining: {cracksCreated}/{MAX_CRACKS}");
     }
 
-    /// <summary>
-    /// Obtient le nombre de fissures actuelles
-    /// </summary>
-    public int GetCurrentCrackCount()
+    private void UpdateCrackUI()
     {
-        return cracksCreated;
+        if (crackBarUI != null)
+            crackBarUI.UpdateBar(cracksCreated, MAX_CRACKS);
+    }
+
+    public int GetCurrentCrackCount() => cracksCreated;
+    public float GetElapsedTime() => elapsedTime;
+
+    /// <summary>
+    /// Retourne l'index de la fissure active la plus proche d'une position donnée.
+    /// Retourne -1 si aucune fissure active.
+    /// </summary>
+    public int GetNearestActiveCrackIndex(Vector2 position)
+    {
+        int nearest = -1;
+        float minDist = float.MaxValue;
+
+        for (int i = 0; i < cracksCreated; i++)
+        {
+            if (!cracks[i].IsActive) continue;
+            if (crackPositions[i] == null) continue;
+
+            float dist = Vector2.Distance(position, crackPositions[i].position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = i;
+            }
+        }
+
+        return nearest;
     }
 
     /// <summary>
-    /// Obtient le temps total écoulé depuis le début
+    /// Répare une fissure spécifique par son index (utilisé par BranchRepairItem).
     /// </summary>
-    public float GetElapsedTime()
+    public void RepairCrackAtIndex(int index, BranchRepairItem branchItem)
     {
-        return elapsedTime;
+        if (index < 0 || index >= cracksCreated) return;
+
+        cracks[index].Disappear();
+        cracksCreated--;
+
+        if (cracksCreated < MAX_CRACKS)
+            timerToNextCrack = crackAppearanceTime[Mathf.Min(cracksCreated, crackAppearanceTime.Length - 1)];
+
+        lastRepairTime = Time.time;
+        UpdateCrackUI();
+
+        if (debugLogs)
+            Debug.Log($"[DamManager] ✓ Fissure {index} réparée avec branche ! Restantes : {cracksCreated}/{MAX_CRACKS}");
+
+        // Détruit la branche
+        EquippableItem equippable = branchItem.GetComponent<EquippableItem>();
+        if (equippable != null)
+        {
+            equippable.Drop();
+            if (debugLogs) Debug.Log("[DamManager] Branche déposée du joueur");
+        }
+        branchItem.gameObject.SetActive(false);
     }
 
-    /// <summary>
-    /// Classe interne pour gérer une fissure
-    /// </summary>
+    // ── Classe interne ───────────────────────────────────────────────────
     private class DamCrack
     {
         private int index;
@@ -285,45 +356,37 @@ public class DamManager : MonoBehaviour
         private LeakAnimator leakAnimator;
         private Sprite noneSprite;
         private bool isActive = false;
-        private bool debugLogs = false;
+
+        public bool IsActive => isActive;
 
         public DamCrack(int index, Transform position, SpriteRenderer visual, LeakAnimator animator, Sprite noneSprite)
         {
-            this.index = index;
-            this.position = position;
-            this.visual = visual;
+            this.index        = index;
+            this.position     = position;
+            this.visual       = visual;
             this.leakAnimator = animator;
-            this.noneSprite = noneSprite;
-            debugLogs = true;
+            this.noneSprite   = noneSprite;
         }
 
         public void Appear()
         {
             if (visual != null)
             {
-                // Ajustement de la position X : se déplace à -17.1 quand la fuite s'active
                 Vector3 pos = visual.transform.position;
                 pos.x = -16.5f;
                 visual.transform.position = pos;
-
-                if (noneSprite != null)
-                    visual.sprite = noneSprite;
-
+                if (noneSprite != null) visual.sprite = noneSprite;
                 visual.enabled = true;
-                if (debugLogs)
-                    Debug.Log($"[DamCrack {index}] Visual enabled");
+                Debug.Log($"[DamCrack {index}] Visual enabled");
             }
-            else if (debugLogs)
-                Debug.LogWarning($"[DamCrack {index}] No SpriteRenderer!");
+            else Debug.LogWarning($"[DamCrack {index}] No SpriteRenderer!");
 
             if (leakAnimator != null)
             {
                 leakAnimator.StartLeaking();
-                if (debugLogs)
-                    Debug.Log($"[DamCrack {index}] LeakAnimator started");
+                Debug.Log($"[DamCrack {index}] LeakAnimator started");
             }
-            else if (debugLogs)
-                Debug.LogWarning($"[DamCrack {index}] No LeakAnimator!");
+            else Debug.LogWarning($"[DamCrack {index}] No LeakAnimator!");
 
             isActive = true;
         }
@@ -332,29 +395,21 @@ public class DamManager : MonoBehaviour
         {
             if (visual != null)
             {
-                // Retour à la position X de base (-17) quand la fuite s'arrête
                 Vector3 pos = visual.transform.position;
                 pos.x = -17f;
                 visual.transform.position = pos;
-
-                if (noneSprite != null)
-                    visual.sprite = noneSprite;
-
+                if (noneSprite != null) visual.sprite = noneSprite;
                 visual.enabled = false;
-                if (debugLogs)
-                    Debug.Log($"[DamCrack {index}] Visual disabled");
+                Debug.Log($"[DamCrack {index}] Visual disabled");
             }
 
             if (leakAnimator != null)
             {
                 leakAnimator.StopLeaking();
-                if (debugLogs)
-                    Debug.Log($"[DamCrack {index}] LeakAnimator stopped");
+                Debug.Log($"[DamCrack {index}] LeakAnimator stopped");
             }
 
             isActive = false;
         }
-
-        public bool IsActive => isActive;
     }
 }

@@ -36,5 +36,7 @@ public class StatsUIManager : MonoBehaviour
             signaturesProgressBar.maxValue = GameState.signaturesGoal;
             signaturesProgressBar.value = GameState.signatures;
         }
+
+        Debug.Log($"[StatsUIManager] Mise à jour UI : Viewers={GameState.viewers}, Signatures={GameState.signatures}/{GameState.signaturesGoal}");
     }
 }
