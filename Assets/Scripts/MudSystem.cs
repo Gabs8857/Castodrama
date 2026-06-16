@@ -2,15 +2,29 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Gère le ramassage de boue en deep swim.
-/// Le joueur appuie sur G pour ramasser une boue (max 1 à la fois).
+/// Gère le ramassage de boue en nage profonde.
+/// Appuie sur G sous l'eau → spawne un MudCloud qui file vers le barrage.
+/// Pas de limite de boue, pas d'icône UI — le nuage gère tout.
 /// </summary>
 public class MudSystem : MonoBehaviour
 {
-    private CharacterAnimator characterAnimator;
-    private bool hasMud = false;
+    [Header("Mud Cloud")]
+    [Tooltip("Vitesse du nuage de boue vers le barrage")]
+    [SerializeField] private float cloudSpeed = 2f;
 
-    public bool HasMud => hasMud;
+    [Header("Cooldown")]
+    [SerializeField] private float mudCooldown = 1f;
+
+    [Header("Debug")]
+    [SerializeField] private bool debugLogs = true;
+
+    private CharacterAnimator characterAnimator;
+    private DamManager damManager;
+    private float lastMudTime = -10f;
+
+    // Gardé pour compatibilité avec DamManager (CheckMudRepair supprimé donc inutile,
+    // mais on le laisse au cas où d'autres scripts y accèdent)
+    public bool HasMud => false;
 
     private void Awake()
     {
@@ -18,45 +32,51 @@ public class MudSystem : MonoBehaviour
         Debug.Log("[MudSystem] ✓ Système de boue initialisé.");
     }
 
+    private void Start()
+    {
+        damManager = FindObjectOfType<DamManager>();
+        if (damManager == null)
+            Debug.LogWarning("[MudSystem] ✗ DamManager introuvable !");
+        else if (debugLogs)
+            Debug.Log("[MudSystem] ✓ DamManager lié.");
+    }
+
     private void Update()
     {
         if (Keyboard.current == null) return;
-
-        // Si on appuie sur G mais qu'on n'est pas au fond
-        if (Keyboard.current.gKey.wasPressedThisFrame && !characterAnimator.IsSwimmingDeep)
-        {
-            Debug.Log("[MudSystem] Tentative de ramassage : Impossible car vous n'êtes pas en nage profonde.");
-        }
-
         if (!Keyboard.current.gKey.wasPressedThisFrame) return;
-        if (!characterAnimator.IsSwimmingDeep) return;
 
-        if (hasMud)
+        if (!characterAnimator.IsSwimmingDeep)
         {
-            Debug.Log("[MudSystem] Tu as déjà une boue !");
+            if (debugLogs)
+                Debug.Log("[MudSystem] Impossible — pas en nage profonde.");
             return;
         }
 
-        hasMud = true;
-        Debug.Log("[MudSystem] Boue ramassée !");
+        if (Time.time - lastMudTime < mudCooldown)
+        {
+            if (debugLogs)
+                Debug.Log($"[MudSystem] Cooldown ({mudCooldown - (Time.time - lastMudTime):F1}s restantes)");
+            return;
+        }
 
-        // Notifie l'UI
-        MudUI mudUI = FindObjectOfType<MudUI>();
-        if (mudUI != null) mudUI.UpdateDisplay(hasMud);
+        if (damManager == null)
+        {
+            Debug.LogWarning("[MudSystem] DamManager introuvable, impossible de spawner un nuage.");
+            return;
+        }
+
+        SpawnMudCloud();
+        lastMudTime = Time.time;
     }
 
-    /// <summary>
-    /// Utilise la boue (appelé par UnderwaterCrackManager).
-    /// </summary>
-    public bool UseMud()
+    private void SpawnMudCloud()
     {
-        if (!hasMud) return false;
-        hasMud = false;
-
-        MudUI mudUI = FindObjectOfType<MudUI>();
-        if (mudUI != null) mudUI.UpdateDisplay(hasMud);
-
-        Debug.Log("[MudSystem] Boue utilisée.");
-        return true;
+        MudCloud cloud = MudCloud.Spawn(transform.position, damManager);
+        if (debugLogs)
+            Debug.Log($"[MudSystem] ☁ Nuage de boue créé en {transform.position}");
     }
+
+    // Gardé pour compatibilité — ne fait plus rien
+    public bool UseMud() => false;
 }

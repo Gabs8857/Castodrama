@@ -153,7 +153,21 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         // Mémorise la dernière direction de mouvement (pour les animations)
         if (isMoving)
         {
-            lastMovementDirection = rb.linearVelocity.normalized;
+            Vector2 newDir = rb.linearVelocity.normalized;
+
+            // 🔥 FIX DÉCALAGE FLIP : si le signe X change (gauche↔droite),
+            // on snap immédiatement la direction lissée sans interpolation
+            // pour éviter que l'animation reste décalée pendant le flip
+            bool horizontalFlip = (newDir.x > 0f && lastMovementDirection.x < 0f)
+                                || (newDir.x < 0f && lastMovementDirection.x > 0f);
+            if (horizontalFlip)
+            {
+                smoothedMovementDirection = newDir;
+                currentFrameIndex = 0;
+                timeSinceLastSwitch = 0f;
+            }
+
+            lastMovementDirection = newDir;
         }
 
         // 🔥 LISSE LA DIRECTION pour éviter les changements brusques (élimine le ping)

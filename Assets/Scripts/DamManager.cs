@@ -3,8 +3,13 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Gère le système du barrage avec ses fissures progressives.
-/// Réparable avec des branches (via BranchRepairItem) OU avec de la boue (MudSystem).
-/// La boue répare au contact du BoxCollider2D de la fissure.
+/// Réparable avec des branches (BranchRepairItem) OU des nuages de boue (MudCloud).
+/// 
+/// Chaque fissure a HITS_TO_REPAIR charges : un nuage de boue retire 1 charge,
+/// une branche répare instantanément.
+/// 
+/// nextCrackIndex : avance séquentiellement 0→4, jamais décrémenté
+/// activeCrackCount : nombre de fissures visibles en ce moment
 /// </summary>
 public class DamManager : MonoBehaviour
 {
@@ -12,25 +17,22 @@ public class DamManager : MonoBehaviour
     [SerializeField] private Transform[] crackPositions = new Transform[4];
 
     [Header("Branch Detection")]
-    [Tooltip("Le nom (ou partie du nom) que l'objet doit avoir pour être accepté")]
     [SerializeField] private string branchNameFilter = "branch";
 
     [Header("Crack Settings")]
     [SerializeField] private float[] crackAppearanceTime = { 10f, 15f, 20f, 25f };
-    [SerializeField] private float repairCooldown = 2f;
+    [SerializeField] private float repairCooldown = 0.5f;
 
-    [Header("Mud Repair")]
-    [Tooltip("BoxCollider2D de chaque fissure (dans l'ordre des crackPositions)")]
-    [SerializeField] private Collider2D[] crackColliders = new Collider2D[4];
+    [Header("Mud Charges")]
+    [Tooltip("Nombre de nuages de boue nécessaires pour réparer une fissure")]
+    [SerializeField] private int hitsToRepair = 3;
 
     [Header("Visual")]
-    [SerializeField] private Sprite crackSprite;
     [SerializeField] private Sprite noneLeakSprite;
     [SerializeField] private SpriteRenderer[] crackVisuals = new SpriteRenderer[4];
     [SerializeField] private LeakAnimator[] leakAnimators = new LeakAnimator[4];
 
     [Header("UI")]
-    [Tooltip("Référence au CrackBarUI pour mettre à jour la barre de fissures")]
     [SerializeField] private CrackBarUI crackBarUI;
 
     [Header("Time Reference")]
@@ -42,11 +44,11 @@ public class DamManager : MonoBehaviour
     private List<DamCrack> cracks = new List<DamCrack>();
     private float elapsedTime = 0f;
     private float timerToNextCrack = 0f;
-    private int cracksCreated = 0;
+    private int activeCrackCount = 0;
+    private int nextCrackIndex = 0;
     private float lastRepairTime = -10f;
     private const int MAX_CRACKS = 4;
     private Collider2D damCollider;
-    private MudSystem mudSystem;
 
     private void Start()
     {
@@ -56,17 +58,6 @@ public class DamManager : MonoBehaviour
         if (damCollider == null && debugLogs)
             Debug.LogWarning("[DamManager] No Collider2D found on Barrage!");
 
-        // Trouve le MudSystem sur le joueur
-        GameObject player = GameObject.Find("Castor") ?? GameObject.Find("Player");
-        if (player != null)
-            mudSystem = player.GetComponent<MudSystem>();
-
-        if (mudSystem == null)
-            Debug.LogWarning("[DamManager] ✗ MudSystem introuvable sur le joueur !");
-        else
-            Debug.Log("[DamManager] ✓ MudSystem lié avec succès.");
-
-        // Initialiser les fissures
         for (int i = 0; i < MAX_CRACKS; i++)
         {
             if (crackVisuals[i] != null && noneLeakSprite != null)
@@ -75,16 +66,14 @@ public class DamManager : MonoBehaviour
                 crackVisuals[i].enabled = false;
             }
 
-            var crack = new DamCrack(i, crackPositions[i], crackVisuals[i], leakAnimators[i], noneLeakSprite);
-            cracks.Add(crack);
+            cracks.Add(new DamCrack(i, crackPositions[i], crackVisuals[i], leakAnimators[i], noneLeakSprite, hitsToRepair));
             if (debugLogs)
-                Debug.Log($"[DamManager] Crack {i + 1} initialized");
+                Debug.Log($"[DamManager] Crack {i + 1} initialized ({hitsToRepair} charges requises)");
         }
 
         if (crackAppearanceTime.Length > 0)
             timerToNextCrack = crackAppearanceTime[0];
 
-        // Init UI
         if (crackBarUI != null)
             crackBarUI.UpdateBar(0, MAX_CRACKS);
 
@@ -97,43 +86,82 @@ public class DamManager : MonoBehaviour
         elapsedTime += Time.deltaTime;
 
         if (debugLogs && Mathf.FloorToInt(elapsedTime) > Mathf.FloorToInt(elapsedTime - Time.deltaTime))
-            Debug.Log($"[DamManager] Prochaine fissure dans: {timerToNextCrack:F1}s - État: {cracksCreated}/{MAX_CRACKS}");
+            Debug.Log($"[DamManager] Prochaine fissure dans: {timerToNextCrack:F1}s - Actives: {activeCrackCount}/{MAX_CRACKS}");
 
         UpdateCrackProgression();
         CheckRepairZone();
-        CheckMudRepair();
     }
 
     private void UpdateCrackProgression()
     {
-        if (cracksCreated < MAX_CRACKS)
+        if (nextCrackIndex >= MAX_CRACKS) return;
+        if (activeCrackCount >= MAX_CRACKS) return;
+
+        timerToNextCrack -= Time.deltaTime;
+        if (timerToNextCrack <= 0f)
         {
-            timerToNextCrack -= Time.deltaTime;
-            if (timerToNextCrack <= 0)
-            {
-                CreateNewCrack();
-                if (cracksCreated < MAX_CRACKS)
-                    timerToNextCrack = crackAppearanceTime[cracksCreated];
-            }
+            CreateNextCrack();
+            if (nextCrackIndex < MAX_CRACKS)
+                timerToNextCrack = crackAppearanceTime[Mathf.Min(nextCrackIndex, crackAppearanceTime.Length - 1)];
         }
     }
 
-    private void CreateNewCrack()
+    private void CreateNextCrack()
     {
-        if (cracksCreated >= MAX_CRACKS || cracksCreated >= cracks.Count) return;
+        int slotToActivate = -1;
+        for (int i = nextCrackIndex; i < MAX_CRACKS; i++)
+        {
+            if (!cracks[i].IsActive)
+            {
+                slotToActivate = i;
+                break;
+            }
+        }
 
-        cracks[cracksCreated].Appear();
-        cracksCreated++;
+        if (slotToActivate < 0) return;
+
+        cracks[slotToActivate].Appear();
+        activeCrackCount++;
+        nextCrackIndex = slotToActivate + 1;
 
         UpdateCrackUI();
 
         if (debugLogs)
         {
             Debug.Log("═══════════════════════════════════════");
-            Debug.Log($"[DamManager] ✓✓✓ CRACK #{cracksCreated} APPEARED ✓✓✓");
-            Debug.Log($"[DamManager] Total cracks now: {cracksCreated}/{MAX_CRACKS}");
+            Debug.Log($"[DamManager] ✓✓✓ CRACK #{slotToActivate + 1} APPEARED ✓✓✓");
+            Debug.Log($"[DamManager] Actives: {activeCrackCount}/{MAX_CRACKS}");
             Debug.Log("═══════════════════════════════════════");
         }
+    }
+
+    /// <summary>
+    /// Appelé par MudCloud quand il touche une fissure.
+    /// Retire 1 charge. Retourne true si la fissure est complètement réparée.
+    /// </summary>
+    public bool ApplyMudCharge(int crackIndex)
+    {
+        if (crackIndex < 0 || crackIndex >= MAX_CRACKS) return false;
+        if (!cracks[crackIndex].IsActive)
+        {
+            if (debugLogs)
+                Debug.Log($"[DamManager] Fissure {crackIndex} déjà inactive, nuage ignoré.");
+            return false;
+        }
+
+        bool fullyRepaired = cracks[crackIndex].ApplyCharge();
+
+        if (debugLogs)
+            Debug.Log($"[DamManager] 🟤 Charge appliquée sur fissure {crackIndex} — charges restantes : {cracks[crackIndex].RemainingCharges}/{hitsToRepair}");
+
+        if (fullyRepaired)
+        {
+            ApplyRepair(crackIndex);
+            if (debugLogs)
+                Debug.Log($"[DamManager] ✓ Fissure {crackIndex} réparée par boue ! Actives : {activeCrackCount}/{MAX_CRACKS}");
+        }
+
+        return fullyRepaired;
     }
 
     /// <summary>
@@ -141,7 +169,7 @@ public class DamManager : MonoBehaviour
     /// </summary>
     private void CheckRepairZone()
     {
-        if (damCollider == null || cracksCreated == 0) return;
+        if (damCollider == null || activeCrackCount == 0) return;
         if (Time.time - lastRepairTime < repairCooldown) return;
 
         Collider2D[] colliders = Physics2D.OverlapBoxAll(damCollider.bounds.center, damCollider.bounds.size, 0f);
@@ -165,144 +193,87 @@ public class DamManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Réparation par boue : détecte si le joueur (avec mud) touche le collider d'une fissure active
-    /// </summary>
-    private void CheckMudRepair()
+    private void ApplyRepair(int crackIndex)
     {
-        if (mudSystem == null || !mudSystem.HasMud) return;
-        if (cracksCreated == 0) return;
-        if (Time.time - lastRepairTime < repairCooldown) return;
-
-        Vector2 playerPos = mudSystem.transform.position;
-
-        // Vérifie chaque fissure active (dans l'ordre d'apparition, de la plus récente)
-        for (int i = cracksCreated - 1; i >= 0; i--)
-        {
-            if (!cracks[i].IsActive) continue;
-
-            // Utilise le crackCollider assigné si disponible
-            if (crackColliders != null && i < crackColliders.Length && crackColliders[i] != null)
-            {
-                if (crackColliders[i].OverlapPoint(playerPos))
-                {
-                    if (debugLogs)
-                        Debug.Log($"[DamManager] 🟤 Joueur avec boue dans la zone fissure {i} → réparation !");
-                    RepairWithMud(i);
-                    return;
-                }
-            }
-            else
-            {
-                // Fallback : distance à la crackPosition
-                if (crackPositions[i] != null)
-                {
-                    float dist = Vector2.Distance(playerPos, crackPositions[i].position);
-                    if (dist <= 1.5f)
-                    {
-                        if (debugLogs)
-                            Debug.Log($"[DamManager] 🟤 Joueur avec boue proche fissure {i} (dist={dist:F2}) → réparation !");
-                        RepairWithMud(i);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    private void RepairWithMud(int crackIndex)
-    {
-        if (!mudSystem.UseMud()) return;
-
         cracks[crackIndex].Disappear();
+        activeCrackCount--;
 
-        // Réorganise : décale les fissures actives pour combler le trou
-        // (on retire la fissure réparée et on réajuste cracksCreated)
-        cracksCreated--;
+        if (crackIndex < nextCrackIndex)
+            nextCrackIndex = crackIndex;
 
-        // Réinitialise le timer
-        if (cracksCreated < MAX_CRACKS)
-            timerToNextCrack = crackAppearanceTime[Mathf.Min(cracksCreated, crackAppearanceTime.Length - 1)];
-
+        timerToNextCrack = crackAppearanceTime[Mathf.Min(activeCrackCount, crackAppearanceTime.Length - 1)];
         lastRepairTime = Time.time;
         UpdateCrackUI();
-
-        if (debugLogs)
-            Debug.Log($"[DamManager] ✓ Fissure {crackIndex} réparée avec boue ! Restantes : {cracksCreated}/{MAX_CRACKS}");
     }
 
     private bool IsBranch(EquippableItem item)
     {
         string nameLower = item.gameObject.name.ToLower();
-        string filterLower = branchNameFilter.ToLower();
-        return nameLower.Contains(filterLower) || nameLower.Contains("baton");
+        return nameLower.Contains(branchNameFilter.ToLower()) || nameLower.Contains("baton");
     }
 
     private void RepairDam(EquippableItem branchItem)
     {
-        if (cracksCreated == 0) return;
-        ApplyRepairLogic();
+        if (activeCrackCount == 0) return;
 
-        if (branchItem != null)
-        {
-            branchItem.Drop();
-            branchItem.gameObject.SetActive(false);
-            if (debugLogs)
-                Debug.Log("[DamManager] Branch used and destroyed");
-        }
+        int idx = GetNearestActiveCrackIndex(branchItem.transform.position);
+        if (idx < 0) return;
+
+        ApplyRepair(idx);
+
+        branchItem.Drop();
+        branchItem.gameObject.SetActive(false);
+
+        if (debugLogs)
+            Debug.Log($"[DamManager] Branch used! Actives: {activeCrackCount}/{MAX_CRACKS}");
     }
 
     public void RepairDamWithBranch(BranchRepairItem branchItem)
     {
-        if (cracksCreated == 0) return;
-        ApplyRepairLogic();
+        if (activeCrackCount == 0) return;
 
-        EquippableItem equippableItem = branchItem.GetComponent<EquippableItem>();
-        if (equippableItem != null)
-        {
-            equippableItem.Drop();
-            if (debugLogs)
-                Debug.Log("[DamManager] Branch dropped from player");
-        }
+        int idx = GetNearestActiveCrackIndex(branchItem.transform.position);
+        if (idx < 0) return;
 
+        ApplyRepair(idx);
+
+        EquippableItem equippable = branchItem.GetComponent<EquippableItem>();
+        if (equippable != null) equippable.Drop();
         branchItem.gameObject.SetActive(false);
-    }
-
-    private void ApplyRepairLogic()
-    {
-        DamCrack lastCrack = cracks[cracksCreated - 1];
-        lastCrack.Disappear();
-        cracksCreated--;
-
-        if (cracksCreated < MAX_CRACKS)
-            timerToNextCrack = crackAppearanceTime[cracksCreated];
-
-        lastRepairTime = Time.time;
-        UpdateCrackUI();
 
         if (debugLogs)
-            Debug.Log($"[DamManager] Dam repaired! Cracks remaining: {cracksCreated}/{MAX_CRACKS}");
+            Debug.Log($"[DamManager] Dam repaired with branch! Actives: {activeCrackCount}/{MAX_CRACKS}");
+    }
+
+    public void RepairCrackAtIndex(int index, BranchRepairItem branchItem)
+    {
+        if (index < 0 || index >= MAX_CRACKS || !cracks[index].IsActive) return;
+
+        ApplyRepair(index);
+
+        EquippableItem equippable = branchItem.GetComponent<EquippableItem>();
+        if (equippable != null) equippable.Drop();
+        branchItem.gameObject.SetActive(false);
+
+        if (debugLogs)
+            Debug.Log($"[DamManager] ✓ Fissure {index} réparée avec branche ! Actives: {activeCrackCount}/{MAX_CRACKS}");
     }
 
     private void UpdateCrackUI()
     {
         if (crackBarUI != null)
-            crackBarUI.UpdateBar(cracksCreated, MAX_CRACKS);
+            crackBarUI.UpdateBar(activeCrackCount, MAX_CRACKS);
     }
 
-    public int GetCurrentCrackCount() => cracksCreated;
+    public int GetCurrentCrackCount() => activeCrackCount;
     public float GetElapsedTime() => elapsedTime;
 
-    /// <summary>
-    /// Retourne l'index de la fissure active la plus proche d'une position donnée.
-    /// Retourne -1 si aucune fissure active.
-    /// </summary>
     public int GetNearestActiveCrackIndex(Vector2 position)
     {
         int nearest = -1;
         float minDist = float.MaxValue;
 
-        for (int i = 0; i < cracksCreated; i++)
+        for (int i = 0; i < MAX_CRACKS; i++)
         {
             if (!cracks[i].IsActive) continue;
             if (crackPositions[i] == null) continue;
@@ -318,35 +289,6 @@ public class DamManager : MonoBehaviour
         return nearest;
     }
 
-    /// <summary>
-    /// Répare une fissure spécifique par son index (utilisé par BranchRepairItem).
-    /// </summary>
-    public void RepairCrackAtIndex(int index, BranchRepairItem branchItem)
-    {
-        if (index < 0 || index >= cracksCreated) return;
-
-        cracks[index].Disappear();
-        cracksCreated--;
-
-        if (cracksCreated < MAX_CRACKS)
-            timerToNextCrack = crackAppearanceTime[Mathf.Min(cracksCreated, crackAppearanceTime.Length - 1)];
-
-        lastRepairTime = Time.time;
-        UpdateCrackUI();
-
-        if (debugLogs)
-            Debug.Log($"[DamManager] ✓ Fissure {index} réparée avec branche ! Restantes : {cracksCreated}/{MAX_CRACKS}");
-
-        // Détruit la branche
-        EquippableItem equippable = branchItem.GetComponent<EquippableItem>();
-        if (equippable != null)
-        {
-            equippable.Drop();
-            if (debugLogs) Debug.Log("[DamManager] Branche déposée du joueur");
-        }
-        branchItem.gameObject.SetActive(false);
-    }
-
     // ── Classe interne ───────────────────────────────────────────────────
     private class DamCrack
     {
@@ -356,20 +298,36 @@ public class DamManager : MonoBehaviour
         private LeakAnimator leakAnimator;
         private Sprite noneSprite;
         private bool isActive = false;
+        private int remainingCharges;
+        private int maxCharges;
 
         public bool IsActive => isActive;
+        public int RemainingCharges => remainingCharges;
 
-        public DamCrack(int index, Transform position, SpriteRenderer visual, LeakAnimator animator, Sprite noneSprite)
+        public DamCrack(int index, Transform position, SpriteRenderer visual, LeakAnimator animator, Sprite noneSprite, int maxCharges)
         {
-            this.index        = index;
-            this.position     = position;
-            this.visual       = visual;
+            this.index      = index;
+            this.position   = position;
+            this.visual     = visual;
             this.leakAnimator = animator;
-            this.noneSprite   = noneSprite;
+            this.noneSprite = noneSprite;
+            this.maxCharges = maxCharges;
+            this.remainingCharges = maxCharges;
+        }
+
+        /// <summary>
+        /// Applique une charge de boue. Retourne true si la fissure est réparée.
+        /// </summary>
+        public bool ApplyCharge()
+        {
+            remainingCharges--;
+            return remainingCharges <= 0;
         }
 
         public void Appear()
         {
+            remainingCharges = maxCharges; // Reset les charges à chaque apparition
+
             if (visual != null)
             {
                 Vector3 pos = visual.transform.position;
@@ -377,7 +335,7 @@ public class DamManager : MonoBehaviour
                 visual.transform.position = pos;
                 if (noneSprite != null) visual.sprite = noneSprite;
                 visual.enabled = true;
-                Debug.Log($"[DamCrack {index}] Visual enabled");
+                Debug.Log($"[DamCrack {index}] Visual enabled ({maxCharges} charges)");
             }
             else Debug.LogWarning($"[DamCrack {index}] No SpriteRenderer!");
 
@@ -410,6 +368,7 @@ public class DamManager : MonoBehaviour
             }
 
             isActive = false;
+            remainingCharges = maxCharges;
         }
     }
 }
