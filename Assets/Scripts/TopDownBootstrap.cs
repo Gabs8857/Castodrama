@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Linq; 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -12,6 +13,7 @@ public static class TopDownBootstrap
     private const string DangerZoneName = "ZoneDanger";
     private const string DangerBarName = "DangerBar";
     private const string HungerBarName = "HungerBar";
+    private static readonly string[] GameSceneNames = new string[] { "Rivière", "TUTO" }; // ✅ Scènes où le bootstrap agit
     private static readonly Color PlayerBrown = new Color(0.45f, 0.25f, 0.1f, 1f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -23,6 +25,13 @@ public static class TopDownBootstrap
 
     private static void PerformSetup()
     {
+        // 🔒 Ne configure que dans les scènes autorisées
+        if (!IsValidGameScene(SceneManager.GetActiveScene().name))
+        {
+            Debug.Log($"[TopDownBootstrap] Scène '{SceneManager.GetActiveScene().name}' ignorée");
+            return;
+        }
+
         Debug.Log($"[TopDownBootstrap] Configuration de la scène : {SceneManager.GetActiveScene().name}");
 
         // --- Joueur ---
@@ -132,7 +141,6 @@ public static class TopDownBootstrap
         }
         if (dangerBarObject.GetComponent<DangerBarUI>() == null)
             dangerBarObject.AddComponent<DangerBarUI>();
-        // Sécurité : retirer HungerBarUI s'il traîne ici par erreur
         HungerBarUI wrongHunger = dangerBarObject.GetComponent<HungerBarUI>();
         if (wrongHunger != null)
             Object.DestroyImmediate(wrongHunger);
@@ -148,12 +156,19 @@ public static class TopDownBootstrap
         }
         if (hungerBarObject.GetComponent<HungerBarUI>() == null)
             hungerBarObject.AddComponent<HungerBarUI>();
-        // Sécurité : retirer DangerBarUI s'il traîne ici par erreur
         DangerBarUI wrongDanger = hungerBarObject.GetComponent<DangerBarUI>();
         if (wrongDanger != null)
             Object.DestroyImmediate(wrongDanger);
     }
 #endif
+
+    /// <summary>
+    /// Vérifie si la scène actuelle fait partie des scènes de jeu autorisées.
+    /// </summary>
+    private static bool IsValidGameScene(string sceneName)
+    {
+        return GameSceneNames.Contains(sceneName);
+    }
 
     private static void EnsureDangerZoneIsConfigured()
     {
@@ -172,7 +187,6 @@ public static class TopDownBootstrap
 
     private static void EnsureHudUiExists()
     {
-        // Trouve ou crée le Canvas
         Canvas canvas = Object.FindObjectOfType<Canvas>();
         if (canvas == null)
         {
@@ -183,7 +197,6 @@ public static class TopDownBootstrap
             canvasObject.AddComponent<GraphicRaycaster>();
         }
 
-        // Préfère ATH comme parent si disponible
         Transform parentForBars = canvas.transform;
         GameObject athObject = GameObject.Find("ATH");
         if (athObject != null)
@@ -204,7 +217,6 @@ public static class TopDownBootstrap
         }
         if (dangerBarObject.GetComponent<DangerBarUI>() == null)
             dangerBarObject.AddComponent<DangerBarUI>();
-        // Sécurité : retirer HungerBarUI s'il traîne ici par erreur
         HungerBarUI wrongHunger = dangerBarObject.GetComponent<HungerBarUI>();
         if (wrongHunger != null)
             Object.Destroy(wrongHunger);
@@ -220,7 +232,6 @@ public static class TopDownBootstrap
         }
         if (hungerBarObject.GetComponent<HungerBarUI>() == null)
             hungerBarObject.AddComponent<HungerBarUI>();
-        // Sécurité : retirer DangerBarUI s'il traîne ici par erreur
         DangerBarUI wrongDanger = hungerBarObject.GetComponent<DangerBarUI>();
         if (wrongDanger != null)
             Object.Destroy(wrongDanger);

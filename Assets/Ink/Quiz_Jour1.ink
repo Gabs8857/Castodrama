@@ -20,18 +20,25 @@ VAR explication_q5 = ""
 
 === q1 ===
 ~ question_1 = "Question 1 jour 1 ?"
-Question 1 jour 1 ?
-+ Réponse A # correct
+j1q1: Connaissance du castor !
++ Mammifère ! # correct
     -> q2
-+ Réponse B
++ Poisson !
     -> q2
-+ Réponse C
-    -> q2
-+ [Temps ecoule]
-    ~ reponse_1 = "Pas de réponse"
-    ~ explication_q1 = "Tu n'as pas répondu à temps."
++ Drama ? 
+    -> drama_j1q1
++ jsp
     -> q2
 
+=== drama_j1q1 ===
+Le Pape a historiquement affirmé que le castor est un poisson, ce qui le rend consommable pendant la période de carême.
++ Mammifère !!
+    ->q2
++ Poisson !!
+    ->q2
++ Je sais toujours pas 
+    ->q2
+    
 === q2 ===
 ~ question_2 = "Question 2 jour 1 ?"
 Question 2 jour 1 ?

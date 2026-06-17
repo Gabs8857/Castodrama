@@ -17,6 +17,7 @@ public class StreamQuestionUI : MonoBehaviour
     public GameObject questionPanel;
     public GameObject choicePanel;
     public TMP_Text questionText;
+    public TMP_Text choiceQuestionText;
     public Button replyButton;
     public Button validateButton;
 
@@ -237,6 +238,7 @@ public class StreamQuestionUI : MonoBehaviour
     {
         questionPanel.SetActive(false);
         replyButton.gameObject.SetActive(false);
+        if (choiceQuestionText != null) choiceQuestionText.text = questionText.text;
         choicePanel.SetActive(true);
         validateButton.gameObject.SetActive(true);
         BuildToggles();
@@ -354,7 +356,6 @@ public class StreamQuestionUI : MonoBehaviour
 
         if (story == null) { GameState.Reset(); return; }
 
-        GameState.question_1 = ReadVar("question_1");
         GameState.question_2 = ReadVar("question_2");
         GameState.question_3 = ReadVar("question_3");
         GameState.question_4 = ReadVar("question_4");

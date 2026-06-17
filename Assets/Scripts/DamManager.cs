@@ -47,7 +47,7 @@ public class DamManager : MonoBehaviour
     private int activeCrackCount = 0;
     private int nextCrackIndex = 0;
     private float lastRepairTime = -10f;
-    private const int MAX_CRACKS = 4;
+    public const int MAX_CRACKS = 4;
     private Collider2D damCollider;
 
     private void Start()
