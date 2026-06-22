@@ -95,7 +95,7 @@ public class WillowFoodItem : MonoBehaviour, IBranchSpawner
 
     private void Update()
     {
-        if (isPlayerNearby && Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame)
+        if (isPlayerNearby && InputHelper.BreakPressed())
         {
             TryFeedPlayer(currentPlayerCollider);
         }

@@ -161,16 +161,9 @@ public class RiverBottomTeleport : MonoBehaviour
             if (isInRiverBottomZone)
             {
                 float remainingCooldown = teleportCooldownUntil - Time.time;
-                Debug.Log($"[RiverBottomTeleport] E-key blocked by cooldown ({remainingCooldown:F2}s remaining)");
+                Debug.Log($"[RiverBottomTeleport] Interact blocked by cooldown ({remainingCooldown:F2}s remaining)");
             }
             eKeyPressedLastFrame = false;
-            return;
-        }
-
-        // Zone detection debug
-        if (Keyboard.current == null)
-        {
-            Debug.LogWarning("[RiverBottomTeleport] Keyboard.current is NULL!");
             return;
         }
 
@@ -181,18 +174,18 @@ public class RiverBottomTeleport : MonoBehaviour
             return;
         }
 
-        Debug.Log("[RiverBottomTeleport] ✓ In zone, checking E-key...");
+        Debug.Log("[RiverBottomTeleport] ✓ In zone, checking Interact...");
         
-        bool eKeyPressed = Keyboard.current.eKey.isPressed;
-        Debug.Log($"[RiverBottomTeleport] E-key state: pressed={eKeyPressed}, lastFrame={eKeyPressedLastFrame}");
+        bool interactHeld = InputHelper.InteractHeld();
+        Debug.Log($"[RiverBottomTeleport] Interact state: held={interactHeld}, lastFrame={eKeyPressedLastFrame}");
         
-        if (eKeyPressed && !eKeyPressedLastFrame)
+        if (interactHeld && !eKeyPressedLastFrame)
         {
-            Debug.Log("[RiverBottomTeleport] ✓✓ E pressed - rising to surface!");
+            Debug.Log("[RiverBottomTeleport] ✓✓ Interact held - rising to surface!");
             HandleWaterSceneTransition();
             teleportCooldownUntil = Time.time + TELEPORT_COOLDOWN;
         }
-        eKeyPressedLastFrame = eKeyPressed;
+        eKeyPressedLastFrame = interactHeld;
     }
 
     public void HandleWaterSceneTransition()

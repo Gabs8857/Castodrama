@@ -40,14 +40,14 @@ public class InvisibleWallsManager : MonoBehaviour
 
     private void Update()
     {
-        if (isInRiverZone && Keyboard.current != null)
+        if (isInRiverZone)
         {
-            bool eKeyPressed = Keyboard.current.eKey.isPressed;
-            if (eKeyPressed && !eKeyPressedLastFrame)
+            bool interactHeld = InputHelper.InteractHeld();
+            if (interactHeld && !eKeyPressedLastFrame)
             {
                 ToggleInvisibleWalls();
             }
-            eKeyPressedLastFrame = eKeyPressed;
+            eKeyPressedLastFrame = interactHeld;
         }
         else
         {

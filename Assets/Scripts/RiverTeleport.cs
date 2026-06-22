@@ -117,23 +117,23 @@ public class RiverTeleport : MonoBehaviour
 
     private void Update()
     {
-        // Ignore E-key during teleport cooldown
+        // Ignore interact during teleport cooldown
         if (Time.time < teleportCooldownUntil)
         {
             eKeyPressedLastFrame = false;
             return;
         }
 
-        if (isInRiverZone && Keyboard.current != null)
+        if (isInRiverZone)
         {
-            bool eKeyPressed = Keyboard.current.eKey.isPressed;
-            if (eKeyPressed && !eKeyPressedLastFrame)
+            bool interactHeld = InputHelper.InteractHeld();
+            if (interactHeld && !eKeyPressedLastFrame)
             {
-                Debug.Log("[RiverTeleport] ✓ E pressed - deep swim!");
+                Debug.Log("[RiverTeleport] ✓ Interact held - deep swim!");
                 HandleWaterSceneTransition();
                 teleportCooldownUntil = Time.time + TELEPORT_COOLDOWN;
             }
-            eKeyPressedLastFrame = eKeyPressed;
+            eKeyPressedLastFrame = interactHeld;
         }
         else
         {

@@ -7,11 +7,8 @@ using System.Collections.Generic;
 
 public class StreamQuestionUI : MonoBehaviour
 {
-    [Header("Ink — Quiz par jour")]
-    public TextAsset quizJour1;
-    public TextAsset quizJour2;
-    public TextAsset quizJour3;
-    private Story story;
+    [Header("Ink — Quiz (fichier unique)")]
+    public TextAsset quizInk;
 
     [Header("UI")]
     public GameObject questionPanel;
@@ -25,21 +22,11 @@ public class StreamQuestionUI : MonoBehaviour
     public Transform choicesContainer;
     public GameObject togglePrefab;
 
-    [Header("Timing")]
-    public float startDelay = 1f;
-    public float betweenDelay = 1f;
-
-    [Header("Timer")]
-    public float questionTimeLimit = 50f;
-    public Slider timerBar;
-    public TMP_Text timerText;
-
     [Header("BDD")]
     public QuizDataSender dataSender;
 
     private const int ViewersPerQuestion  = 150;
     private const int SignaturesPerAnswer = 100;
-    private const string TimerChoiceText  = "Temps ecoule";
 
     private class ChoiceData
     {
@@ -48,190 +35,79 @@ public class StreamQuestionUI : MonoBehaviour
         public Toggle toggle;
     }
 
+    private Story story;
     private List<ChoiceData> currentChoices = new List<ChoiceData>();
-    private string lastChosenText = "";
-    private Coroutine timerCoroutine;
-    private bool quizFinished = false;
-    private int currentQuestionNumber = 0;
+    private int currentGlobalIndex = 0;
+    private System.Action onDone;
 
     void Start()
     {
         questionPanel.SetActive(false);
         choicePanel.SetActive(false);
-        if (timerBar != null) timerBar.gameObject.SetActive(false);
         replyButton.onClick.AddListener(OpenChoices);
         validateButton.onClick.AddListener(ValidateChoices);
         validateButton.gameObject.SetActive(false);
-        StartCoroutine(StartQuiz());
     }
 
-    public void StartNewDay()
+    public void TriggerQuestion(string knotName, int globalIndex, System.Action onFinished)
     {
-        quizFinished = false;
-        currentQuestionNumber = 0;
-        lastChosenText = "";
+        if (!GameState.CanStartQuestion())
+        {
+            Debug.Log("[Quiz] Impossible de lancer, mode = " + GameState.Mode);
+            return;
+        }
+
+        if (quizInk == null) { Debug.LogWarning("[Quiz] quizInk non assigné !"); return; }
+
+        onDone = onFinished;
+        currentGlobalIndex = globalIndex;
         currentChoices.Clear();
-        story = null;
-        StartCoroutine(StartQuiz());
+
+        story = new Story(quizInk.text);
+        story.variablesState["current_day"] = GameState.currentDay;
+        story.ChoosePathString(knotName);
+
+        GameState.Set(GameMode.Question);
+        ShowQuestion();
     }
 
-    // Appelé par DayManager quand le timer du jour expire
-    // Coupe les questions en cours et marque les non répondues "Temps écoulé"
     public void ForceFinish()
     {
-        if (quizFinished) return;
-
-        Debug.Log("[Quiz] ForceFinish — arrêt brutal, questions restantes → Temps écoulé");
-
-        StopTimer();
-
-        // Fermer tous les panels
         questionPanel.SetActive(false);
         choicePanel.SetActive(false);
         replyButton.gameObject.SetActive(false);
         validateButton.gameObject.SetActive(false);
-
-        if (story != null)
-        {
-            // Parcourir le reste du story en choisissant "Temps ecoule" à chaque question
-            int safetyLimit = 20;
-            while (safetyLimit-- > 0)
-            {
-                // Avancer le texte jusqu'aux choix
-                while (story.canContinue)
-                {
-                    story.Continue();
-                    if (story.currentChoices.Count > 0) break;
-                }
-
-                if (story.currentChoices.Count == 0) break;
-
-                // Chercher le choix timer
-                int timerIdx = -1;
-                for (int i = 0; i < story.currentChoices.Count; i++)
-                    if (story.currentChoices[i].text == TimerChoiceText) { timerIdx = i; break; }
-
-                int choiceIdx = timerIdx >= 0 ? timerIdx : 0;
-                story.ChooseChoiceIndex(choiceIdx);
-
-                // Enregistrer la non-réponse
-                currentQuestionNumber++;
-                switch (currentQuestionNumber)
-                {
-                    case 1: GameState.reponse_1 = "Pas de réponse"; GameState.explication_q1 = "Temps écoulé."; break;
-                    case 2: GameState.reponse_2 = "Pas de réponse"; GameState.explication_q2 = "Temps écoulé."; break;
-                    case 3: GameState.reponse_3 = "Pas de réponse"; GameState.explication_q3 = "Temps écoulé."; break;
-                    case 4: GameState.reponse_4 = "Pas de réponse"; GameState.explication_q4 = "Temps écoulé."; break;
-                    case 5: GameState.reponse_5 = "Pas de réponse"; GameState.explication_q5 = "Temps écoulé."; break;
-                    case 6: GameState.reponse_6 = "Pas de réponse"; GameState.explication_q6 = "Temps écoulé."; break;
-                }
-            }
-        }
-
-        FinishQuiz();
+        story = null;
+        GameState.Reset();
     }
 
-    TextAsset GetCurrentDayInk()
+    public void StartNewDay() => ForceFinish();
+
+    // -------------------------------------------------------
+
+    void ShowQuestion()
     {
-        switch (GameState.currentDay)
-        {
-            case 1: return quizJour1;
-            case 2: return quizJour2;
-            case 3: return quizJour3;
-            default: return quizJour1;
-        }
-    }
-
-    IEnumerator StartQuiz()
-    {
-        if (!GameState.CanStartQuestion()) yield break;
-
-        TextAsset inkAsset = GetCurrentDayInk();
-        if (inkAsset == null) { Debug.LogWarning("[Quiz] Ink du jour " + GameState.currentDay + " non assigné !"); yield break; }
-
-        story = new Story(inkAsset.text);
-        yield return new WaitForSeconds(startDelay);
-        GameState.Set(GameMode.Question);
-        LoadStep();
-    }
-
-    void LoadStep()
-    {
-        if (quizFinished) return;
-        string currentText = "";
         if (story == null) return;
 
-        if (!story.canContinue && story.currentChoices.Count == 0) { FinishQuiz(); return; }
-
+        string currentText = "";
         while (story.canContinue)
         {
             string line = story.Continue();
-            if (!string.IsNullOrEmpty(line) && line.Trim() != lastChosenText.Trim())
-                currentText += line + "\n";
+            if (!string.IsNullOrWhiteSpace(line))
+                currentText += line.Trim() + "\n";
             if (story.currentChoices.Count > 0) break;
         }
 
-        lastChosenText = "";
+        if (string.IsNullOrWhiteSpace(currentText) && story.currentChoices.Count == 0)
+        {
+            Finish(); return;
+        }
 
-        if (string.IsNullOrEmpty(currentText.Trim()) && story.currentChoices.Count == 0) { FinishQuiz(); return; }
-
-        bool onlyTimer = story.currentChoices.Count == 1 && story.currentChoices[0].text == TimerChoiceText;
-        if (onlyTimer) { FinishQuiz(); return; }
-
-        questionText.text = currentText;
+        questionText.text = currentText.Trim();
         questionPanel.SetActive(true);
         choicePanel.SetActive(false);
         replyButton.gameObject.SetActive(true);
         validateButton.gameObject.SetActive(false);
-        StartTimer();
-    }
-
-    void StartTimer()
-    {
-        if (timerCoroutine != null) StopCoroutine(timerCoroutine);
-        timerCoroutine = StartCoroutine(RunTimer());
-    }
-
-    void StopTimer()
-    {
-        if (timerCoroutine != null) { StopCoroutine(timerCoroutine); timerCoroutine = null; }
-        if (timerBar  != null) timerBar.gameObject.SetActive(false);
-        if (timerText != null) timerText.text = "";
-    }
-
-    IEnumerator RunTimer()
-    {
-        float elapsed = 0f;
-        if (timerBar != null)
-        {
-            timerBar.minValue = 0f; timerBar.maxValue = questionTimeLimit;
-            timerBar.value = questionTimeLimit; timerBar.gameObject.SetActive(true);
-        }
-        while (elapsed < questionTimeLimit)
-        {
-            elapsed += Time.deltaTime;
-            float remaining = questionTimeLimit - elapsed;
-            if (timerBar  != null) timerBar.value = remaining;
-            if (timerText != null) timerText.text  = Mathf.CeilToInt(remaining) + "s";
-            yield return null;
-        }
-        OnTimerExpired();
-    }
-
-    void OnTimerExpired()
-    {
-        StopTimer();
-        questionPanel.SetActive(false);
-        choicePanel.SetActive(false);
-        replyButton.gameObject.SetActive(false);
-        validateButton.gameObject.SetActive(false);
-
-        int timerIdx = -1;
-        for (int i = 0; i < story.currentChoices.Count; i++)
-            if (story.currentChoices[i].text == TimerChoiceText) { timerIdx = i; break; }
-        if (timerIdx >= 0) { lastChosenText = TimerChoiceText; story.ChooseChoiceIndex(timerIdx); }
-
-        StartCoroutine(NextStep());
     }
 
     void OpenChoices()
@@ -253,8 +129,6 @@ public class StreamQuestionUI : MonoBehaviour
 
         foreach (Choice choice in story.currentChoices)
         {
-            if (choice.text == TimerChoiceText) continue;
-
             bool isCorrect = false;
             foreach (string tag in choice.tags ?? new List<string>())
                 if (tag.Trim() == "correct") { isCorrect = true; break; }
@@ -271,75 +145,103 @@ public class StreamQuestionUI : MonoBehaviour
 
     void ValidateChoices()
     {
-        StopTimer();
-
         List<string> checkedTexts = new List<string>();
         List<string> correctTexts = new List<string>();
-
         foreach (ChoiceData cd in currentChoices)
         {
             if (cd.isCorrect) correctTexts.Add(cd.text);
             if (cd.toggle != null && cd.toggle.isOn) checkedTexts.Add(cd.text);
         }
 
-        bool allCorrectChecked = true;
-        bool noWrongChecked = true;
+        ChoiceData chosen = null;
         foreach (ChoiceData cd in currentChoices)
+            if (cd.toggle != null && cd.toggle.isOn) { chosen = cd; break; }
+        if (chosen == null && currentChoices.Count > 0) chosen = currentChoices[0];
+        if (chosen == null) return;
+
+        if (checkedTexts.Count == 0) checkedTexts.Add(chosen.text);
+
+        int choiceIndex = -1;
+        for (int i = 0; i < story.currentChoices.Count; i++)
+            if (story.currentChoices[i].text == chosen.text) { choiceIndex = i; break; }
+        if (choiceIndex < 0) choiceIndex = 0;
+
+        story.ChooseChoiceIndex(choiceIndex);
+        choicePanel.SetActive(false);
+        validateButton.gameObject.SetActive(false);
+
+        // Avancer le texte et capturer le contenu suivant (Drama éventuel)
+        string nextText = "";
+        while (story.canContinue)
         {
-            bool isChecked = cd.toggle != null && cd.toggle.isOn;
-            if (cd.isCorrect && !isChecked) allCorrectChecked = false;
-            if (!cd.isCorrect && isChecked) noWrongChecked = false;
+            string line = story.Continue();
+            if (!string.IsNullOrWhiteSpace(line))
+                nextText += line.Trim() + "\n";
+            if (story.currentChoices.Count > 0) break;
         }
 
-        bool isFullyCorrect = allCorrectChecked && noWrongChecked;
+        // S'il y a d'autres choix (Drama) → afficher le nouvel écran
+        if (story.currentChoices.Count > 0)
+        {
+            questionText.text = nextText.Trim();
+            questionPanel.SetActive(true);
+            choicePanel.SetActive(false);
+            replyButton.gameObject.SetActive(true);
+            validateButton.gameObject.SetActive(false);
+            return;
+        }
+
+        // Fin — on sauvegarde la réponse du DERNIER écran validé
+        bool allCorrectChecked = correctTexts.Count > 0
+            && checkedTexts.TrueForAll(t => correctTexts.Contains(t))
+            && correctTexts.TrueForAll(t => checkedTexts.Contains(t));
 
         GameState.AddViewers(ViewersPerQuestion);
         GameState.AddSignatures(SignaturesPerAnswer);
 
-        int firstCheckedIndex = -1;
-        for (int i = 0; i < story.currentChoices.Count; i++)
-        {
-            if (story.currentChoices[i].text == TimerChoiceText) continue;
-            if (checkedTexts.Contains(story.currentChoices[i].text)) { firstCheckedIndex = i; break; }
-        }
-        if (firstCheckedIndex < 0)
-            for (int i = 0; i < story.currentChoices.Count; i++)
-                if (story.currentChoices[i].text != TimerChoiceText) { firstCheckedIndex = i; break; }
+        string reponsesStr = string.Join(", ", checkedTexts);
+        SaveAnswerToGameState(reponsesStr, allCorrectChecked, correctTexts);
 
-        string reponsesStr = checkedTexts.Count > 0 ? string.Join(", ", checkedTexts) : "Aucune réponse";
-        SaveAnswerToGameState(reponsesStr, isFullyCorrect, correctTexts);
-
-        if (firstCheckedIndex >= 0) { lastChosenText = story.currentChoices[firstCheckedIndex].text; story.ChooseChoiceIndex(firstCheckedIndex); }
-
-        choicePanel.SetActive(false);
-        validateButton.gameObject.SetActive(false);
-        StartCoroutine(NextStep());
+        Finish();
     }
 
+    // Sauvegarde dans les variables RELATIVES (reponse_1 à reponse_6)
+    // en convertissant le globalIndex en index relatif au jour courant
     void SaveAnswerToGameState(string reponsesStr, bool isCorrect, List<string> correctTexts)
     {
-        currentQuestionNumber++;
-        string explication = isCorrect ? "Bonne réponse !" : "Mauvaise réponse. La bonne était : " + string.Join(", ", correctTexts);
+        string explication = isCorrect
+            ? "Bonne reponse !"
+            : "Mauvaise reponse. La bonne etait : " + string.Join(", ", correctTexts);
+
         if (isCorrect) GameState.quizScore++;
 
-        switch (currentQuestionNumber)
-        {
-            case 1: GameState.question_1 = ReadVar("question_1"); GameState.reponse_1 = reponsesStr; GameState.explication_q1 = explication; break;
-            case 2: GameState.question_2 = ReadVar("question_2"); GameState.reponse_2 = reponsesStr; GameState.explication_q2 = explication; break;
-            case 3: GameState.question_3 = ReadVar("question_3"); GameState.reponse_3 = reponsesStr; GameState.explication_q3 = explication; break;
-            case 4: GameState.question_4 = ReadVar("question_4"); GameState.reponse_4 = reponsesStr; GameState.explication_q4 = explication; break;
-            case 5: GameState.question_5 = ReadVar("question_5"); GameState.reponse_5 = reponsesStr; GameState.explication_q5 = explication; break;
-            case 6: GameState.question_6 = ReadVar("question_6"); GameState.reponse_6 = reponsesStr; GameState.explication_q6 = explication; break;
-        }
-    }
+        // Convertit l'index global en index relatif au jour (1-5 ou 1-6)
+        // Jour 1 : globalIndex 1-5  → relatif 1-5
+        // Jour 2 : globalIndex 6-11 → relatif 1-6
+        // Jour 3 : globalIndex 12-17 → relatif 1-6
+        int[] offsets = new int[] { 0, 0, 5, 11 }; // index 0 inutilisé
+        int dayOffset = GameState.currentDay >= 1 && GameState.currentDay <= 3
+            ? offsets[GameState.currentDay] : 0;
+        int relativeIndex = currentGlobalIndex - dayOffset;
 
-    IEnumerator NextStep()
-    {
-        questionPanel.SetActive(false); choicePanel.SetActive(false);
-        replyButton.gameObject.SetActive(false); validateButton.gameObject.SetActive(false);
-        if (!story.canContinue && story.currentChoices.Count == 0) { FinishQuiz(); yield break; }
-        yield return new WaitForSeconds(betweenDelay);
-        LoadStep();
+        Debug.Log("[Quiz] SaveAnswer globalIndex=" + currentGlobalIndex
+            + " jour=" + GameState.currentDay
+            + " relativeIndex=" + relativeIndex
+            + " reponse=" + reponsesStr);
+
+        switch (relativeIndex)
+        {
+            case 1: GameState.reponse_1 = reponsesStr; GameState.explication_q1 = explication; break;
+            case 2: GameState.reponse_2 = reponsesStr; GameState.explication_q2 = explication; break;
+            case 3: GameState.reponse_3 = reponsesStr; GameState.explication_q3 = explication; break;
+            case 4: GameState.reponse_4 = reponsesStr; GameState.explication_q4 = explication; break;
+            case 5: GameState.reponse_5 = reponsesStr; GameState.explication_q5 = explication; break;
+            case 6: GameState.reponse_6 = reponsesStr; GameState.explication_q6 = explication; break;
+            default:
+                Debug.LogWarning("[Quiz] relativeIndex hors range : " + relativeIndex
+                    + " (globalIndex=" + currentGlobalIndex + ", jour=" + GameState.currentDay + ")");
+                break;
+        }
     }
 
     string ReadVar(string varName)
@@ -348,27 +250,15 @@ public class StreamQuestionUI : MonoBehaviour
         catch { return ""; }
     }
 
-    void FinishQuiz()
+    void Finish()
     {
-        if (quizFinished) return;
-        quizFinished = true;
-        StopTimer();
-
-        if (story == null) { GameState.Reset(); return; }
-
-        GameState.question_2 = ReadVar("question_2");
-        GameState.question_3 = ReadVar("question_3");
-        GameState.question_4 = ReadVar("question_4");
-        GameState.question_5 = ReadVar("question_5");
-        GameState.question_6 = ReadVar("question_6");
-
         questionPanel.SetActive(false);
         choicePanel.SetActive(false);
-
-        if (dataSender != null) dataSender.SendResults();
-
         story = null;
         GameState.Reset();
-        Debug.Log("[Quiz] Jour " + GameState.currentDay + " terminé !");
+        Debug.Log("[Quiz] Question " + currentGlobalIndex + " terminée.");
+
+        onDone?.Invoke();
+        onDone = null;
     }
 }

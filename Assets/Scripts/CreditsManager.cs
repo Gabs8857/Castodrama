@@ -34,8 +34,7 @@ public class CreditsManager : MonoBehaviour
     void Update()
     {
         // Echap ou Espace pour retourner au menu
-        if (Keyboard.current.escapeKey.wasPressedThisFrame ||
-            Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (InputHelper.PausePressed() || InputHelper.SubmitPressed())
         {
             GoToMenu();
         }

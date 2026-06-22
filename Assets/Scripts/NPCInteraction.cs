@@ -39,7 +39,7 @@ public class NPCInteraction : MonoBehaviour
     void Update()
     {
         if (playerNearby &&
-            Keyboard.current.eKey.wasPressedThisFrame &&
+            InputHelper.InteractPressed() &&
             !isTalking &&
             currentDialogue != null)
         {

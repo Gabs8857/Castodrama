@@ -43,8 +43,7 @@ public class MudSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current == null) return;
-        if (!Keyboard.current.gKey.wasPressedThisFrame) return;
+        if (!InputHelper.GrabPressed()) return;
 
         if (!characterAnimator.IsSwimmingDeep)
         {

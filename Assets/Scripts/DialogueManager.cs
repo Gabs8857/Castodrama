@@ -42,7 +42,7 @@ public class DialogueManager : MonoBehaviour
     void Update()
     {
         if (waitingForSpace && !choicesVisible &&
-            Keyboard.current.spaceKey.wasPressedThisFrame)
+            InputHelper.SubmitPressed())
             ShowNextLine();
     }
 

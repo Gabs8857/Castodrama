@@ -64,18 +64,18 @@ public class EquippableItem : MonoBehaviour, IZoneDetectable
     {
         timeSinceSpawn += Time.deltaTime;
 
-        if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame)
+        if (InputHelper.GrabPressed())
         {
             if (isPickedUp)
             {
                 // Si déjà en main, on le repose
-                Debug.Log($"[EquippableItem] G pressé pour reposer!");
+                Debug.Log($"[EquippableItem] Grab pressé pour reposer!");
                 Drop();
             }
             else if (player != null && timeSinceSpawn >= pickupDelay)
             {
                 // Si pas en main, on le pick up
-                Debug.Log($"[EquippableItem] G pressé pour grab!");
+                Debug.Log($"[EquippableItem] Grab pressé pour grab!");
                 if (player.PickUpItem(gameObject))
                 {
                     OnItemPickedUp();

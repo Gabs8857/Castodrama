@@ -20,7 +20,7 @@ public class PauseMenu : MonoBehaviour
     void Update()
     {
         // Echap pour ouvrir/fermer le menu pause
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (InputHelper.PausePressed())
         {
             if (isPaused)
                 Resume();

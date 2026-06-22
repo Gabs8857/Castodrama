@@ -15,7 +15,8 @@ public class DayManager : MonoBehaviour
     public StreamQuestionUI streamQuestionUI;
     public NPCInteraction npcInteraction;
     public DayAndNightCycle dayNightCycle;
-    public GrassSpawner grassSpawner; // Référence au GrassSpawner
+    public GrassSpawner grassSpawner;
+    public QuizDataSender dataSender;
 
     [Header("Scènes")]
     public string creditsSceneName = "Credits";
@@ -27,7 +28,6 @@ public class DayManager : MonoBehaviour
 
     void Start()
     {
-        // Lancer le timer du jour 1 au démarrage
         DayAndNightCycle cycle = GetCycle();
         if (cycle != null) cycle.ResumeTimer();
     }
@@ -36,10 +36,18 @@ public class DayManager : MonoBehaviour
     {
         Debug.Log("[DayManager] Jour " + GameState.currentDay + " terminé → TP hutte");
 
+        // Plus de ForceFinish : les zones non visitées restent simplement sans réponse
         if (streamQuestionUI != null)
-            streamQuestionUI.ForceFinish();
+            streamQuestionUI.StartNewDay(); // ferme proprement si une question est en cours
 
         GameState.SaveDayResults();
+
+        // Envoi des réponses du jour — AVANT ResetDayVars qui les remettrait à zéro
+        if (dataSender != null)
+            dataSender.SendDayResults(GameState.currentDay);
+        else
+            Debug.LogWarning("[DayManager] QuizDataSender non assigné !");
+
         GameState.isInHut = true;
         GameState.hasSeenBilan = false;
 
@@ -83,15 +91,16 @@ public class DayManager : MonoBehaviour
         if (player != null && worldSpawnPoint != null)
             player.transform.position = worldSpawnPoint.position;
 
-        // Faire repousser les herbes via le GameState (plus fiable)
+        // Réinitialiser toutes les zones de quiz — true pour inclure les zones désactivées
+        QuizZone[] zones = FindObjectsOfType<QuizZone>(true);
+        Debug.Log("[DayManager] Reset de " + zones.Length + " zones pour le jour " + GameState.currentDay);
+        foreach (QuizZone zone in zones)
+            zone.ResetZone();
+
         if (GameState.grassSpawner != null)
-        {
             GameState.grassSpawner.RespawnAll();
-        }
         else
-        {
-            Debug.LogError("[DayManager] GameState.grassSpawner est NULL ! Vérifie que l'objet GrassSpawner est bien dans la scène et actif.");
-        }
+            Debug.LogError("[DayManager] GameState.grassSpawner est NULL !");
 
         DayAndNightCycle cycle = GetCycle();
         if (cycle != null) cycle.ResumeTimer();
