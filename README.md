@@ -24,7 +24,7 @@ HUB CENTRAL: TopDownPlayerController
 ├─ Mouvement (hérité de PlayerController)
 ├─ Inventaire & ramassage d'items
 ├─ Animations (CharacterAnimator)
-├─ Détection de zones (eau, lave, feu, glace)
+├─ Détection de zones (eau)
 ├─ Gestion de la faim
 └─ Suivi de la caméra (TopDownCameraFollow)
 ```
