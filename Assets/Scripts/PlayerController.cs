@@ -28,6 +28,11 @@ public class PlayerController : MonoBehaviour
         set => moveSpeed = value;
     }
 
+    /// <summary>
+    /// Indique si le joueur est actuellement en mouvement
+    /// </summary>
+    public bool IsMoving => moveInput.sqrMagnitude > inputDeadzone * inputDeadzone;
+
     protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

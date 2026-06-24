@@ -24,7 +24,7 @@ public class MainMenu : MonoBehaviour
 
     void Update()
     {
-        if (InputHelper.DebugTogglePressed())
+        if (Keyboard.current.f9Key.wasPressedThisFrame)
         {
             Debug.Log("[MainMenu] F9 appuyé !");
             StartDebugGame();

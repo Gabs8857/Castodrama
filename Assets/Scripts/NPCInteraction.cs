@@ -1,50 +1,35 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 public class NPCInteraction : MonoBehaviour
 {
     public DialogueManager dialogueManager;
-
-    [Header("Dialogues par jour")]
-    public TextAsset dialogueJour1;
-    public TextAsset dialogueJour2;
-    public TextAsset dialogueJour3;
 
     [Header("Crédits")]
     public string creditsSceneName = "Credits";
 
     private bool playerNearby = false;
     private bool isTalking = false;
-    private TextAsset currentDialogue;
 
-    void Start()
-    {
-        // Charger le bon dialogue selon le jour actuel au démarrage
-        SetDayDialogue(GameState.currentDay);
-    }
-
+    // SetDayDialogue conservé pour compatibilité avec DayManager,
+    // mais rien à faire ici : c'est DialogueManager + current_day qui gèrent le bon ink.
     public void SetDayDialogue(int day)
     {
-        switch (day)
-        {
-            case 1: currentDialogue = dialogueJour1; break;
-            case 2: currentDialogue = dialogueJour2; break;
-            case 3: currentDialogue = dialogueJour3; break;
-            default: currentDialogue = dialogueJour1; break;
-        }
-        Debug.Log("[NPC] Dialogue chargé pour le jour " + day);
+        Debug.Log("[NPC] Dialogue prêt pour le jour " + day);
     }
 
     void Update()
     {
         if (playerNearby &&
-            InputHelper.InteractPressed() &&
-            !isTalking &&
-            currentDialogue != null)
+            Keyboard.current.eKey.wasPressedThisFrame &&
+            !isTalking)
         {
             isTalking = true;
-            dialogueManager.StartDialogue(currentDialogue);
+            dialogueManager.StartDialogue();
+
+            // Hook tuto
+            if (TutorialManager.Instance != null)
+                TutorialManager.Instance.OnPlayerInteracted();
 
             if (dialogueManager.dialogueBlocked)
                 isTalking = false;
@@ -54,7 +39,6 @@ public class NPCInteraction : MonoBehaviour
         {
             isTalking = false;
 
-            // Notifier le DayManager que le bilan est fait
             DayManager dm = FindObjectOfType<DayManager>();
             if (dm != null) dm.OnBilanDone();
         }

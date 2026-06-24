@@ -13,6 +13,11 @@ public class QuizDataSender : MonoBehaviour
         StartCoroutine(PostDayResults(day));
     }
 
+    public void SendResults()
+    {
+        SendDayResults(GameState.currentDay);
+    }
+
     IEnumerator PostDayResults(int day)
     {
         bool isDebugMode = PlayerPrefs.GetInt("debug_mode", 0) == 1;

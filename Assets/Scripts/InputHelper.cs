@@ -8,13 +8,14 @@ using UnityEngine.InputSystem;
 /// (le New Input System remappe les boutons physiques vers ces noms communs).
 /// 
 /// Mapping :
-///   E (Interagir)      → B / Croix selon manette (buttonEast)
+///   E (Interagir)      → B / Croix (buttonEast)
 ///   F (Manger)         → X / Carré (buttonWest)
 ///   G (Grab/Boue)       → RB (rightShoulder)
 ///   C (Casser)         → A / Croix (buttonSouth)
 ///   Espace (Soumettre) → Y / Triangle (buttonNorth) - pour dialogues, menus
-///   Echap (Pause)      → Start ou Select (- sur Switch / View sur Xbox)
-///   Navigation Quiz    → D-Pad Gauche/Droite (horizontal uniquement)
+///   Espace (UI/ATH)    → A / Croix (buttonSouth) - pour valider dans l'ATH
+///   Echap (Pause)      → Start / Select (- sur Switch / View sur Xbox)
+///   Navigation Quiz    → D-Pad Gauche/Droite + Joystick Droit (horizontal)
 ///   Valider/Interagir UI → E / B (même bouton que l'interaction monde)
 /// 
 /// Usage : remplace
@@ -24,7 +25,10 @@ using UnityEngine.InputSystem;
 /// 
 ///   if (Keyboard.current.spaceKey.wasPressedThisFrame)
 /// par
-///   if (InputHelper.SubmitPressed())
+///   if (InputHelper.SubmitPressed()) OU InputHelper.UIConfirmPressed()
+/// 
+///   if (Gamepad.current.leftStick.ReadValue().x ...) pour le mouvement
+///   Utilisez InputHelper.ChoiceHorizontalPressed() pour la navigation UI
 /// </summary>
 public static class InputHelper
 {
@@ -86,7 +90,7 @@ public static class InputHelper
     /// <summary>
     /// Déplacement horizontal dans un choix/quiz.
     /// Retourne -1 (gauche), 1 (droite), 0 (rien).
-    /// Clavier : Q/D + flèches. Manette : D-Pad gauche/droite (+ stick gauche en fallback).
+    /// Clavier : Q/D + flèches. Manette : D-Pad gauche/droite + joystick droit.
     /// </summary>
     public static int ChoiceHorizontalPressed()
     {
@@ -100,9 +104,17 @@ public static class InputHelper
 
         if (Gamepad.current != null)
         {
+            // D-Pad
             if (Gamepad.current.dpad.left.wasPressedThisFrame)
                 return -1;
             if (Gamepad.current.dpad.right.wasPressedThisFrame)
+                return 1;
+            
+            // Joystick droit pour navigation dans les menus/quiz
+            Vector2 rightStick = Gamepad.current.rightStick.ReadValue();
+            if (rightStick.x < -0.5f)
+                return -1;
+            if (rightStick.x > 0.5f)
                 return 1;
         }
 
@@ -132,6 +144,28 @@ public static class InputHelper
     {
         bool keyboard = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
         bool gamepad = Gamepad.current != null && Gamepad.current.buttonNorth.isPressed;
+        return keyboard || gamepad;
+    }
+
+    // ── Confirmer UI (Espace / A) — pour valider dans l'ATH/quiz ────────
+    /// <summary>
+    /// Utilisé pour valider/cocher dans l'ATH (Arbre de Thoughts / quiz).
+    /// Clavier : Espace. Manette : A / Croix (buttonSouth).
+    /// Note : buttonSouth est aussi utilisé pour Casser (C), mais dans un contexte différent.
+    /// Dans l'ATH, on ne casse pas d'arbres, donc pas de conflit pratique.
+    /// </summary>
+    public static bool UIConfirmPressed()
+    {
+        bool keyboard = Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+        bool gamepad = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+        return keyboard || gamepad;
+    }
+
+    // ── Confirmer UI maintenu (Espace / A) ────────────────────────────────
+    public static bool UIConfirmHeld()
+    {
+        bool keyboard = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+        bool gamepad = Gamepad.current != null && Gamepad.current.buttonSouth.isPressed;
         return keyboard || gamepad;
     }
 }

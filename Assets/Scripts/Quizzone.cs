@@ -1,11 +1,13 @@
 using UnityEngine;
 
+// QuizZone — à poser sur chaque collider trigger de la map.
+// Configure dans l'Inspector :
+//   - knotName      : nom du knot ink à jouer (ex: "j1_q1", "j2_q3"...)
+//   - globalIndex   : numéro global de la question (1-17)
+//   - streamQuestionUI : référence au StreamQuestionUI de la scène
+
 public class QuizZone : MonoBehaviour
 {
-    [Header("Jour")]
-    [Tooltip("Jour auquel appartient cette question (1, 2 ou 3). La zone ne se déclenche que ce jour-là.")]
-    public int assignedDay = 1;
-
     [Header("Question associée")]
     [Tooltip("Nom du knot dans Quiz.ink (ex: j1_q1, j2_q4, j3_q2...)")]
     public string knotName;
@@ -16,6 +18,7 @@ public class QuizZone : MonoBehaviour
     [Header("Références")]
     public StreamQuestionUI streamQuestionUI;
 
+    // Rendu optionnel : objet visuel à désactiver quand la zone est épuisée
     [Header("Visuel (optionnel)")]
     public GameObject zoneVisual;
 
@@ -23,56 +26,23 @@ public class QuizZone : MonoBehaviour
 
     void Start()
     {
+        // Ré-activer la zone au démarrage d'un nouveau jour si besoin
         done = false;
-
-        // Force l'activation du zoneVisual d'abord pour s'assurer qu'il est bien là
-        if (zoneVisual != null)
-            zoneVisual.SetActive(true);
-
-        UpdateVisualForCurrentDay();
-
-        Debug.Log("[QuizZone] " + gameObject.name
-            + " | assignedDay=" + assignedDay
-            + " | currentDay=" + GameState.currentDay
-            + " | zoneVisual=" + (zoneVisual == null ? "NULL" : zoneVisual.name)
-            + " | active=" + (zoneVisual != null ? zoneVisual.activeSelf.ToString() : "N/A"));
+        if (zoneVisual != null) zoneVisual.SetActive(true);
     }
 
+    // Appelé par DayManager au début d'un nouveau jour
     public void ResetZone()
     {
         done = false;
         gameObject.SetActive(true);
-
-        // Force l'activation avant de filtrer par jour
-        if (zoneVisual != null)
-            zoneVisual.SetActive(true);
-
-        UpdateVisualForCurrentDay();
-
-        Debug.Log("[QuizZone] ResetZone " + gameObject.name
-            + " | assignedDay=" + assignedDay
-            + " | currentDay=" + GameState.currentDay
-            + " | visible=" + (zoneVisual != null ? zoneVisual.activeSelf.ToString() : "N/A"));
-    }
-
-    void UpdateVisualForCurrentDay()
-    {
-        if (zoneVisual == null) return;
-        bool isRightDay = GameState.currentDay == assignedDay;
-        zoneVisual.SetActive(isRightDay && !done);
+        if (zoneVisual != null) zoneVisual.SetActive(true);
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
         if (done) return;
-
-        if (GameState.currentDay != assignedDay)
-        {
-            Debug.Log("[QuizZone] Zone jour " + assignedDay + " ignorée (jour actuel = " + GameState.currentDay + ")");
-            return;
-        }
-
         if (streamQuestionUI == null) { Debug.LogWarning("[QuizZone] streamQuestionUI non assigné !"); return; }
         if (!GameState.CanStartQuestion()) return;
 
@@ -80,10 +50,15 @@ public class QuizZone : MonoBehaviour
         if (zoneVisual != null) zoneVisual.SetActive(false);
 
         streamQuestionUI.TriggerQuestion(knotName, globalIndex, OnQuestionDone);
+
+        // Hook tuto
+        if (TutorialManager.Instance != null)
+            TutorialManager.Instance.OnQuizTriggered();
     }
 
     void OnQuestionDone()
     {
         Debug.Log("[QuizZone] Question " + globalIndex + " répondue, zone désactivée.");
+        // La zone reste done = true jusqu'au prochain ResetZone (nouveau jour)
     }
 }

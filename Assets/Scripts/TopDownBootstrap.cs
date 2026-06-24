@@ -117,7 +117,7 @@ public static class TopDownBootstrap
     [InitializeOnLoadMethod]
     private static void InitializeInEditor()
     {
-        EditorApplication.delayCall += EnsureHudInEditorHierarchy;
+       EditorApplication.delayCall += EnsureHudInEditorHierarchy;
     }
 
     private static void EnsureHudInEditorHierarchy()

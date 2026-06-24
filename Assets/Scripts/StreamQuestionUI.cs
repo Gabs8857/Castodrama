@@ -40,6 +40,11 @@ public class StreamQuestionUI : MonoBehaviour
     private int currentGlobalIndex = 0;
     private System.Action onDone;
 
+    // Mémorise les choix du premier écran pour la sauvegarde finale
+    // (utile si Drama fait une deuxième passe de choix)
+    private List<ChoiceData> firstChoices = new List<ChoiceData>();
+    private bool firstChoiceDone = false;
+
     void Start()
     {
         questionPanel.SetActive(false);
@@ -53,15 +58,17 @@ public class StreamQuestionUI : MonoBehaviour
     {
         if (!GameState.CanStartQuestion())
         {
-            Debug.Log("[Quiz] Impossible de lancer, mode = " + GameState.Mode);
+            Debug.Log("[Quiz] Impossible de lancer une question, mode = " + GameState.Mode);
             return;
         }
 
-        if (quizInk == null) { Debug.LogWarning("[Quiz] quizInk non assigné !"); return; }
+        if (quizInk == null) { Debug.LogWarning("[Quiz] quizInk non assigne !"); return; }
 
         onDone = onFinished;
         currentGlobalIndex = globalIndex;
         currentChoices.Clear();
+        firstChoices.Clear();
+        firstChoiceDone = false;
 
         story = new Story(quizInk.text);
         story.variablesState["current_day"] = GameState.currentDay;
@@ -81,7 +88,10 @@ public class StreamQuestionUI : MonoBehaviour
         GameState.Reset();
     }
 
-    public void StartNewDay() => ForceFinish();
+    public void StartNewDay()
+    {
+        ForceFinish();
+    }
 
     // -------------------------------------------------------
 
@@ -145,6 +155,41 @@ public class StreamQuestionUI : MonoBehaviour
 
     void ValidateChoices()
     {
+        // Trouver le choix selectionne
+        ChoiceData chosen = null;
+        foreach (ChoiceData cd in currentChoices)
+            if (cd.toggle != null && cd.toggle.isOn) { chosen = cd; break; }
+        if (chosen == null && currentChoices.Count > 0) chosen = currentChoices[0];
+        if (chosen == null) return;
+
+        // Memoriser le premier ecran de choix pour la sauvegarde (avant Drama)
+        if (!firstChoiceDone)
+        {
+            firstChoices = new List<ChoiceData>(currentChoices);
+            firstChoiceDone = true;
+        }
+
+        // Avancer le story avec ce choix
+        int choiceIndex = -1;
+        for (int i = 0; i < story.currentChoices.Count; i++)
+            if (story.currentChoices[i].text == chosen.text) { choiceIndex = i; break; }
+        if (choiceIndex < 0) return;
+
+        story.ChooseChoiceIndex(choiceIndex);
+
+        choicePanel.SetActive(false);
+        validateButton.gameObject.SetActive(false);
+
+        // Si le story a encore du contenu apres ce choix (ex: knot Drama),
+        // on affiche la suite sans sauvegarder encore.
+        if (story.canContinue || story.currentChoices.Count > 0)
+        {
+            ShowQuestion();
+            return;
+        }
+
+        // Plus de contenu : c'est la reponse finale.
+        // On evalue sur les choix du dernier ecran (Drama ou premier ecran).
         List<string> checkedTexts = new List<string>();
         List<string> correctTexts = new List<string>();
         foreach (ChoiceData cd in currentChoices)
@@ -152,46 +197,8 @@ public class StreamQuestionUI : MonoBehaviour
             if (cd.isCorrect) correctTexts.Add(cd.text);
             if (cd.toggle != null && cd.toggle.isOn) checkedTexts.Add(cd.text);
         }
-
-        ChoiceData chosen = null;
-        foreach (ChoiceData cd in currentChoices)
-            if (cd.toggle != null && cd.toggle.isOn) { chosen = cd; break; }
-        if (chosen == null && currentChoices.Count > 0) chosen = currentChoices[0];
-        if (chosen == null) return;
-
         if (checkedTexts.Count == 0) checkedTexts.Add(chosen.text);
 
-        int choiceIndex = -1;
-        for (int i = 0; i < story.currentChoices.Count; i++)
-            if (story.currentChoices[i].text == chosen.text) { choiceIndex = i; break; }
-        if (choiceIndex < 0) choiceIndex = 0;
-
-        story.ChooseChoiceIndex(choiceIndex);
-        choicePanel.SetActive(false);
-        validateButton.gameObject.SetActive(false);
-
-        // Avancer le texte et capturer le contenu suivant (Drama éventuel)
-        string nextText = "";
-        while (story.canContinue)
-        {
-            string line = story.Continue();
-            if (!string.IsNullOrWhiteSpace(line))
-                nextText += line.Trim() + "\n";
-            if (story.currentChoices.Count > 0) break;
-        }
-
-        // S'il y a d'autres choix (Drama) → afficher le nouvel écran
-        if (story.currentChoices.Count > 0)
-        {
-            questionText.text = nextText.Trim();
-            questionPanel.SetActive(true);
-            choicePanel.SetActive(false);
-            replyButton.gameObject.SetActive(true);
-            validateButton.gameObject.SetActive(false);
-            return;
-        }
-
-        // Fin — on sauvegarde la réponse du DERNIER écran validé
         bool allCorrectChecked = correctTexts.Count > 0
             && checkedTexts.TrueForAll(t => correctTexts.Contains(t))
             && correctTexts.TrueForAll(t => checkedTexts.Contains(t));
@@ -205,8 +212,6 @@ public class StreamQuestionUI : MonoBehaviour
         Finish();
     }
 
-    // Sauvegarde dans les variables RELATIVES (reponse_1 à reponse_6)
-    // en convertissant le globalIndex en index relatif au jour courant
     void SaveAnswerToGameState(string reponsesStr, bool isCorrect, List<string> correctTexts)
     {
         string explication = isCorrect
@@ -215,32 +220,27 @@ public class StreamQuestionUI : MonoBehaviour
 
         if (isCorrect) GameState.quizScore++;
 
-        // Convertit l'index global en index relatif au jour (1-5 ou 1-6)
-        // Jour 1 : globalIndex 1-5  → relatif 1-5
-        // Jour 2 : globalIndex 6-11 → relatif 1-6
-        // Jour 3 : globalIndex 12-17 → relatif 1-6
-        int[] offsets = new int[] { 0, 0, 5, 11 }; // index 0 inutilisé
-        int dayOffset = GameState.currentDay >= 1 && GameState.currentDay <= 3
-            ? offsets[GameState.currentDay] : 0;
-        int relativeIndex = currentGlobalIndex - dayOffset;
+        string qText = ReadVar("question_" + currentGlobalIndex);
 
-        Debug.Log("[Quiz] SaveAnswer globalIndex=" + currentGlobalIndex
-            + " jour=" + GameState.currentDay
-            + " relativeIndex=" + relativeIndex
-            + " reponse=" + reponsesStr);
-
-        switch (relativeIndex)
+        switch (currentGlobalIndex)
         {
-            case 1: GameState.reponse_1 = reponsesStr; GameState.explication_q1 = explication; break;
-            case 2: GameState.reponse_2 = reponsesStr; GameState.explication_q2 = explication; break;
-            case 3: GameState.reponse_3 = reponsesStr; GameState.explication_q3 = explication; break;
-            case 4: GameState.reponse_4 = reponsesStr; GameState.explication_q4 = explication; break;
-            case 5: GameState.reponse_5 = reponsesStr; GameState.explication_q5 = explication; break;
-            case 6: GameState.reponse_6 = reponsesStr; GameState.explication_q6 = explication; break;
-            default:
-                Debug.LogWarning("[Quiz] relativeIndex hors range : " + relativeIndex
-                    + " (globalIndex=" + currentGlobalIndex + ", jour=" + GameState.currentDay + ")");
-                break;
+            case 1:  GameState.question_1  = qText; GameState.reponse_1  = reponsesStr; GameState.explication_q1  = explication; break;
+            case 2:  GameState.question_2  = qText; GameState.reponse_2  = reponsesStr; GameState.explication_q2  = explication; break;
+            case 3:  GameState.question_3  = qText; GameState.reponse_3  = reponsesStr; GameState.explication_q3  = explication; break;
+            case 4:  GameState.question_4  = qText; GameState.reponse_4  = reponsesStr; GameState.explication_q4  = explication; break;
+            case 5:  GameState.question_5  = qText; GameState.reponse_5  = reponsesStr; GameState.explication_q5  = explication; break;
+            case 6:  GameState.question_6  = qText; GameState.reponse_6  = reponsesStr; GameState.explication_q6  = explication; break;
+            case 7:  GameState.question_7  = qText; GameState.reponse_7  = reponsesStr; GameState.explication_q7  = explication; break;
+            case 8:  GameState.question_8  = qText; GameState.reponse_8  = reponsesStr; GameState.explication_q8  = explication; break;
+            case 9:  GameState.question_9  = qText; GameState.reponse_9  = reponsesStr; GameState.explication_q9  = explication; break;
+            case 10: GameState.question_10 = qText; GameState.reponse_10 = reponsesStr; GameState.explication_q10 = explication; break;
+            case 11: GameState.question_11 = qText; GameState.reponse_11 = reponsesStr; GameState.explication_q11 = explication; break;
+            case 12: GameState.question_12 = qText; GameState.reponse_12 = reponsesStr; GameState.explication_q12 = explication; break;
+            case 13: GameState.question_13 = qText; GameState.reponse_13 = reponsesStr; GameState.explication_q13 = explication; break;
+            case 14: GameState.question_14 = qText; GameState.reponse_14 = reponsesStr; GameState.explication_q14 = explication; break;
+            case 15: GameState.question_15 = qText; GameState.reponse_15 = reponsesStr; GameState.explication_q15 = explication; break;
+            case 16: GameState.question_16 = qText; GameState.reponse_16 = reponsesStr; GameState.explication_q16 = explication; break;
+            case 17: GameState.question_17 = qText; GameState.reponse_17 = reponsesStr; GameState.explication_q17 = explication; break;
         }
     }
 
@@ -256,7 +256,13 @@ public class StreamQuestionUI : MonoBehaviour
         choicePanel.SetActive(false);
         story = null;
         GameState.Reset();
-        Debug.Log("[Quiz] Question " + currentGlobalIndex + " terminée.");
+        Debug.Log("[Quiz] Question " + currentGlobalIndex + " terminee.");
+
+        if (dataSender != null) dataSender.SendResults();
+
+        // Hook tuto
+        if (TutorialManager.Instance != null)
+            TutorialManager.Instance.OnQuizAnswered();
 
         onDone?.Invoke();
         onDone = null;
