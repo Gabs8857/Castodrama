@@ -16,7 +16,6 @@ Jeu 2D coopératif en Unity 6 LTS.
 - **E** : Interaction contextuelle (Parler aux PNJs, plonger en Nage Profonde).
 - **Echap** : Ouvrir/Fermer le menu pause.
 - **WASD / ZQSD** : Se déplacer.
-- **D-Pad (Manette)** : Zoom caméra.
 
 ## Architecture générale
 
