@@ -11,12 +11,11 @@ using UnityEngine.InputSystem;
 ///   E (Interagir)      → B / Croix (buttonEast)
 ///   F (Manger)         → X / Carré (buttonWest)
 ///   G (Grab/Boue)       → RB (rightShoulder)
-///   C (Casser)         → A / Croix (buttonSouth)
+///   C (Casser)         → B / Croix (buttonSouth)
 ///   Espace (Soumettre) → Y / Triangle (buttonNorth) - pour dialogues, menus
-///   Espace (UI/ATH)    → A / Croix (buttonSouth) - pour valider dans l'ATH
 ///   Echap (Pause)      → Start / Select (- sur Switch / View sur Xbox)
-///   Navigation Quiz    → D-Pad Gauche/Droite + Joystick Droit (horizontal)
-///   Valider/Interagir UI → E / B (même bouton que l'interaction monde)
+///   Navigation Quiz    → Joystick Droit (horizontal)
+///   Valider/Interagir UI → A
 /// 
 /// Usage : remplace
 ///   if (Keyboard.current.eKey.wasPressedThisFrame)

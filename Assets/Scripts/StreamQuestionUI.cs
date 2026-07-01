@@ -1,32 +1,44 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 using Ink.Runtime;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Gère l'affichage des questions de quiz (via Ink) et la validation des réponses.
+/// Supporte la souris (clic sur les Toggle) et la manette (stick droit + A via GamepadToggleNavigator).
+/// </summary>
 public class StreamQuestionUI : MonoBehaviour
 {
     [Header("Ink — Quiz (fichier unique)")]
-    public TextAsset quizInk;
+    [SerializeField] private TextAsset quizInk;
 
     [Header("UI")]
-    public GameObject questionPanel;
-    public GameObject choicePanel;
-    public TMP_Text questionText;
-    public TMP_Text choiceQuestionText;
-    public Button replyButton;
-    public Button validateButton;
+    [SerializeField] private GameObject questionPanel;
+    [SerializeField] private GameObject choicePanel;
+    [SerializeField] private TMP_Text questionText;
+    [SerializeField] private TMP_Text choiceQuestionText;
+    [SerializeField] private Button replyButton;
+    [SerializeField] private Button validateButton;
 
     [Header("Choices")]
-    public Transform choicesContainer;
-    public GameObject togglePrefab;
+    [SerializeField] private Transform choicesContainer;
+    [SerializeField] private GameObject togglePrefab;
+
+    [Header("Gamepad")]
+    [Tooltip("Navigation manette (stick droit + A) sur les propositions")]
+    [SerializeField] private GamepadToggleNavigator gamepadNavigator;
 
     [Header("BDD")]
-    public QuizDataSender dataSender;
+    [SerializeField] private QuizDataSender dataSender;
 
     private const int ViewersPerQuestion  = 150;
     private const int SignaturesPerAnswer = 100;
+
+    // Index relatif → variables GameState par jour
+    private static readonly int[] DayOffsets = { 0, 0, 5, 11 }; // index 0 inutilisé
 
     private class ChoiceData
     {
@@ -36,16 +48,11 @@ public class StreamQuestionUI : MonoBehaviour
     }
 
     private Story story;
-    private List<ChoiceData> currentChoices = new List<ChoiceData>();
+    private readonly List<ChoiceData> currentChoices = new List<ChoiceData>();
     private int currentGlobalIndex = 0;
     private System.Action onDone;
 
-    // Mémorise les choix du premier écran pour la sauvegarde finale
-    // (utile si Drama fait une deuxième passe de choix)
-    private List<ChoiceData> firstChoices = new List<ChoiceData>();
-    private bool firstChoiceDone = false;
-
-    void Start()
+    private void Start()
     {
         questionPanel.SetActive(false);
         choicePanel.SetActive(false);
@@ -54,21 +61,47 @@ public class StreamQuestionUI : MonoBehaviour
         validateButton.gameObject.SetActive(false);
     }
 
+    private void Update()
+    {
+        HandleGamepadButtons();
+    }
+
+    /// <summary>
+    /// Permet d'appuyer sur A pour cliquer le bouton Répondre sur l'écran de question.
+    /// Le bouton Valider, lui, est géré par GamepadToggleNavigator (intégré à la
+    /// navigation des toggles) pour éviter qu'un A destiné à cocher une case
+    /// ne déclenche Valider par accident.
+    /// </summary>
+    private void HandleGamepadButtons()
+    {
+        if (Gamepad.current == null) return;
+        if (!Gamepad.current.buttonSouth.wasPressedThisFrame) return;
+
+        if (questionPanel.activeSelf && replyButton.gameObject.activeSelf && replyButton.interactable)
+        {
+            replyButton.onClick.Invoke();
+        }
+    }
+
+    // ── API publique ─────────────────────────────────────────────────────
+
     public void TriggerQuestion(string knotName, int globalIndex, System.Action onFinished)
     {
         if (!GameState.CanStartQuestion())
         {
-            Debug.Log("[Quiz] Impossible de lancer une question, mode = " + GameState.Mode);
+            Debug.Log("[Quiz] Impossible de lancer, mode = " + GameState.Mode);
             return;
         }
 
-        if (quizInk == null) { Debug.LogWarning("[Quiz] quizInk non assigne !"); return; }
+        if (quizInk == null)
+        {
+            Debug.LogWarning("[Quiz] quizInk non assigné !");
+            return;
+        }
 
         onDone = onFinished;
         currentGlobalIndex = globalIndex;
         currentChoices.Clear();
-        firstChoices.Clear();
-        firstChoiceDone = false;
 
         story = new Story(quizInk.text);
         story.variablesState["current_day"] = GameState.currentDay;
@@ -88,29 +121,20 @@ public class StreamQuestionUI : MonoBehaviour
         GameState.Reset();
     }
 
-    public void StartNewDay()
-    {
-        ForceFinish();
-    }
+    public void StartNewDay() => ForceFinish();
 
-    // -------------------------------------------------------
+    // ── Affichage ────────────────────────────────────────────────────────
 
-    void ShowQuestion()
+    private void ShowQuestion()
     {
         if (story == null) return;
 
-        string currentText = "";
-        while (story.canContinue)
-        {
-            string line = story.Continue();
-            if (!string.IsNullOrWhiteSpace(line))
-                currentText += line.Trim() + "\n";
-            if (story.currentChoices.Count > 0) break;
-        }
+        string currentText = ContinueStoryUntilChoice();
 
         if (string.IsNullOrWhiteSpace(currentText) && story.currentChoices.Count == 0)
         {
-            Finish(); return;
+            Finish();
+            return;
         }
 
         questionText.text = currentText.Trim();
@@ -120,85 +144,91 @@ public class StreamQuestionUI : MonoBehaviour
         validateButton.gameObject.SetActive(false);
     }
 
-    void OpenChoices()
+    private void OpenChoices()
     {
         questionPanel.SetActive(false);
         replyButton.gameObject.SetActive(false);
-        if (choiceQuestionText != null) choiceQuestionText.text = questionText.text;
+
+        if (choiceQuestionText != null)
+            choiceQuestionText.text = questionText.text;
+
         choicePanel.SetActive(true);
         validateButton.gameObject.SetActive(true);
         BuildToggles();
     }
 
-    void BuildToggles()
+    private void BuildToggles()
     {
-        List<GameObject> toDestroy = new List<GameObject>();
-        foreach (Transform c in choicesContainer) if (c != null) toDestroy.Add(c.gameObject);
-        foreach (GameObject go in toDestroy) if (go != null) Destroy(go);
+        ClearContainer();
         currentChoices.Clear();
 
         foreach (Choice choice in story.currentChoices)
         {
             bool isCorrect = false;
             foreach (string tag in choice.tags ?? new List<string>())
-                if (tag.Trim() == "correct") { isCorrect = true; break; }
+            {
+                if (tag.Trim() == "correct")
+                {
+                    isCorrect = true;
+                    break;
+                }
+            }
 
             GameObject obj = Instantiate(togglePrefab, choicesContainer);
             Toggle toggle = obj.GetComponent<Toggle>();
             TMP_Text label = obj.GetComponentInChildren<TMP_Text>(true);
+
             if (label != null) label.text = choice.text;
             if (toggle != null) toggle.isOn = false;
 
             currentChoices.Add(new ChoiceData { text = choice.text, isCorrect = isCorrect, toggle = toggle });
         }
+
+        // Branche la navigation manette sur les toggles nouvellement créés
+        if (gamepadNavigator != null)
+            gamepadNavigator.SetContainer(choicesContainer);
     }
 
-    void ValidateChoices()
+    private void ClearContainer()
     {
-        // Trouver le choix selectionne
-        ChoiceData chosen = null;
-        foreach (ChoiceData cd in currentChoices)
-            if (cd.toggle != null && cd.toggle.isOn) { chosen = cd; break; }
-        if (chosen == null && currentChoices.Count > 0) chosen = currentChoices[0];
+        List<GameObject> toDestroy = new List<GameObject>();
+        foreach (Transform c in choicesContainer)
+            if (c != null) toDestroy.Add(c.gameObject);
+
+        foreach (GameObject go in toDestroy)
+            if (go != null) Destroy(go);
+    }
+
+    // ── Validation ───────────────────────────────────────────────────────
+
+    private void ValidateChoices()
+    {
+        ChoiceData chosen = GetCheckedChoiceOrFallback();
         if (chosen == null) return;
 
-        // Memoriser le premier ecran de choix pour la sauvegarde (avant Drama)
-        if (!firstChoiceDone)
-        {
-            firstChoices = new List<ChoiceData>(currentChoices);
-            firstChoiceDone = true;
-        }
+        List<string> checkedTexts = GetCheckedTexts(chosen);
+        List<string> correctTexts = GetCorrectTexts();
 
-        // Avancer le story avec ce choix
-        int choiceIndex = -1;
-        for (int i = 0; i < story.currentChoices.Count; i++)
-            if (story.currentChoices[i].text == chosen.text) { choiceIndex = i; break; }
-        if (choiceIndex < 0) return;
-
+        int choiceIndex = FindStoryChoiceIndex(chosen.text);
         story.ChooseChoiceIndex(choiceIndex);
 
         choicePanel.SetActive(false);
         validateButton.gameObject.SetActive(false);
 
-        // Si le story a encore du contenu apres ce choix (ex: knot Drama),
-        // on affiche la suite sans sauvegarder encore.
-        if (story.canContinue || story.currentChoices.Count > 0)
+        string nextText = ContinueStoryUntilChoice();
+
+        // S'il y a d'autres choix (ex: enchaînement Drama) → nouvel écran
+        if (story.currentChoices.Count > 0)
         {
-            ShowQuestion();
+            questionText.text = nextText.Trim();
+            questionPanel.SetActive(true);
+            choicePanel.SetActive(false);
+            replyButton.gameObject.SetActive(true);
+            validateButton.gameObject.SetActive(false);
             return;
         }
 
-        // Plus de contenu : c'est la reponse finale.
-        // On evalue sur les choix du dernier ecran (Drama ou premier ecran).
-        List<string> checkedTexts = new List<string>();
-        List<string> correctTexts = new List<string>();
-        foreach (ChoiceData cd in currentChoices)
-        {
-            if (cd.isCorrect) correctTexts.Add(cd.text);
-            if (cd.toggle != null && cd.toggle.isOn) checkedTexts.Add(cd.text);
-        }
-        if (checkedTexts.Count == 0) checkedTexts.Add(chosen.text);
-
+        // Fin de la question — sauvegarde du dernier écran validé
         bool allCorrectChecked = correctTexts.Count > 0
             && checkedTexts.TrueForAll(t => correctTexts.Contains(t))
             && correctTexts.TrueForAll(t => checkedTexts.Contains(t));
@@ -206,13 +236,76 @@ public class StreamQuestionUI : MonoBehaviour
         GameState.AddViewers(ViewersPerQuestion);
         GameState.AddSignatures(SignaturesPerAnswer);
 
-        string reponsesStr = string.Join(", ", checkedTexts);
-        SaveAnswerToGameState(reponsesStr, allCorrectChecked, correctTexts);
-
+        SaveAnswerToGameState(string.Join(", ", checkedTexts), allCorrectChecked, correctTexts);
         Finish();
     }
 
-    void SaveAnswerToGameState(string reponsesStr, bool isCorrect, List<string> correctTexts)
+    private ChoiceData GetCheckedChoiceOrFallback()
+    {
+        foreach (ChoiceData cd in currentChoices)
+            if (cd.toggle != null && cd.toggle.isOn)
+                return cd;
+
+        // Aucun choix coché → fallback sur le premier (évite de bloquer le joueur)
+        return currentChoices.Count > 0 ? currentChoices[0] : null;
+    }
+
+    private List<string> GetCheckedTexts(ChoiceData fallbackChoice)
+    {
+        List<string> checkedTexts = new List<string>();
+        foreach (ChoiceData cd in currentChoices)
+            if (cd.toggle != null && cd.toggle.isOn)
+                checkedTexts.Add(cd.text);
+
+        if (checkedTexts.Count == 0)
+            checkedTexts.Add(fallbackChoice.text);
+
+        return checkedTexts;
+    }
+
+    private List<string> GetCorrectTexts()
+    {
+        List<string> correctTexts = new List<string>();
+        foreach (ChoiceData cd in currentChoices)
+            if (cd.isCorrect)
+                correctTexts.Add(cd.text);
+        return correctTexts;
+    }
+
+    private int FindStoryChoiceIndex(string choiceText)
+    {
+        for (int i = 0; i < story.currentChoices.Count; i++)
+            if (story.currentChoices[i].text == choiceText)
+                return i;
+        return 0;
+    }
+
+    /// <summary>
+    /// Avance l'histoire Ink jusqu'au prochain point de choix, en concaténant le texte affiché.
+    /// </summary>
+    private string ContinueStoryUntilChoice()
+    {
+        string text = "";
+        while (story.canContinue)
+        {
+            string line = story.Continue();
+            if (!string.IsNullOrWhiteSpace(line))
+                text += line.Trim() + "\n";
+            if (story.currentChoices.Count > 0) break;
+        }
+        return text;
+    }
+
+    // ── Sauvegarde ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Sauvegarde dans les variables relatives (reponse_1 à reponse_6) en convertissant
+    /// le globalIndex en index relatif au jour courant.
+    /// Jour 1 : globalIndex 1-5  → relatif 1-5
+    /// Jour 2 : globalIndex 6-11 → relatif 1-6
+    /// Jour 3 : globalIndex 12-17 → relatif 1-6
+    /// </summary>
+    private void SaveAnswerToGameState(string reponsesStr, bool isCorrect, List<string> correctTexts)
     {
         string explication = isCorrect
             ? "Bonne reponse !"
@@ -220,49 +313,40 @@ public class StreamQuestionUI : MonoBehaviour
 
         if (isCorrect) GameState.quizScore++;
 
-        string qText = ReadVar("question_" + currentGlobalIndex);
+        int dayOffset = (GameState.currentDay >= 1 && GameState.currentDay <= 3)
+            ? DayOffsets[GameState.currentDay]
+            : 0;
+        int relativeIndex = currentGlobalIndex - dayOffset;
 
-        switch (currentGlobalIndex)
+        Debug.Log($"[Quiz] SaveAnswer globalIndex={currentGlobalIndex} jour={GameState.currentDay} "
+            + $"relativeIndex={relativeIndex} reponse={reponsesStr}");
+
+        switch (relativeIndex)
         {
-            case 1:  GameState.question_1  = qText; GameState.reponse_1  = reponsesStr; GameState.explication_q1  = explication; break;
-            case 2:  GameState.question_2  = qText; GameState.reponse_2  = reponsesStr; GameState.explication_q2  = explication; break;
-            case 3:  GameState.question_3  = qText; GameState.reponse_3  = reponsesStr; GameState.explication_q3  = explication; break;
-            case 4:  GameState.question_4  = qText; GameState.reponse_4  = reponsesStr; GameState.explication_q4  = explication; break;
-            case 5:  GameState.question_5  = qText; GameState.reponse_5  = reponsesStr; GameState.explication_q5  = explication; break;
-            case 6:  GameState.question_6  = qText; GameState.reponse_6  = reponsesStr; GameState.explication_q6  = explication; break;
-            case 7:  GameState.question_7  = qText; GameState.reponse_7  = reponsesStr; GameState.explication_q7  = explication; break;
-            case 8:  GameState.question_8  = qText; GameState.reponse_8  = reponsesStr; GameState.explication_q8  = explication; break;
-            case 9:  GameState.question_9  = qText; GameState.reponse_9  = reponsesStr; GameState.explication_q9  = explication; break;
-            case 10: GameState.question_10 = qText; GameState.reponse_10 = reponsesStr; GameState.explication_q10 = explication; break;
-            case 11: GameState.question_11 = qText; GameState.reponse_11 = reponsesStr; GameState.explication_q11 = explication; break;
-            case 12: GameState.question_12 = qText; GameState.reponse_12 = reponsesStr; GameState.explication_q12 = explication; break;
-            case 13: GameState.question_13 = qText; GameState.reponse_13 = reponsesStr; GameState.explication_q13 = explication; break;
-            case 14: GameState.question_14 = qText; GameState.reponse_14 = reponsesStr; GameState.explication_q14 = explication; break;
-            case 15: GameState.question_15 = qText; GameState.reponse_15 = reponsesStr; GameState.explication_q15 = explication; break;
-            case 16: GameState.question_16 = qText; GameState.reponse_16 = reponsesStr; GameState.explication_q16 = explication; break;
-            case 17: GameState.question_17 = qText; GameState.reponse_17 = reponsesStr; GameState.explication_q17 = explication; break;
+            case 1: GameState.reponse_1 = reponsesStr; GameState.explication_q1 = explication; break;
+            case 2: GameState.reponse_2 = reponsesStr; GameState.explication_q2 = explication; break;
+            case 3: GameState.reponse_3 = reponsesStr; GameState.explication_q3 = explication; break;
+            case 4: GameState.reponse_4 = reponsesStr; GameState.explication_q4 = explication; break;
+            case 5: GameState.reponse_5 = reponsesStr; GameState.explication_q5 = explication; break;
+            case 6: GameState.reponse_6 = reponsesStr; GameState.explication_q6 = explication; break;
+            default:
+                Debug.LogWarning($"[Quiz] relativeIndex hors range : {relativeIndex} "
+                    + $"(globalIndex={currentGlobalIndex}, jour={GameState.currentDay})");
+                break;
         }
     }
 
-    string ReadVar(string varName)
-    {
-        try { return story.variablesState[varName]?.ToString() ?? ""; }
-        catch { return ""; }
-    }
-
-    void Finish()
+    private void Finish()
     {
         questionPanel.SetActive(false);
         choicePanel.SetActive(false);
         story = null;
         GameState.Reset();
-        Debug.Log("[Quiz] Question " + currentGlobalIndex + " terminee.");
 
-        if (dataSender != null) dataSender.SendResults();
+        Debug.Log("[Quiz] Question " + currentGlobalIndex + " terminée.");
 
-        // Hook tuto
-        if (TutorialManager.Instance != null)
-            TutorialManager.Instance.OnQuizAnswered();
+        if (dataSender != null)
+            dataSender.SendDayResults(GameState.currentDay);
 
         onDone?.Invoke();
         onDone = null;

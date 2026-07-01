@@ -91,6 +91,7 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
 
     private SpriteResolver spriteResolver;
     private Rigidbody2D rb;
+    private CastoreumAnimator castoreumAnimator;
     private float timeSinceLastSwitch = 0f;
     private int currentFrameIndex = 0;
     private bool isSwimming = false;
@@ -107,6 +108,7 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
     {
         spriteResolver = GetComponent<SpriteResolver>();
         rb = GetComponent<Rigidbody2D>();
+        castoreumAnimator = GetComponent<CastoreumAnimator>();
         
         if (spriteResolver == null)
         {
@@ -121,6 +123,11 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
 
     private void Update()
     {
+        // 🦫 Pendant le claim de castoréum, CastoreumAnimator gère tout seul
+        // l'animation et le blocage de mouvement — CharacterAnimator se met en pause.
+        if (castoreumAnimator != null && castoreumAnimator.IsClaiming)
+            return;
+
         if (spriteResolver == null || rb == null)
             return;
 
@@ -153,21 +160,7 @@ public class CharacterAnimator : MonoBehaviour, IZoneDetectable
         // Mémorise la dernière direction de mouvement (pour les animations)
         if (isMoving)
         {
-            Vector2 newDir = rb.linearVelocity.normalized;
-
-            // 🔥 FIX DÉCALAGE FLIP : si le signe X change (gauche↔droite),
-            // on snap immédiatement la direction lissée sans interpolation
-            // pour éviter que l'animation reste décalée pendant le flip
-            bool horizontalFlip = (newDir.x > 0f && lastMovementDirection.x < 0f)
-                                || (newDir.x < 0f && lastMovementDirection.x > 0f);
-            if (horizontalFlip)
-            {
-                smoothedMovementDirection = newDir;
-                currentFrameIndex = 0;
-                timeSinceLastSwitch = 0f;
-            }
-
-            lastMovementDirection = newDir;
+            lastMovementDirection = rb.linearVelocity.normalized;
         }
 
         // 🔥 LISSE LA DIRECTION pour éviter les changements brusques (élimine le ping)

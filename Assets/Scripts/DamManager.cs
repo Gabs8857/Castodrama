@@ -268,6 +268,18 @@ public class DamManager : MonoBehaviour
     public int GetCurrentCrackCount() => activeCrackCount;
     public float GetElapsedTime() => elapsedTime;
 
+    /// <summary>
+    /// Retourne la position monde d'une fissure par son index.
+    /// Utilisé par MudCloud pour calculer la distance jusqu'à la fissure ciblée.
+    /// </summary>
+    public Vector2 GetCrackPosition(int index)
+    {
+        if (index < 0 || index >= MAX_CRACKS || crackPositions[index] == null)
+            return transform.position; // fallback : position du barrage lui-même
+
+        return crackPositions[index].position;
+    }
+
     public int GetNearestActiveCrackIndex(Vector2 position)
     {
         int nearest = -1;

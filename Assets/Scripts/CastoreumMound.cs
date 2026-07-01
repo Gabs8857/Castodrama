@@ -2,6 +2,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 
+/// <summary>
+/// Butte à castoréum que le joueur peut marquer (claim) en restant à proximité
+/// et en maintenant l'interaction. Pendant le claim, le joueur est figé en
+/// animation "Castoreum" via CastoreumAnimator (mouvement bloqué).
+/// </summary>
 public class CastoreumMound : MonoBehaviour
 {
     [Header("💡 Lumière")]
@@ -22,6 +27,7 @@ public class CastoreumMound : MonoBehaviour
 
     private bool isClaiming = false;
     private Transform playerTransform;
+    private CastoreumAnimator playerCastoreumAnimator;
     private bool playerInRange = false;
 
     // ========== START ==========
@@ -30,18 +36,12 @@ public class CastoreumMound : MonoBehaviour
         if (moundLight == null)
             moundLight = GetComponentInChildren<Light2D>();
 
-        // 🔍 VÉRIFIE LE COLLIDER
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
-        {
             Debug.Log($"[CastoreumMound] {gameObject.name} | Collider: {col.name} | isTrigger: {col.isTrigger} | Type: {col.GetType().Name}");
-        }
         else
-        {
             Debug.LogError($"[CastoreumMound] ❌ {gameObject.name} | AUCUN COLLIDER TROUVÉ !");
-        }
 
-        // 🔍 VÉRIFIE LA LUMIÈRE
         if (moundLight != null)
             Debug.Log($"[CastoreumMound] {gameObject.name} | Light2D trouvée: {moundLight.name}");
         else
@@ -53,56 +53,78 @@ public class CastoreumMound : MonoBehaviour
     // ========== UPDATE ==========
     private void Update()
     {
-        // 🔍 VÉRIFIE LE JOUEUR
         if (playerTransform == null)
         {
-            playerTransform = FindObjectOfType<TopDownPlayerController>()?.transform;
-            if (playerTransform == null)
+            TopDownPlayerController controller = FindObjectOfType<TopDownPlayerController>();
+            if (controller == null)
             {
                 Debug.LogError($"[CastoreumMound] ❌ {gameObject.name} | TopDownPlayerController INTROUVABLE !");
                 return;
             }
-            else
-            {
-                Debug.Log($"[CastoreumMound] {gameObject.name} | Joueur trouvé: {playerTransform.name}");
-            }
+
+            playerTransform = controller.transform;
+            playerCastoreumAnimator = controller.GetComponent<CastoreumAnimator>();
+
+            if (playerCastoreumAnimator == null)
+                Debug.LogWarning($"[CastoreumMound] ⚠ CastoreumAnimator introuvable sur le joueur !");
+
+            Debug.Log($"[CastoreumMound] {gameObject.name} | Joueur trouvé: {playerTransform.name}");
         }
 
-        // 🔍 AFFICHE LA DISTANCE EN TEMPS RÉEL
         float distance = Vector2.Distance(transform.position, playerTransform.position);
         bool newPlayerInRange = distance <= interactionRange;
 
         if (newPlayerInRange != playerInRange)
         {
             playerInRange = newPlayerInRange;
-            Debug.Log($"[CastoreumMound] {gameObject.name} | " +
-                      $"Distance: {distance:F2} | " +
-                      $"Range: {interactionRange} | " +
-                      $"InRange: {playerInRange}");
+            Debug.Log($"[CastoreumMound] {gameObject.name} | Distance: {distance:F2} | Range: {interactionRange} | InRange: {playerInRange}");
+
+            // Si le joueur sort de la zone, on coupe le claim proprement
+            if (!playerInRange && isClaiming)
+                StopClaim();
         }
 
-        // 🔍 VÉRIFIE L'APPAREIL SUR E
-        if (playerInRange && InputHelper.InteractPressed())
+        // Démarrage du claim
+        if (playerInRange && InputHelper.InteractPressed() && claimProgress < 1f && !isClaiming)
         {
             Debug.Log($"[CastoreumMound] {gameObject.name} | 🎮 INTERACT PRESSÉ ! | ClaimProgress: {claimProgress:P0}");
-            if (claimProgress < 1f)
-            {
-                isClaiming = true;
-            }
+            StartClaim();
         }
 
-        // 🔍 CLAIM EN COURS
+        // Claim en cours
         if (isClaiming && playerInRange)
         {
             claimProgress = Mathf.Min(1f, claimProgress + claimSpeed * Time.deltaTime);
             UpdateLightColor();
             Debug.Log($"[CastoreumMound] {gameObject.name} | Claim: {claimProgress:P0}");
+
+            if (claimProgress >= 1f)
+            {
+                Debug.Log($"[CastoreumMound] {gameObject.name} | ✓✓✓ BUTTE ENTIÈREMENT MARQUÉE ✓✓✓");
+                StopClaim();
+            }
         }
         else if (isClaiming && !playerInRange)
         {
             Debug.LogWarning($"[CastoreumMound] {gameObject.name} | ⚠️ Claim interrompu (joueur trop loin) !");
-            isClaiming = false;
+            StopClaim();
         }
+    }
+
+    private void StartClaim()
+    {
+        isClaiming = true;
+
+        if (playerCastoreumAnimator != null)
+            playerCastoreumAnimator.StartClaiming();
+    }
+
+    private void StopClaim()
+    {
+        isClaiming = false;
+
+        if (playerCastoreumAnimator != null)
+            playerCastoreumAnimator.StopClaiming();
     }
 
     // ========== TRIGGERS ==========
@@ -111,9 +133,7 @@ public class CastoreumMound : MonoBehaviour
         Debug.Log($"[CastoreumMound] {gameObject.name} | 🔘 OnTriggerEnter2D avec: {other.name} | Tag: {other.tag} | Layer: {LayerMask.LayerToName(other.gameObject.layer)}");
 
         if (IsPlayer(other))
-        {
             Debug.Log($"[CastoreumMound] {gameObject.name} | ✅ CONTACT AVEC LE JOUEUR !");
-        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -129,18 +149,15 @@ public class CastoreumMound : MonoBehaviour
         bool isPlayer = byTag || byComponent;
 
         if (debugLogs && isPlayer)
-        {
             Debug.Log($"[CastoreumMound] {gameObject.name} | Joueur détecté via: {(byTag ? "TAG" : "COMPOSANT")}");
-        }
+
         return isPlayer;
     }
 
     private void UpdateLightColor()
     {
         if (moundLight != null)
-        {
             moundLight.color = Color.Lerp(unclaimedColor, claimedColor, claimProgress);
-        }
     }
 
     public float GetClaimProgress() => claimProgress;

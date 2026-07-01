@@ -1,56 +1,75 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Ink.Runtime;
 
+[RequireComponent(typeof(Collider2D))] // ← CHANGÉ POUR COLLIDER2D
 public class NPCInteraction : MonoBehaviour
 {
-    public DialogueManager dialogueManager;
+    [Header("Ink à lancer")]
+    [SerializeField] private TextAsset inkJSON;
 
-    [Header("Crédits")]
-    public string creditsSceneName = "Credits";
+    [Header("Tag détecté")]
+    [SerializeField] private string tagDetecte = "Player";
 
-    private bool playerNearby = false;
-    private bool isTalking = false;
+    [Header("Variable requise")]
+    [SerializeField] private string gateVariable = "";
 
-    // SetDayDialogue conservé pour compatibilité avec DayManager,
-    // mais rien à faire ici : c'est DialogueManager + current_day qui gèrent le bon ink.
-    public void SetDayDialogue(int day)
+    private bool dejaLance = false;
+
+    void Awake()
     {
-        Debug.Log("[NPC] Dialogue prêt pour le jour " + day);
-    }
-
-    void Update()
-    {
-        if (playerNearby &&
-            Keyboard.current.eKey.wasPressedThisFrame &&
-            !isTalking)
+        Collider2D col = GetComponent<Collider2D>(); // ← CHANGÉ POUR COLLIDER2D
+        if (col == null)
         {
-            isTalking = true;
-            dialogueManager.StartDialogue();
-
-            // Hook tuto
-            if (TutorialManager.Instance != null)
-                TutorialManager.Instance.OnPlayerInteracted();
-
-            if (dialogueManager.dialogueBlocked)
-                isTalking = false;
+            Debug.LogError($"{name}: AUCUN COLLIDER2D TROUVÉ ! Ajoute un Box Collider 2D et coche Is Trigger.", this);
+            return;
         }
-
-        if (isTalking && dialogueManager.dialogueFinished)
+        if (!col.isTrigger)
         {
-            isTalking = false;
-
-            DayManager dm = FindObjectOfType<DayManager>();
-            if (dm != null) dm.OnBilanDone();
+            Debug.LogWarning($"{name}: Le Collider2D doit être en mode 'Is Trigger' !", this);
+            col.isTrigger = true;
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    // ← CHANGÉ POUR OnTriggerEnter2D (2D)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player")) playerNearby = true;
+        if (dejaLance || !other.CompareTag(tagDetecte)) return;
+
+        if (inkJSON == null)
+        {
+            Debug.LogError($"{name}: Ink JSON non assigné !", this);
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(gateVariable) && !Autorise()) return;
+
+        if (DialogueManager.Instance == null)
+        {
+            Debug.LogError("[NPCInteraction] DialogueManager.Instance est NULL !");
+            return;
+        }
+
+        Debug.Log($"[NPCInteraction] ✅ Lancement du dialogue: {inkJSON.name}");
+        dejaLance = true;
+        DialogueManager.Instance.StartDialogue(inkJSON);
+        Destroy(gameObject);
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    bool Autorise()
     {
-        if (other.CompareTag("Player")) playerNearby = false;
+        if (string.IsNullOrWhiteSpace(gateVariable)) return true;
+
+        var vars = DialogueManager.Instance?.DialogueVariables?.variables;
+        if (vars == null) return false;
+
+        if (vars.TryGetValue(gateVariable, out var value))
+        {
+            if (value is BoolValue boolValue) return boolValue.value;
+            if (value is IntValue intValue) return intValue.value != 0;
+        }
+        return false;
     }
+
+    public void SetDayDialogue(int day) { }
 }
