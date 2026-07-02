@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class TopDownHunger : MonoBehaviour
 {
     [SerializeField]
@@ -35,7 +34,6 @@ public class TopDownHunger : MonoBehaviour
     public float CurrentHunger => currentHunger;
     public float NormalizedHunger => maxHunger <= 0f ? 0f : Mathf.Clamp01(currentHunger / maxHunger);
     public int StarveCount => starveCount;
-
     private void Update()
     {
         if (drainPerSecond <= 0f)

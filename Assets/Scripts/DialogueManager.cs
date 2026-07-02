@@ -8,27 +8,30 @@ using System.Collections.Generic;
 public class DialogueManager : MonoBehaviour
 {
     // =========================================================================
-    // RÉFÉRENCES UI
+    // REFERENCES UI
     // =========================================================================
-    [Header("UI")]
+    [Header("UI Elements")]
     public GameObject dialoguePanel;
     public TMP_Text dialogueText;
 
-    [Header("Portrait")]
+    [Header("Portrait Settings")]
     public Image portraitImage;
     public string[] characterNames;
     public Sprite[] characterSprites;
 
-    [Header("Choices")]
+    [Header("Choice System")]
     public Transform choicesContainer;
     public GameObject choicePrefab;
 
+    [Header("Map System")]
+    public GameObject mapScreen; // Assigne ton GameObject de carte ici
+
     // =========================================================================
-    // FICHIERS INK
+    // INK FILES
     // =========================================================================
-    [Header("Ink Files")]
-    public TextAsset dialoguesInk; // Fichier par défaut (peut être vide)
-    public TextAsset globalsJSON;  // Variables globales (ex: globals.ink)
+    [Header("Ink Configuration")]
+    public TextAsset dialoguesInk; // Peut être vide (on utilise startKnot)
+    public TextAsset globalsJSON;  // Fichier avec les variables globales
 
     [Header("Character Colors")]
     public string[] characterColors = new string[]
@@ -40,7 +43,7 @@ public class DialogueManager : MonoBehaviour
     };
 
     // =========================================================================
-    // SINGLETON ET VARIABLES
+    // SINGLETON & VARIABLES
     // =========================================================================
     public static DialogueManager Instance { get; private set; }
     public DialogueVariables DialogueVariables { get; private set; }
@@ -65,14 +68,13 @@ public class DialogueManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // Initialiser les variables globales
             if (globalsJSON != null)
             {
                 DialogueVariables = new DialogueVariables(globalsJSON);
             }
             else
             {
-                Debug.LogWarning("[DialogueManager] globalsJSON non assigné ! Les variables ne seront pas persistées.");
+                Debug.LogWarning("[DialogueManager] globalsJSON non assigné !");
             }
         }
         else
@@ -83,30 +85,43 @@ public class DialogueManager : MonoBehaviour
 
     void Start()
     {
-        dialoguePanel?.SetActive(false);
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(false);
+        }
     }
 
     void Update()
     {
-        if (waitingForSpace && !choicesVisible && Keyboard.current?.spaceKey.wasPressedThisFrame == true)
+        if (waitingForSpace && !choicesVisible && Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             ShowNextLine();
+        }
+
+        // Fermeture manuelle de la carte avec ÉCHAP
+        if (mapScreen != null && mapScreen.activeSelf && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            mapScreen.SetActive(false);
         }
     }
 
     // =========================================================================
-    // DÉMARRAGE DES DIALOGUES
+    // DÉMARRAGE DES DIALOGUES (AVEC SUPPORT DES KNOTS)
     // =========================================================================
     public void EnterDialogueMode(TextAsset inkJSON)
     {
         StartDialogue(inkJSON);
     }
 
-    public void StartDialogue(TextAsset inkJSON = null)
+    /// <summary>
+    /// Démarre un dialogue avec un fichier Ink et un Knot de départ optionnel
+    /// </summary>
+    /// <param name="inkJSON">Fichier Ink à utiliser</param>
+    /// <param name="startKnot">Nom du Knot de départ (ex: "tutodebut")</param>
+    public void StartDialogue(TextAsset inkJSON = null, string startKnot = null)
     {
         dialogueBlocked = false;
 
-        // Vérifier si le dialogue est autorisé
         if (!GameState.CanStartDialogue())
         {
             Debug.Log("[DialogueManager] Dialogue bloqué par GameState");
@@ -114,7 +129,6 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        // Utiliser le fichier Ink du trigger, ou le fichier par défaut
         TextAsset dialogueToUse = inkJSON ?? dialoguesInk;
         if (dialogueToUse == null)
         {
@@ -135,6 +149,13 @@ public class DialogueManager : MonoBehaviour
         GameState.Set(GameMode.Dialogue);
         story = new Story(dialogueToUse.text);
 
+        // ✅ SUPPORT DES KNOTS : Si un Knot de départ est spécifié
+        if (!string.IsNullOrEmpty(startKnot))
+        {
+            story.ChoosePathString(startKnot);
+            Debug.Log($"[DialogueManager] Démarrage au Knot: {startKnot}");
+        }
+
         // Synchroniser avec les variables globales
         if (DialogueVariables != null)
         {
@@ -146,37 +167,32 @@ public class DialogueManager : MonoBehaviour
         InjectVar("score", GameState.quizScore);
         InjectVar("signatures_total", GameState.signatures);
 
-        // Variables de quiz (version explicite pour éviter les erreurs)
-        InjectVar("question_1", GameState.question_1);
-        InjectVar("reponse_1", GameState.reponse_1);
-        InjectVar("explication_q1", GameState.explication_q1);
-        InjectVar("question_2", GameState.question_2);
-        InjectVar("reponse_2", GameState.reponse_2);
-        InjectVar("explication_q2", GameState.explication_q2);
-        InjectVar("question_3", GameState.question_3);
-        InjectVar("reponse_3", GameState.reponse_3);
-        InjectVar("explication_q3", GameState.explication_q3);
+        // Variables de quiz
+        for (int i = 1; i <= 17; i++)
+        {
+            InjectVar($"question_{i}", typeof(GameState).GetField($"question_{i}")?.GetValue(null));
+            InjectVar($"reponse_{i}", typeof(GameState).GetField($"reponse_{i}")?.GetValue(null));
+            InjectVar($"explication_q{i}", typeof(GameState).GetField($"explication_q{i}")?.GetValue(null));
+        }
 
         // Afficher le panneau
         if (dialoguePanel != null)
         {
             dialoguePanel.SetActive(true);
         }
-        else
-        {
-            Debug.LogError("[DialogueManager] dialoguePanel non assigné !");
-        }
 
         LoadNextLines();
     }
 
+    // =========================================================================
+    // GESTION DES VARIABLES INK
+    // =========================================================================
     private void InjectVar(string varName, object value)
     {
         if (value == null || story == null) return;
 
         try
         {
-            // Conversion automatique des types C# vers Ink
             if (value is bool boolValue)
             {
                 story.variablesState[varName] = new BoolValue(boolValue);
@@ -195,18 +211,17 @@ public class DialogueManager : MonoBehaviour
             }
             else
             {
-                // Tentative de cast direct pour les autres types
                 story.variablesState[varName] = (Ink.Runtime.Object)value;
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[DialogueManager] Impossible d'injecter '{varName}': {e.Message}");
+            Debug.LogWarning($"[DialogueManager] Erreur injection variable '{varName}': {e.Message}");
         }
     }
 
     // =========================================================================
-    // GESTION DES LIGNES ET CHOIX
+    // GESTION DES LIGNES ET KNOTS
     // =========================================================================
     private void LoadNextLines()
     {
@@ -263,6 +278,9 @@ public class DialogueManager : MonoBehaviour
             UpdatePortrait(speaker);
             waitingForSpace = true;
             choicesVisible = false;
+
+            // Vérifier les tags spéciaux (carte, etc.)
+            CheckSpecialTags();
         }
         else
         {
@@ -277,6 +295,27 @@ public class DialogueManager : MonoBehaviour
             else
             {
                 End();
+            }
+        }
+    }
+
+    private void CheckSpecialTags()
+    {
+        if (story == null || mapScreen == null) return;
+
+        foreach (string tag in story.currentTags)
+        {
+            string cleanTag = tag.Trim().ToLower();
+
+            if (cleanTag == "show_map")
+            {
+                mapScreen.SetActive(true);
+                Debug.Log("[DialogueManager] Carte affichée");
+            }
+            else if (cleanTag == "hide_map")
+            {
+                mapScreen.SetActive(false);
+                Debug.Log("[DialogueManager] Carte masquée");
             }
         }
     }
@@ -297,6 +336,7 @@ public class DialogueManager : MonoBehaviour
             {
                 GameObject btn = Instantiate(choicePrefab, choicesContainer);
                 TMP_Text choiceText = btn.GetComponentInChildren<TMP_Text>();
+
                 if (choiceText != null)
                 {
                     choiceText.text = choice.text;
@@ -346,7 +386,6 @@ public class DialogueManager : MonoBehaviour
             dialoguePanel.SetActive(false);
         }
 
-        // Sauvegarder les variables
         if (DialogueVariables != null && story != null)
         {
             DialogueVariables.StopListening(story);

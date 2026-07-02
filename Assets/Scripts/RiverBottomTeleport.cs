@@ -191,6 +191,14 @@ public class RiverBottomTeleport : MonoBehaviour
     public void HandleWaterSceneTransition()
     {
         Debug.Log("[RiverBottomTeleport] HandleWaterSceneTransition called - returning to surface");
+
+        WaterSceneTransition sceneTransition = FindObjectOfType<WaterSceneTransition>();
+        if (sceneTransition != null)
+        {
+            sceneTransition.OnExitWater();
+            Debug.Log("[RiverBottomTeleport] ✓ Synced WaterSceneTransition exit state");
+        }
+
         // Désactive le deep swim
         CharacterAnimator animator = FindObjectOfType<CharacterAnimator>();
         if (animator != null)

@@ -145,6 +145,13 @@ public class RiverTeleport : MonoBehaviour
     {
         Debug.Log("[RiverTeleport] HandleWaterSceneTransition called - activating deep swim mode");
 
+        WaterSceneTransition sceneTransition = FindObjectOfType<WaterSceneTransition>();
+        if (sceneTransition != null)
+        {
+            sceneTransition.OnEnterWater();
+            Debug.Log("[RiverTeleport] ✓ Synced WaterSceneTransition enter state");
+        }
+
         // Activer le deep swim
         CharacterAnimator animator = FindObjectOfType<CharacterAnimator>();
         if (animator != null)
