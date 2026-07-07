@@ -176,6 +176,9 @@ public class FoodItem : MonoBehaviour
                 // Désactive au lieu de détruire → permet la repousse au jour suivant
                 gameObject.SetActive(false);
             }
+
+            if (TutorialManager.Instance != null)
+    TutorialManager.Instance.OnPlayerAte();
         }
     }
 

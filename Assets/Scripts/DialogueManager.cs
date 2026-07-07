@@ -23,6 +23,9 @@ public class DialogueManager : MonoBehaviour
     public Transform choicesContainer;
     public GameObject choicePrefab;
 
+    [Header("Gamepad")]
+    [SerializeField] private GamepadButtonListNavigator choicesNavigator;
+
     [Header("Map System")]
     public GameObject mapScreen; // Assigne ton GameObject de carte ici
 
@@ -93,13 +96,15 @@ public class DialogueManager : MonoBehaviour
 
     void Update()
     {
-        if (waitingForSpace && !choicesVisible && Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        SyncInputModeVar();
+
+        if (waitingForSpace && !choicesVisible && InputHelper.SubmitPressed())
         {
             ShowNextLine();
         }
 
         // Fermeture manuelle de la carte avec ÉCHAP
-        if (mapScreen != null && mapScreen.activeSelf && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (mapScreen != null && mapScreen.activeSelf && InputHelper.PausePressed())
         {
             mapScreen.SetActive(false);
         }
@@ -166,6 +171,7 @@ public class DialogueManager : MonoBehaviour
         InjectVar("current_day", GameState.currentDay);
         InjectVar("score", GameState.quizScore);
         InjectVar("signatures_total", GameState.signatures);
+        InjectVar("gamepad", InputHelper.IsGamepadPreferred());
 
         // Variables de quiz
         for (int i = 1; i <= 17; i++)
@@ -182,6 +188,13 @@ public class DialogueManager : MonoBehaviour
         }
 
         LoadNextLines();
+    }
+
+    private void SyncInputModeVar()
+    {
+        if (story == null) return;
+
+        InjectVar("gamepad", InputHelper.IsGamepadPreferred());
     }
 
     // =========================================================================
@@ -218,6 +231,29 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogWarning($"[DialogueManager] Erreur injection variable '{varName}': {e.Message}");
         }
+    }
+
+    public void SetBoolVariable(string varName, bool value)
+    {
+        if (story == null) return;
+
+        try
+        {
+            story.variablesState[varName] = new BoolValue(value);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[DialogueManager] Erreur injection bool '{varName}': {e.Message}");
+        }
+    }
+
+    public bool IsDialogueOpen => story != null;
+
+    public void FinishDialogueNow()
+    {
+        if (story == null) return;
+
+        End();
     }
 
     // =========================================================================
@@ -363,6 +399,12 @@ public class DialogueManager : MonoBehaviour
                     });
                 }
             }
+
+            if (choicesNavigator != null)
+            {
+                choicesNavigator.gameObject.SetActive(true);
+                choicesNavigator.ResetSelection();
+            }
         }
     }
 
@@ -389,6 +431,11 @@ public class DialogueManager : MonoBehaviour
         if (DialogueVariables != null && story != null)
         {
             DialogueVariables.StopListening(story);
+        }
+
+        if (choicesNavigator != null)
+        {
+            choicesNavigator.gameObject.SetActive(false);
         }
 
         GameState.Reset();

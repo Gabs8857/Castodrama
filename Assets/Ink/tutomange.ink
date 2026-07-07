@@ -4,7 +4,7 @@
 // trigger 4
 Par ici, la salade est de saison #speaker: Simone #portrait: Simone
 {gamepad:
-Goûte, clique X #speaker: Simone #portrait: Simone
+Goûte, clique A #speaker: Simone #portrait: Simone
 -else:
 Goûte, clique F #speaker: Simone #portrait: Simone
 }

@@ -46,6 +46,12 @@ public class PlayerController : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (GameState.Mode != GameMode.Free)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         moveInput = ReadMoveInput();
         if (moveInput.sqrMagnitude > 1f)
         {
@@ -57,6 +63,12 @@ public class PlayerController : MonoBehaviour
     {
         if (rb == null)
         {
+            return;
+        }
+
+        if (GameState.Mode != GameMode.Free)
+        {
+            rb.linearVelocity = Vector2.zero;
             return;
         }
 

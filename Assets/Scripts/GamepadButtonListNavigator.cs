@@ -40,6 +40,11 @@ public class GamepadButtonListNavigator : MonoBehaviour
 
     private void OnEnable()
     {
+        RefreshButtons();
+    }
+
+    public void RefreshButtons()
+    {
         if (autoDetectChildren)
         {
             buttons.Clear();

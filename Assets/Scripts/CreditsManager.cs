@@ -16,6 +16,7 @@ public class CreditsManager : MonoBehaviour
 
     [Header("Navigation")]
     public string menuSceneName = "Menu"; // retour au menu
+    public string riverSceneName = "Rivière"; // raccourci P vers la rivière
 
     private RectTransform rectTransform;
     private bool scrolling = false;
@@ -33,6 +34,12 @@ public class CreditsManager : MonoBehaviour
 
     void Update()
     {
+        if (Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
+        {
+            GoToRiver();
+            return;
+        }
+
         // Echap ou Espace pour retourner au menu
         if (InputHelper.PausePressed() || InputHelper.SubmitPressed())
         {
@@ -59,5 +66,10 @@ public class CreditsManager : MonoBehaviour
     public void GoToMenu()
     {
         SceneManager.LoadScene(menuSceneName);
+    }
+
+    public void GoToRiver()
+    {
+        SceneManager.LoadScene(riverSceneName);
     }
 }

@@ -160,6 +160,9 @@ public class RiverTeleport : MonoBehaviour
             Debug.Log("[RiverTeleport] ✓ Started deep swimming animation");
         }
 
+        if (TutorialManager.Instance != null)
+            TutorialManager.Instance.OnTutorialActionCompleted("tutonage_completed", 3);
+
         if (fondRivièreObject != null)
         {
             fondRivièreObject.SetActive(true);

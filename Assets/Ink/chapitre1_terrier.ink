@@ -12,7 +12,7 @@
 //-> tutomange
 //-> tutofin
 VAR marcher_completed=false
-VAR gamepad=true
+VAR gamepad=false
 VAR carte=false
 
 VAR tutomarche_completed=false
@@ -20,11 +20,17 @@ VAR tutocarte_completed=false
 VAR tutonage_completed=false
 VAR tutomange_completed=false
 VAR tutohalo_completed=false
+VAR disableHaloLight = false
+VAR fintuto = false
 
 // junior est couché, trigger1 autour de junior au demaragge1
 // pour lancer le dialogue immediatement
 === tutodebut ===
-Junior, approche-toi s'il te plait.
+{gamepad:
+Junior, approche-toi s'il te plait. (appuie sur le bouton A)
+-else:
+Junior, approche-toi s'il te plait. (appuie sur la barre espace)
+}
 #speaker:Socrate #portrait:Socrate
 Bien Père ! #speaker:Junior #portrait:Junior
 ->tutomarche
@@ -37,6 +43,7 @@ Pour bouger, utilise le joystick gauche #speaker: Simone #portrait: Simone
 -else:
 Pour bouger, utilise les touches ZQSD ou les flêches #speaker: Simone #portrait: Simone
 }
+~ tutomarche_completed=true
 ->END
 
 // VAR globals.ink // a mettre quand trigger
@@ -44,7 +51,7 @@ Pour bouger, utilise les touches ZQSD ou les flêches #speaker: Simone #portrait
 
 === tutocarte === // dans trigger2
 //junior s'est levé et a marché vers ses parents
-~ tutomarche_completed=true
+
 Nous, Castors, vivons la nuit. 
 Si nous avons une mauvaise vue, nous la compensons par d'autres sens bien plus développés comme le toucher et l'odorat, et une grande connaissance de notre environnement.
 ~carte=true
@@ -73,6 +80,7 @@ Tu en découvriras d'autres lors de tes explorations
 
 Junior, sortons bouloter ! #portrait: Simone #speaker: Simone
 ~tutohalo_completed=true
+~disableHaloLight = true
 ->END
 
 
@@ -92,19 +100,36 @@ Pour faire surface ou plonger, clique E #speaker: Simone #portrait: Simone
 // trigger 4
 Par ici, la salade est de saison #speaker: Simone #portrait: Simone
 {gamepad:
-Goûte, clique X #speaker: Simone #portrait: Simone
+Goûte, clique A #speaker: Simone #portrait: Simone
 -else:
 Goûte, clique F #speaker: Simone #portrait: Simone
 }
 // collider pas trop grand pour ne pas aller trop loin, avec un trigger qui demande de rentrer
 ~tutomange_completed=true // il faudrait verifier qu'il clique pour dire "completed"
--> END
 
-
-=== tutofin ===
+// === tutoreparation ===
+// //Explication réparation Barrage
+// Tu vois ces arbres, en plus de l'écorce qui délicieuse,
+// Tu peux récupérrer les branches poour réparer ton barrage.
+// Tu peux aussi te servir de la boue aussi en appuyant sur
+// {gamepad:
+// en appuyant sur  RB 
+// -else:
+// en appuyant sur G
+// }
+->END
+===tutofin===
+// ->END
 //trigger 5  pas trop grand pour ne pas aller trop loin, avec un trigger qui demande de rentrer qui invite a rentrer
 // et aussi trigger 6 si on rentre dans le terrier avec le meme dialogue (la il faudra reflechir car il faudra detruire les deux triggers ou bien invalider les dialogues avec es variables)
 Hâtons nous vers le terrier.
 Regarde le cadran en haut a gauche, le soleil se lève bientôt.
 Demain sera une grande nuit pour le peuple castor !
+~fintuto=true
 -> END
+
+// === tutotwitch ===
+// //explication de la partiie chat twitch à ses parents
+// J'ai envie de partager notre belle forêt avec mes viewers sur la platforme twitch
+// En plus, ils pourront réagir enn direct via le chat
+// ->END

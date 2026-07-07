@@ -348,6 +348,9 @@ public class StreamQuestionUI : MonoBehaviour
         if (dataSender != null)
             dataSender.SendDayResults(GameState.currentDay);
 
+        if (TutorialManager.Instance != null)
+            TutorialManager.Instance.OnQuizAnswered();
+
         onDone?.Invoke();
         onDone = null;
     }

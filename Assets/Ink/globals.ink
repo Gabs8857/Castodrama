@@ -1,5 +1,5 @@
 VAR marcher_completed=false
-VAR gamepad=true
+VAR gamepad=false
 VAR carte=false
 
 VAR tutomarche_completed=false

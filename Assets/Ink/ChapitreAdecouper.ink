@@ -1,5 +1,5 @@
 VAR marcher_completed=false
-VAR gamepad=true
+VAR gamepad=false
 VAR carte=false
 
 -> debut
@@ -62,7 +62,7 @@ Pour faire surface ou plonger, clique E #speaker: Simone #portrait: Simone
 // trigger trigger
 Par ici, la salade est de saison #speaker: Simone #portrait: Simone
 {gamepad:
-Goûte, clique X #speaker: Simone #portrait: Simone
+Goûte, clique A #speaker: Simone #portrait: Simone
 -else:
 Goûte, clique F #speaker: Simone #portrait: Simone
 }

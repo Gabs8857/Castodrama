@@ -42,7 +42,7 @@ public class TopDownCameraFollow : MonoBehaviour
     private float rotationSmoothTime = 0.1f;
 
     [SerializeField]
-    private float smoothTime = 0.12f;
+    private float smoothTime = 0f;
 
     [SerializeField]
     private float zoomSpeed = 6f;

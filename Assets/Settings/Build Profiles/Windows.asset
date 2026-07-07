@@ -18,14 +18,16 @@ MonoBehaviour:
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
     rid: 6799025071421391139
-  m_OverrideGlobalSceneList: 0
+  m_OverrideGlobalSceneList: 1
   m_Scenes:
-  - m_enabled: 1
-    m_path: "Assets/Scenes/Rivi\xE8re.unity"
   - m_enabled: 1
     m_path: Assets/Scenes/Menu.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Credits.unity
+    m_path: Assets/Scenes/TUTO.unity
+  - m_enabled: 1
+    m_path: "Assets/Scenes/Rivi\xE8re.unity"
+  - m_enabled: 1
+    m_path: Assets/Scenes/CreditScene.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

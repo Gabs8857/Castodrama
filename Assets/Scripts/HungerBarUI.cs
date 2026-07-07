@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+// using ink.Runtime;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,6 +16,9 @@ public class HungerBarUI : MonoBehaviour
     [SerializeField] private Image hungerBarFill;
     [SerializeField] private Image hungerBarBackground;
     [SerializeField] private Sprite defaultBackgroundSprite;
+
+    // [Header("CONFIGURATION DU DIALOGUE")]
+    // [SerializeField] private TextAsset inkJSON;
 
     private static Sprite runtimeRingSprite;
     private bool hungerUpdateLogged = false;

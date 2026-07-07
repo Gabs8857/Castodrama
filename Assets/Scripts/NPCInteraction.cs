@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Ink.Runtime;
+using System.Collections;
 
 [RequireComponent(typeof(Collider2D))]
 public class NPCInteraction : MonoBehaviour
@@ -18,23 +19,32 @@ public class NPCInteraction : MonoBehaviour
     [Tooltip("Variable Ink requise pour activer ce trigger (ex: tutomarche_done)")]
     [SerializeField] private string gateVariable = "";
 
+    private Collider2D interactionCollider;
     private bool dejaLance = false;
 
     // =========================================================================
     void Awake()
     {
-        Collider2D col = GetComponent<Collider2D>();
-        if (col == null)
+        interactionCollider = GetComponent<Collider2D>();
+        if (interactionCollider == null)
         {
             Debug.LogError($"{name}: ❌ AUCUN COLLIDER2D TROUVÉ ! Ajoute un Box Collider 2D et coche Is Trigger.", this);
             return;
         }
 
-        if (!col.isTrigger)
+        if (!interactionCollider.isTrigger)
         {
             Debug.LogWarning($"{name}: ⚠️ Le Collider2D doit être en mode 'Is Trigger' !", this);
-            col.isTrigger = true;
+            interactionCollider.isTrigger = true;
         }
+
+        UpdateTriggerState();
+    }
+
+    // =========================================================================
+    void Update()
+    {
+        UpdateTriggerState();
     }
 
     // =========================================================================
@@ -70,8 +80,25 @@ public class NPCInteraction : MonoBehaviour
         Debug.Log($"[NPCInteraction] {name}: ✅ Lancement du dialogue '{inkJSON.name}', Knot: '{startKnot}'");
         dejaLance = true;
 
-        // Appel avec le Knot spécifié
-        DialogueManager.Instance.StartDialogue(inkJSON, startKnot);
+        if (GameState.Mode != GameMode.Free)
+        {
+            Debug.Log($"[NPCInteraction] {name}: GameState occupé ({GameState.Mode}) → fermeture puis lancement différé.");
+
+            if (DialogueManager.Instance.IsDialogueOpen)
+            {
+                DialogueManager.Instance.FinishDialogueNow();
+            }
+
+            StartCoroutine(LaunchDialogueNextFrame(inkJSON, startKnot));
+        }
+        else
+        {
+            // Appel avec le Knot spécifié
+            DialogueManager.Instance.StartDialogue(inkJSON, startKnot);
+        }
+
+        if (TutorialManager.Instance != null)
+            TutorialManager.Instance.OnPlayerInteracted();
 
         // Optionnel : Détruit le trigger après utilisation
         Destroy(gameObject);
@@ -80,6 +107,12 @@ public class NPCInteraction : MonoBehaviour
     // =========================================================================
     bool Autorise()
     {
+        return Autorise(true);
+    }
+
+    // =========================================================================
+    bool Autorise(bool logErrors)
+    {
         if (string.IsNullOrWhiteSpace(gateVariable))
         {
             return true;
@@ -87,14 +120,16 @@ public class NPCInteraction : MonoBehaviour
 
         if (DialogueManager.Instance?.DialogueVariables?.variables == null)
         {
-            Debug.LogError("[NPCInteraction] ❌ DialogueVariables ou variables est NULL !");
+            if (logErrors)
+                Debug.LogError("[NPCInteraction] ❌ DialogueVariables ou variables est NULL !");
             return false;
         }
 
         var vars = DialogueManager.Instance.DialogueVariables.variables;
         if (!vars.TryGetValue(gateVariable, out var value))
         {
-            Debug.LogError($"[NPCInteraction] ❌ Variable '{gateVariable}' introuvable !");
+            if (logErrors)
+                Debug.LogError($"[NPCInteraction] ❌ Variable '{gateVariable}' introuvable !");
             return false;
         }
 
@@ -109,4 +144,35 @@ public class NPCInteraction : MonoBehaviour
     // =========================================================================
     // Pour compatibilité avec DayManager
     public void SetDayDialogue(int day) { }
+
+    // =========================================================================
+    void UpdateTriggerState()
+    {
+        if (interactionCollider == null)
+        {
+            return;
+        }
+
+        bool triggerAutorise = string.IsNullOrWhiteSpace(gateVariable) || Autorise(false);
+        if (interactionCollider.enabled != triggerAutorise)
+        {
+            interactionCollider.enabled = triggerAutorise;
+        }
+    }
+
+    private IEnumerator LaunchDialogueNextFrame(TextAsset dialogAsset, string knotName)
+    {
+        yield return null;
+
+        if (DialogueManager.Instance == null)
+        {
+            Debug.LogError($"[NPCInteraction] {name}: DialogueManager.Instance est NULL au lancement différé !");
+            yield break;
+        }
+
+        if (GameState.Mode != GameMode.Free)
+            GameState.Reset();
+
+        DialogueManager.Instance.StartDialogue(dialogAsset, knotName);
+    }
 }
