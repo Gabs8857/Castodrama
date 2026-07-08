@@ -258,8 +258,10 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = index;
 
+        string displayText = GetStepText(index);
+
         if (tutorialText != null)
-            tutorialText.text = stepTexts[index];
+            tutorialText.text = displayText;
 
         if (stepCounterText != null)
             stepCounterText.text = (index + 1) + " / " + stepTexts.Length;
@@ -273,7 +275,25 @@ public class TutorialManager : MonoBehaviour
         if (pressEPrompt != null)
             pressEPrompt.SetActive(index == 1 || index == 4);
 
-        Log("Étape " + (index + 1) + " affichée : " + stepTexts[index]);
+        Log("Étape " + (index + 1) + " affichée : " + displayText);
+    }
+
+    string GetStepText(int index)
+    {
+        if (!InputHelper.IsGamepadPreferred())
+            return stepTexts[index];
+
+        switch (index)
+        {
+            case 0:
+                return "🕹️  Utilise le stick gauche pour te déplacer.";
+            case 1:
+                return "💬  Approche-toi du personnage et appuie sur <b>A</b> pour lui parler.";
+            case 4:
+                return "🌙  Reviens voir le personnage et appuie sur <b>A</b> pour voir ton bilan.";
+            default:
+                return stepTexts[index];
+        }
     }
 
     void FinishTutorial()

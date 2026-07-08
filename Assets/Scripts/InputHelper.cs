@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 /// <summary>
 /// Centralise la détection clavier + manette pour toutes les actions du jeu.
@@ -16,8 +17,43 @@ using UnityEngine.InputSystem;
 /// </summary>
 public static class InputHelper
 {
+    private enum InputDeviceKind
+    {
+        Unknown,
+        Keyboard,
+        Gamepad,
+    }
+
+    private static InputDeviceKind lastInputDevice = InputDeviceKind.Unknown;
+
+    static InputHelper()
+    {
+        InputSystem.onEvent += OnInputEvent;
+    }
+
+    private static void OnInputEvent(InputEventPtr eventPtr, InputDevice device)
+    {
+        if (!eventPtr.IsA<StateEvent>() && !eventPtr.IsA<DeltaStateEvent>())
+            return;
+
+        if (device is Gamepad)
+        {
+            lastInputDevice = InputDeviceKind.Gamepad;
+        }
+        else if (device is Keyboard || device is Mouse)
+        {
+            lastInputDevice = InputDeviceKind.Keyboard;
+        }
+    }
+
     public static bool IsGamepadPreferred()
     {
+        if (lastInputDevice == InputDeviceKind.Gamepad)
+            return true;
+
+        if (lastInputDevice == InputDeviceKind.Keyboard)
+            return false;
+
         return Gamepad.current != null;
     }
 

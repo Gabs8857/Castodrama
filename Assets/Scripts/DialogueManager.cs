@@ -27,14 +27,14 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private GamepadButtonListNavigator choicesNavigator;
 
     [Header("Map System")]
-    public GameObject mapScreen; // Assigne ton GameObject de carte ici
+    public GameObject mapScreen;
 
     // =========================================================================
     // INK FILES
     // =========================================================================
     [Header("Ink Configuration")]
-    public TextAsset dialoguesInk; // Peut être vide (on utilise startKnot)
-    public TextAsset globalsJSON;  // Fichier avec les variables globales
+    public TextAsset dialoguesInk;
+    public TextAsset globalsJSON;
 
     [Header("Character Colors")]
     public string[] characterColors = new string[]
@@ -60,6 +60,11 @@ public class DialogueManager : MonoBehaviour
 
     public bool dialogueFinished { get; private set; } = false;
     public bool dialogueBlocked { get; private set; } = false;
+    private TopDownHunger tutohaloHungerSystem;
+    private bool tutohaloHungerLockActive = false;
+
+    // Pour le debug gamepad : valeur injectée au dernier StartDialogue
+    private bool lastInjectedGamepad = false;
 
     // =========================================================================
     // INITIALISATION
@@ -72,13 +77,9 @@ public class DialogueManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
             if (globalsJSON != null)
-            {
                 DialogueVariables = new DialogueVariables(globalsJSON);
-            }
             else
-            {
                 Debug.LogWarning("[DialogueManager] globalsJSON non assigné !");
-            }
         }
         else
         {
@@ -89,9 +90,7 @@ public class DialogueManager : MonoBehaviour
     void Start()
     {
         if (dialoguePanel != null)
-        {
             dialoguePanel.SetActive(false);
-        }
     }
 
     void Update()
@@ -99,30 +98,22 @@ public class DialogueManager : MonoBehaviour
         SyncInputModeVar();
 
         if (waitingForSpace && !choicesVisible && InputHelper.SubmitPressed())
-        {
             ShowNextLine();
-        }
 
-        // Fermeture manuelle de la carte avec ÉCHAP
         if (mapScreen != null && mapScreen.activeSelf && InputHelper.PausePressed())
-        {
             mapScreen.SetActive(false);
-        }
     }
 
     // =========================================================================
-    // DÉMARRAGE DES DIALOGUES (AVEC SUPPORT DES KNOTS)
+    // DÉMARRAGE DES DIALOGUES
     // =========================================================================
-    public void EnterDialogueMode(TextAsset inkJSON)
-    {
-        StartDialogue(inkJSON);
-    }
+    public void EnterDialogueMode(TextAsset inkJSON) => StartDialogue(inkJSON);
 
     /// <summary>
-    /// Démarre un dialogue avec un fichier Ink et un Knot de départ optionnel
+    /// Démarre un dialogue Ink avec knot optionnel.
+    /// IMPORTANT : gamepad est injecté AVANT ChoosePathString pour que les
+    /// conditions {gamepad:...} dans Ink soient évaluées avec la bonne valeur.
     /// </summary>
-    /// <param name="inkJSON">Fichier Ink à utiliser</param>
-    /// <param name="startKnot">Nom du Knot de départ (ex: "tutodebut")</param>
     public void StartDialogue(TextAsset inkJSON = null, string startKnot = null)
     {
         dialogueBlocked = false;
@@ -150,30 +141,28 @@ public class DialogueManager : MonoBehaviour
         choicesVisible = false;
         lastChosenText = "";
 
-        // Démarrer la Story
         GameState.Set(GameMode.Dialogue);
         story = new Story(dialogueToUse.text);
 
-        // ✅ SUPPORT DES KNOTS : Si un Knot de départ est spécifié
-        if (!string.IsNullOrEmpty(startKnot))
-        {
-            story.ChoosePathString(startKnot);
-            Debug.Log($"[DialogueManager] Démarrage au Knot: {startKnot}");
-        }
+        // ✅ FIX : Injecter gamepad ET les variables AVANT ChoosePathString
+        // pour que les conditions {gamepad:...} soient évaluées correctement
+        // dès le premier Continue() — même si le knot fait ->autreKnot en chaîne.
+        bool isGamepad = InputHelper.IsGamepadPreferred();
+        lastInjectedGamepad = isGamepad;
 
-        // Synchroniser avec les variables globales
-        if (DialogueVariables != null)
-        {
-            DialogueVariables.StartListening(story);
-        }
+        Debug.Log("═══════════════════════════════════════");
+        Debug.Log($"[DialogueManager] StartDialogue → knot='{startKnot ?? "(root)"}'");
+        Debug.Log($"[DialogueManager] 🎮 gamepad = {isGamepad}");
+        Debug.Log($"[DialogueManager]    Gamepad.current != null : {Gamepad.current != null}");
+        Debug.Log($"[DialogueManager]    IsGamepadPreferred()    : {isGamepad}");
+        Debug.Log("═══════════════════════════════════════");
 
-        // Injecter les variables de jeu
+        // 🔑 Variables injectées AVANT ChoosePathString
+        InjectVar("gamepad", isGamepad);
         InjectVar("current_day", GameState.currentDay);
         InjectVar("score", GameState.quizScore);
         InjectVar("signatures_total", GameState.signatures);
-        InjectVar("gamepad", InputHelper.IsGamepadPreferred());
 
-        // Variables de quiz
         for (int i = 1; i <= 17; i++)
         {
             InjectVar($"question_{i}", typeof(GameState).GetField($"question_{i}")?.GetValue(null));
@@ -181,20 +170,51 @@ public class DialogueManager : MonoBehaviour
             InjectVar($"explication_q{i}", typeof(GameState).GetField($"explication_q{i}")?.GetValue(null));
         }
 
-        // Afficher le panneau
-        if (dialoguePanel != null)
+        // Tutohalo spécial
+        if (!string.IsNullOrEmpty(startKnot) &&
+            string.Equals(startKnot.Trim(), "tutohalo", System.StringComparison.OrdinalIgnoreCase))
+            ApplyTutohaloHungerLock();
+
+        // ChoosePathString APRÈS l'injection
+        if (!string.IsNullOrEmpty(startKnot))
         {
-            dialoguePanel.SetActive(true);
+            try
+            {
+                story.ChoosePathString(startKnot);
+                Debug.Log($"[DialogueManager] ✓ ChoosePathString('{startKnot}') OK");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[DialogueManager] ❌ ChoosePathString('{startKnot}') échoué : {e.Message}");
+            }
         }
+
+        // Synchroniser avec les variables globales APRÈS ChoosePathString
+        if (DialogueVariables != null)
+            DialogueVariables.StartListening(story);
+
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(true);
 
         LoadNextLines();
     }
 
+    /// <summary>
+    /// Synchro gamepad chaque frame — met à jour la variable Ink si elle change.
+    /// Log uniquement quand la valeur change (pas de spam).
+    /// </summary>
     private void SyncInputModeVar()
     {
         if (story == null) return;
 
-        InjectVar("gamepad", InputHelper.IsGamepadPreferred());
+        bool isGamepad = InputHelper.IsGamepadPreferred();
+
+        if (isGamepad != lastInjectedGamepad)
+        {
+            Debug.Log($"[DialogueManager] 🎮 SyncInputModeVar : gamepad {lastInjectedGamepad} → {isGamepad} (device changé en cours de dialogue)");
+            lastInjectedGamepad = isGamepad;
+            InjectVar("gamepad", isGamepad);
+        }
     }
 
     // =========================================================================
@@ -204,32 +224,41 @@ public class DialogueManager : MonoBehaviour
     {
         if (value == null || story == null) return;
 
+        // Vérifie que la variable existe dans la Story avant d'injecter
+        // (évite le spam de warnings pour les variables de quiz absentes du fichier tuto)
         try
         {
+            var _ = story.variablesState[varName];
+        }
+        catch
+        {
+            // Variable non déclarée dans ce fichier Ink — on ignore silencieusement
+            return;
+        }
+
+        try
+        {
+            // ✅ Ink attend les types C# natifs (bool, int, float, string),
+            // PAS les wrappers BoolValue/IntValue/etc. — c'est ce qui causait
+            // "Invalid value passed to VariableState"
             if (value is bool boolValue)
             {
-                story.variablesState[varName] = new BoolValue(boolValue);
+                story.variablesState[varName] = boolValue;
+                if (varName == "gamepad")
+                    Debug.Log($"[DialogueManager] ✓ InjectVar('gamepad', {boolValue}) — OK");
             }
             else if (value is int intValue)
-            {
-                story.variablesState[varName] = new IntValue(intValue);
-            }
+                story.variablesState[varName] = intValue;
             else if (value is float floatValue)
-            {
-                story.variablesState[varName] = new FloatValue(floatValue);
-            }
+                story.variablesState[varName] = floatValue;
             else if (value is string stringValue)
-            {
-                story.variablesState[varName] = new StringValue(stringValue);
-            }
+                story.variablesState[varName] = stringValue;
             else
-            {
                 story.variablesState[varName] = (Ink.Runtime.Object)value;
-            }
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[DialogueManager] Erreur injection variable '{varName}': {e.Message}");
+            Debug.LogWarning($"[DialogueManager] ⚠ Erreur injection '{varName}': {e.Message}");
         }
     }
 
@@ -239,12 +268,39 @@ public class DialogueManager : MonoBehaviour
 
         try
         {
-            story.variablesState[varName] = new BoolValue(value);
+            story.variablesState[varName] = value; // bool natif, pas BoolValue
+            Debug.Log($"[DialogueManager] SetBoolVariable('{varName}', {value})");
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[DialogueManager] Erreur injection bool '{varName}': {e.Message}");
+            Debug.LogWarning($"[DialogueManager] Erreur SetBoolVariable '{varName}': {e.Message}");
         }
+    }
+
+    /// <summary>
+    /// Lit une variable globale Ink (persistante via DialogueVariables),
+    /// utilisable même quand aucun dialogue n'est en cours.
+    /// Utile pour conditionner des triggers/objets dans la scène (ex: "fintuto").
+    /// </summary>
+    public bool GetGlobalBool(string varName)
+    {
+        if (DialogueVariables == null || DialogueVariables.variables == null)
+        {
+            Debug.LogWarning("[DialogueManager] DialogueVariables non initialisé.");
+            return false;
+        }
+
+        if (!DialogueVariables.variables.TryGetValue(varName, out Ink.Runtime.Object val))
+        {
+            Debug.LogWarning($"[DialogueManager] Variable '{varName}' introuvable dans DialogueVariables.");
+            return false;
+        }
+
+        if (val is Ink.Runtime.BoolValue boolVal)
+            return boolVal.value;
+
+        Debug.LogWarning($"[DialogueManager] Variable '{varName}' n'est pas un bool (type: {val.GetType()}).");
+        return false;
     }
 
     public bool IsDialogueOpen => story != null;
@@ -252,12 +308,44 @@ public class DialogueManager : MonoBehaviour
     public void FinishDialogueNow()
     {
         if (story == null) return;
-
+        Debug.Log("[DialogueManager] FinishDialogueNow() appelé");
         End();
     }
 
+    private void ApplyTutohaloHungerLock()
+    {
+        if (tutohaloHungerLockActive) return;
+
+        if (tutohaloHungerSystem == null)
+            tutohaloHungerSystem = FindObjectOfType<TopDownHunger>();
+
+        if (tutohaloHungerSystem == null)
+        {
+            Debug.LogWarning("[DialogueManager] TopDownHunger introuvable pour tutohalo.");
+            return;
+        }
+
+        tutohaloHungerSystem.SetHunger(30f);
+        tutohaloHungerSystem.SetHungerDrainPaused(true);
+        tutohaloHungerLockActive = true;
+        Debug.Log("[DialogueManager] tutohalo → faim fixée à 30 et décrue bloquée.");
+    }
+
+    private void ReleaseTutohaloHungerLock()
+    {
+        if (!tutohaloHungerLockActive || tutohaloHungerSystem == null)
+        {
+            tutohaloHungerLockActive = false;
+            return;
+        }
+
+        tutohaloHungerSystem.SetHungerDrainPaused(false);
+        tutohaloHungerLockActive = false;
+        Debug.Log("[DialogueManager] tutohalo → décrue faim réactivée.");
+    }
+
     // =========================================================================
-    // GESTION DES LIGNES ET KNOTS
+    // GESTION DES LIGNES
     // =========================================================================
     private void LoadNextLines()
     {
@@ -275,6 +363,9 @@ public class DialogueManager : MonoBehaviour
             {
                 pendingLines.Add(line.Trim());
                 pendingSpeakers.Add(speaker);
+
+                // 🔍 Debug : affiche chaque ligne lue avec la valeur gamepad au moment de la lecture
+                Debug.Log($"[DialogueManager] 📖 Ligne lue (gamepad={lastInjectedGamepad}): \"{line.Trim()}\"");
             }
 
             if (story.currentChoices.Count > 0) break;
@@ -283,17 +374,11 @@ public class DialogueManager : MonoBehaviour
         lastChosenText = "";
 
         if (pendingLines.Count > 0)
-        {
             ShowNextLine();
-        }
         else if (story.currentChoices.Count > 0)
-        {
             ShowChoices();
-        }
         else
-        {
             End();
-        }
     }
 
     private void ShowNextLine()
@@ -307,31 +392,21 @@ public class DialogueManager : MonoBehaviour
             pendingSpeakers.RemoveAt(0);
 
             if (dialogueText != null)
-            {
                 dialogueText.text = FormatLine(line);
-            }
 
             UpdatePortrait(speaker);
             waitingForSpace = true;
             choicesVisible = false;
-
-            // Vérifier les tags spéciaux (carte, etc.)
             CheckSpecialTags();
         }
         else
         {
             if (story.currentChoices.Count > 0)
-            {
                 ShowChoices();
-            }
             else if (story.canContinue)
-            {
                 LoadNextLines();
-            }
             else
-            {
                 End();
-            }
         }
     }
 
@@ -342,7 +417,6 @@ public class DialogueManager : MonoBehaviour
         foreach (string tag in story.currentTags)
         {
             string cleanTag = tag.Trim().ToLower();
-
             if (cleanTag == "show_map")
             {
                 mapScreen.SetActive(true);
@@ -361,50 +435,41 @@ public class DialogueManager : MonoBehaviour
         choicesVisible = true;
         waitingForSpace = false;
 
-        if (choicesContainer != null)
+        if (choicesContainer == null) return;
+
+        foreach (Transform child in choicesContainer)
+            Destroy(child.gameObject);
+
+        foreach (Choice choice in story.currentChoices)
         {
-            foreach (Transform child in choicesContainer)
-            {
-                Destroy(child.gameObject);
-            }
+            GameObject btn = Instantiate(choicePrefab, choicesContainer);
+            TMP_Text choiceText = btn.GetComponentInChildren<TMP_Text>();
+            if (choiceText != null) choiceText.text = choice.text;
 
-            foreach (Choice choice in story.currentChoices)
-            {
-                GameObject btn = Instantiate(choicePrefab, choicesContainer);
-                TMP_Text choiceText = btn.GetComponentInChildren<TMP_Text>();
+            int choiceIndex = choice.index;
+            string chosenText = choice.text;
 
-                if (choiceText != null)
+            Button button = btn.GetComponent<Button>();
+            if (button != null)
+            {
+                button.onClick.AddListener(() =>
                 {
-                    choiceText.text = choice.text;
-                }
+                    lastChosenText = chosenText;
+                    story.ChooseChoiceIndex(choiceIndex);
 
-                int choiceIndex = choice.index;
-                string chosenText = choice.text;
+                    foreach (Transform c in choicesContainer)
+                        Destroy(c.gameObject);
 
-                Button button = btn.GetComponent<Button>();
-                if (button != null)
-                {
-                    button.onClick.AddListener(() =>
-                    {
-                        lastChosenText = chosenText;
-                        story.ChooseChoiceIndex(choiceIndex);
-
-                        foreach (Transform c in choicesContainer)
-                        {
-                            Destroy(c.gameObject);
-                        }
-
-                        choicesVisible = false;
-                        LoadNextLines();
-                    });
-                }
+                    choicesVisible = false;
+                    LoadNextLines();
+                });
             }
+        }
 
-            if (choicesNavigator != null)
-            {
-                choicesNavigator.gameObject.SetActive(true);
-                choicesNavigator.ResetSelection();
-            }
+        if (choicesNavigator != null)
+        {
+            choicesNavigator.gameObject.SetActive(true);
+            choicesNavigator.ResetSelection();
         }
     }
 
@@ -413,36 +478,24 @@ public class DialogueManager : MonoBehaviour
     // =========================================================================
     private void End()
     {
-        if (dialogueText != null)
-        {
-            dialogueText.text = "";
-        }
+        Debug.Log("[DialogueManager] End() → dialogue terminé");
 
-        if (portraitImage != null)
-        {
-            portraitImage.gameObject.SetActive(false);
-        }
-
-        if (dialoguePanel != null)
-        {
-            dialoguePanel.SetActive(false);
-        }
+        if (dialogueText != null) dialogueText.text = "";
+        if (portraitImage != null) portraitImage.gameObject.SetActive(false);
+        if (dialoguePanel != null) dialoguePanel.SetActive(false);
 
         if (DialogueVariables != null && story != null)
-        {
             DialogueVariables.StopListening(story);
-        }
 
         if (choicesNavigator != null)
-        {
             choicesNavigator.gameObject.SetActive(false);
-        }
 
         GameState.Reset();
+        ReleaseTutohaloHungerLock();
         story = null;
-
         dialogueFinished = true;
-        Debug.Log("[DialogueManager] Dialogue terminé");
+
+        Debug.Log("[DialogueManager] ✓ Dialogue terminé — GameState reset");
     }
 
     // =========================================================================
@@ -455,11 +508,8 @@ public class DialogueManager : MonoBehaviour
         foreach (string tag in story.currentTags)
         {
             if (tag.Trim().StartsWith("speaker:"))
-            {
                 return tag.Trim().Substring("speaker:".Length).Trim();
-            }
         }
-
         return "";
     }
 
@@ -504,9 +554,7 @@ public class DialogueManager : MonoBehaviour
         {
             string[] parts = entry.Split('=');
             if (parts.Length == 2 && parts[0].Trim() == name.Trim())
-            {
                 return parts[1].Trim();
-            }
         }
         return "#FFFFFF";
     }

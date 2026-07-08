@@ -24034,9 +24034,7 @@ MonoBehaviour:
   characterNames:
   - Castor
   - LauraMusque
-  characterSprites:
-  - {fileID: 3884105601831245096, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
-  - {fileID: -7214435466733486317, guid: a1af486373404404fb462627ec0450d3, type: 3}
+  characterSprites: []
   choicesContainer: {fileID: 1785096470}
   choicePrefab: {fileID: 1292566221231316446, guid: b7584098471b70c498713fe93c5927d3, type: 3}
   choicesNavigator: {fileID: 0}
@@ -150423,7 +150421,7 @@ Transform:
   m_GameObject: {fileID: 394322998}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12, y: 0, z: 0}
+  m_LocalPosition: {x: 206.13, y: 6.7, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

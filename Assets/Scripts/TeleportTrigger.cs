@@ -178,6 +178,12 @@ public class TeleportTrigger : MonoBehaviour
 
     private void Teleport(Transform target)
     {
+        TeleportCameraController cameraController = GetCameraController();
+        if (cameraController != null)
+        {
+            cameraController.PrepareTeleport(destination);
+        }
+
         Vector3 destinationPosition = destination.position;
 
         CharacterController cc = target.GetComponent<CharacterController>();
@@ -188,6 +194,10 @@ public class TeleportTrigger : MonoBehaviour
 
             cc.enabled = true;
             HandleSceneTransition();
+            if (cameraController != null)
+            {
+                cameraController.FinalizeTeleport(destination);
+            }
             return;
         }
 
@@ -204,11 +214,19 @@ public class TeleportTrigger : MonoBehaviour
             Physics2D.SyncTransforms();
 
             HandleSceneTransition();
+            if (cameraController != null)
+            {
+                cameraController.FinalizeTeleport(destination);
+            }
             return;
         }
 
         target.SetPositionAndRotation(destinationPosition, copyDestinationRotation ? destination.rotation : target.rotation);
         HandleSceneTransition();
+        if (cameraController != null)
+        {
+            cameraController.FinalizeTeleport(destination);
+        }
     }
 
     private void HandleSceneTransition()
@@ -219,5 +237,20 @@ public class TeleportTrigger : MonoBehaviour
         {
             sceneTransition.HandleTeleportToDestination(destination);
         }
+    }
+
+    private TeleportCameraController GetCameraController()
+    {
+        Camera camera = Camera.main;
+        if (camera != null)
+        {
+            TeleportCameraController controller = camera.GetComponent<TeleportCameraController>();
+            if (controller != null)
+            {
+                return controller;
+            }
+        }
+
+        return FindObjectOfType<TeleportCameraController>();
     }
 }

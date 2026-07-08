@@ -31,17 +31,17 @@ Junior, approche-toi s'il te plait. (appuie sur le bouton A)
 -else:
 Junior, approche-toi s'il te plait. (appuie sur la barre espace)
 }
-#speaker:Socrate #portrait:Socrate
-Bien Père ! #speaker:Junior #portrait:Junior
+#speaker:Socrate
+Bien Père ! #speaker:Junior
 ->tutomarche
 ->END
 
 
 === tutomarche ===
 {gamepad:
-Pour bouger, utilise le joystick gauche #speaker: Simone #portrait: Simone
+Pour bouger, utilise le joystick gauche #speaker: Simone
 -else:
-Pour bouger, utilise les touches ZQSD ou les flêches #speaker: Simone #portrait: Simone
+Pour bouger, utilise les touches ZQSD ou les flêches #speaker: Simone
 }
 ~ tutomarche_completed=true
 ->END
@@ -73,12 +73,12 @@ Les verts indiquent les herbes, les tons jaunes, les arbres, dont nous reconnais
 // le halo de junior passe au jaune
 Mère, Pére, que se passe-t-il ?
 
-Junior, dans le jeu comme dans la vie, il y a des priorités. #portrait: Socrate #speaker: Socrate
-Le halo qui t'entoure est une aide pour te déplacer dans le noir, il signale aussi ton humeur.  #portrait: Simone #speaker: Simone
-En vert, tout va bien, en jaune : il fait faim !  #portrait: Socrate #speaker: Socrate
+Junior, dans le jeu comme dans la vie, il y a des priorités.  
+Le halo qui t'entoure est une aide pour te déplacer dans le noir, il signale aussi ton humeur.   
+En vert, tout va bien, en jaune : il fait faim !   
 Tu en découvriras d'autres lors de tes explorations 
 
-Junior, sortons bouloter ! #portrait: Simone #speaker: Simone
+Junior, sortons bouloter ! 
 ~tutohalo_completed=true
 ~disableHaloLight = true
 ->END
@@ -87,22 +87,23 @@ Junior, sortons bouloter ! #portrait: Simone #speaker: Simone
 === tutonage ===
 // trigger 3 sortie du terrier, faire surface, manger
 {gamepad:
-Pour faire surface ou plonger, clique B #speaker: Simone #portrait: Simone
+Pour faire surface ou plonger, clique B #speaker: Simone
 -else:
-Pour faire surface ou plonger, clique E #speaker: Simone #portrait: Simone
+Pour faire surface ou plonger, clique E #speaker: Simone
 }
 ~tutonage_completed=true // il faudrait verifier qu'il clique ou qu'il est avancé pour dire "completed"
 // mettre Simone dans les herbes
+
 -> END
 
 
 === tutomange ===
 // trigger 4
-Par ici, la salade est de saison #speaker: Simone #portrait: Simone
+Par ici, la salade est de saison #speaker: Simone 
 {gamepad:
-Goûte, clique A #speaker: Simone #portrait: Simone
+Goûte, clique A #speaker: Simone 
 -else:
-Goûte, clique F #speaker: Simone #portrait: Simone
+Goûte, clique F #speaker: Simone 
 }
 // collider pas trop grand pour ne pas aller trop loin, avec un trigger qui demande de rentrer
 ~tutomange_completed=true // il faudrait verifier qu'il clique pour dire "completed"

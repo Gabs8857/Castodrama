@@ -39,7 +39,7 @@ public class MainMenu : MonoBehaviour
         if (tutoPanel != null)
             tutoPanel.SetActive(true);
         else
-            SceneManager.LoadSceneAsync("Rivière");
+            SceneManager.LoadSceneAsync("TUTO");
     }
 
     public void GoToTuto()
@@ -53,7 +53,7 @@ public class MainMenu : MonoBehaviour
     {
         PlayerPrefs.SetInt("debug_mode", 0);
         PlayerPrefs.Save();
-        SceneManager.LoadSceneAsync("Rivière");
+        SceneManager.LoadSceneAsync("TUTO");
     }
 
     public void CloseTutoPanel()

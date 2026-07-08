@@ -29,6 +29,7 @@ public class TopDownHunger : MonoBehaviour
 
     private bool hasStarved = false;
     private int starveCount = 0;
+    private bool hungerDrainPaused = false;
 
     public float MaxHunger => maxHunger;
     public float CurrentHunger => currentHunger;
@@ -36,7 +37,7 @@ public class TopDownHunger : MonoBehaviour
     public int StarveCount => starveCount;
     private void Update()
     {
-        if (drainPerSecond <= 0f)
+        if (drainPerSecond <= 0f || hungerDrainPaused)
         {
             return;
         }
@@ -127,6 +128,11 @@ public class TopDownHunger : MonoBehaviour
     public void AddHunger(float amount)
     {
         SetHunger(currentHunger + amount);
+    }
+
+    public void SetHungerDrainPaused(bool paused)
+    {
+        hungerDrainPaused = paused;
     }
 
     /// <summary>
