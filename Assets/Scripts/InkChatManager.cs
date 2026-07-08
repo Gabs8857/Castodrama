@@ -17,7 +17,7 @@ public class InkChatManager : MonoBehaviour
     {
         if (inkJSON == null)
         {
-            Debug.LogError("❌ Ink JSON NULL");
+            // Debug.LogError("❌ Ink JSON NULL");
             return;
         }
 
@@ -26,7 +26,7 @@ public class InkChatManager : MonoBehaviour
 
         if (chatManager == null)
         {
-            Debug.LogError("❌ ChatManager introuvable");
+            // Debug.LogError("❌ ChatManager introuvable");
             return;
         }
 
@@ -60,12 +60,12 @@ public class InkChatManager : MonoBehaviour
             {
                 chatManager.AddMessage(text);
 
-                Debug.Log("CHAT : " + text);
+                // Debug.Log("CHAT : " + text);
             }
 
             yield return new WaitForSeconds(delay);
         }
 
-        Debug.Log("✅ Fin Ink Chat");
+        // Debug.Log("✅ Fin Ink Chat");
     }
 }

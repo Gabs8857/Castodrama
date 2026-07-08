@@ -217096,8 +217096,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 349.99994, y: -204.99995}
-  m_SizeDelta: {x: 170.5, y: 387.9346}
+  m_AnchoredPosition: {x: 349.50006, y: -200.2114}
+  m_SizeDelta: {x: 170, y: 383.146}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1184912555
 MonoBehaviour:
@@ -221464,7 +221464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e144b914ecffb74fb94d9da4940d09e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InkChatManager
-  inkJSON: {fileID: 4900000, guid: 29bd3165314ac5f489e28da6b70c0d52, type: 3}
+  inkJSON: {fileID: 4900000, guid: b1708041503ca8247845bb0fe2a1e524, type: 3}
   delay: 4
   chatManager: {fileID: 2046584464}
 --- !u!4 &1242525834
@@ -230515,6 +230515,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82970a1ea678fe74f9cbbe61522be3f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatsUIManager
+  viewersText: {fileID: 0}
+  signaturesText: {fileID: 0}
+  signaturesProgressBar: {fileID: 0}
 --- !u!114 &1350595012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -240378,8 +240381,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -9.9362}
-  m_SizeDelta: {x: 177.8, y: 328.6275}
+  m_AnchoredPosition: {x: 2.0059, y: 3.0619965}
+  m_SizeDelta: {x: 181.8118, y: 302.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1473522041
 MonoBehaviour:
@@ -279975,6 +279978,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4db3f270b1ca96a4793e2b22b357edae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  tutorialPanel: {fileID: 0}
+  tutorialText: {fileID: 0}
+  stepCounterText: {fileID: 0}
+  pressEPrompt: {fileID: 0}
+  progressBar: {fileID: 0}
+  dayNightCycle: {fileID: 0}
+  player: {fileID: 0}
+  tutoInkJSON: {fileID: 0}
+  gameSceneName: "Rivi\xE8re"
+  debugLogs: 1
 --- !u!1 &1846446768
 GameObject:
   m_ObjectHideFlags: 0
@@ -282673,7 +282686,7 @@ RectTransform:
   m_GameObject: {fileID: 1891235792}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.9, y: 1, z: 1}
+  m_LocalScale: {x: 0.97, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1473522040}
@@ -289788,10 +289801,10 @@ RectTransform:
   - {fileID: 1207703252}
   m_Father: {fileID: 1184912554}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMin: {x: 1, y: 0.09878006}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 5, y: 1.2}
+  m_AnchoredPosition: {x: -2.215, y: 0}
+  m_SizeDelta: {x: 2.785, y: 0.92760086}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1975022334
 MonoBehaviour:
