@@ -6,7 +6,7 @@ using UnityEngine;
 //   - globalIndex   : numéro global de la question (1-17)
 //   - streamQuestionUI : référence au StreamQuestionUI de la scène
 
-public class QuizZone : MonoBehaviour
+public class Quizzone : MonoBehaviour
 {
     [Header("Question associée")]
     [Tooltip("Nom du knot dans Quiz.ink (ex: j1_q1, j2_q4, j3_q2...)")]

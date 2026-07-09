@@ -13,7 +13,7 @@ public static class TopDownBootstrap
     private const string DangerZoneName = "ZoneDanger";
     private const string DangerBarName = "DangerBar";
     private const string HungerBarName = "HungerBar";
-    private static readonly string[] GameSceneNames = new string[] { "Rivière", "TUTO" }; // ✅ Scènes où le bootstrap agit
+    private static readonly string[] GameSceneNames = new string[] { "Rivière", "TUTO","PreFIN" }; // ✅ Scènes où le bootstrap agit
     private static readonly Color PlayerBrown = new Color(0.45f, 0.25f, 0.1f, 1f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

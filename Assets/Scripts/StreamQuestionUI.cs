@@ -14,6 +14,10 @@ public class StreamQuestionUI : MonoBehaviour
 {
     [Header("Ink — Quiz (fichier unique)")]
     [SerializeField] private TextAsset quizInk;
+    
+    [Header ("INK Chat")]
+    [SerializeField] private TextAsset chatInk;
+    [SerializeField] private TextAsset KnotInk;
 
     [Header("UI")]
     [SerializeField] private GameObject questionPanel;
@@ -72,6 +76,7 @@ public class StreamQuestionUI : MonoBehaviour
     /// navigation des toggles) pour éviter qu'un A destiné à cocher une case
     /// ne déclenche Valider par accident.
     /// </summary>
+    /// 
     private void HandleGamepadButtons()
     {
         if (Gamepad.current == null) return;
@@ -109,6 +114,7 @@ public class StreamQuestionUI : MonoBehaviour
 
         GameState.Set(GameMode.Question);
         ShowQuestion();
+        OpenChoices();
     }
 
     public void ForceFinish()
@@ -138,10 +144,10 @@ public class StreamQuestionUI : MonoBehaviour
         }
 
         questionText.text = currentText.Trim();
-        questionPanel.SetActive(true);
-        choicePanel.SetActive(false);
-        replyButton.gameObject.SetActive(true);
-        validateButton.gameObject.SetActive(false);
+        //questionPanel.SetActive(true);
+        choicePanel.SetActive(true);
+        //replyButton.gameObject.SetActive(true);
+        validateButton.gameObject.SetActive(true);
     }
 
     private void OpenChoices()

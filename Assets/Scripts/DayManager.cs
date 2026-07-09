@@ -92,9 +92,9 @@ public class DayManager : MonoBehaviour
             player.transform.position = worldSpawnPoint.position;
 
         // Réinitialiser toutes les zones de quiz — true pour inclure les zones désactivées
-        QuizZone[] zones = FindObjectsOfType<QuizZone>(true);
+        Quizzone[] zones = FindObjectsOfType<Quizzone>(true);
         Debug.Log("[DayManager] Reset de " + zones.Length + " zones pour le jour " + GameState.currentDay);
-        foreach (QuizZone zone in zones)
+        foreach (Quizzone zone in zones)
             zone.ResetZone();
 
         if (GameState.grassSpawner != null)

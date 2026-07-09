@@ -16,7 +16,7 @@ PlayerSettings:
   productName: Castodrama
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
-  m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_SplashScreenBackgroundColor: {r: 0.3647059, g: 0.6431373, b: 0.47450984, a: 1}
   m_ShowUnitySplashScreen: 1
   m_ShowUnitySplashLogo: 0
   m_SplashScreenOverlayOpacity: 1
@@ -44,11 +44,9 @@ PlayerSettings:
     duration: 2.701
   - logo: {fileID: 4943638262153848675, guid: 96fa4807e10e6cd46b901c6f06cf0720, type: 3}
     duration: 2
-  - logo: {fileID: -7214435466733486317, guid: a1af486373404404fb462627ec0450d3, type: 3}
+  - logo: {fileID: -7504770171343419489, guid: 8b4477cb67f7acf47a3efd2732d88c68, type: 3}
     duration: 2
   - logo: {fileID: 3884105601831245096, guid: 62f5745f26f0a80478117d8a5b1ba93c, type: 3}
-    duration: 2
-  - logo: {fileID: 0}
     duration: 2
   m_VirtualRealitySplashScreen: {fileID: 2800000, guid: fc39d692c1b8b49489355861031708e8, type: 3}
   m_HolographicTrackingLossScreen: {fileID: 0}
@@ -157,7 +155,6 @@ PlayerSettings:
   bundleVersion: 1.0
   preloadedAssets:
   - {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  - {fileID: -1890186584336590131, guid: 777856ad7fc91a34eaca3b4147e4956a, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -432,7 +429,10 @@ PlayerSettings:
   m_BuildTargetGroupLightmapSettings: []
   m_BuildTargetGroupLoadStoreDebugModeSettings: []
   m_BuildTargetNormalMapEncoding: []
-  m_BuildTargetDefaultTextureCompressionFormat: []
+  m_BuildTargetDefaultTextureCompressionFormat:
+  - serializedVersion: 3
+    m_BuildTarget: WebGL
+    m_Formats: 05000000
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1

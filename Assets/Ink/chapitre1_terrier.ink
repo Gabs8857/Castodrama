@@ -13,7 +13,6 @@
 //-> tutofin
 VAR marcher_completed=false
 VAR gamepad=false
-VAR carte=false
 
 VAR tutomarche_completed=false
 VAR tutocarte_completed=false
@@ -54,12 +53,15 @@ Pour bouger, utilise les touches ZQSD ou les flêches #speaker: Simone
 
 Nous, Castors, vivons la nuit. 
 Si nous avons une mauvaise vue, nous la compensons par d'autres sens bien plus développés comme le toucher et l'odorat, et une grande connaissance de notre environnement.
-~carte=true
 // la carte s'affiche sur l'ecran
+#show_tutocarte
 C'est comme une carte mentale qui ressemblerait à ça.
 
 Approche-toi, regarde ces points lumineux. 
+
+
 ~tutocarte_completed=true
+#hide_tutocarte
 -> END
 
 // VAR globals.ink // a mettre quand trigger

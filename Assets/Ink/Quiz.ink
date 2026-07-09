@@ -24,88 +24,87 @@ INCLUDE globals.ink
 -> j1_q1
 
 === j1_q1 ===
-~ question_1 = "Connaissance du castor ! 4 pattes, 1 queue plate genre écaillée, je suis, je suis..."
-j1q1: Connaissance du castor ! 4 pattes, 1 queue plate genre écaillée, je suis, je suis...
-+ Un mammifère ? # correct
-    -> drama_j1q1
-+ Un poisson ?
-    -> drama_j1q1
-+ Drama ?
-    -> drama_j1q1
-+ jsp
-    -> drama_j1q1
+~ question_1 = "Connaissance"
+4 pattes, 1 queue plate genre écaillée, je suis...
++ [Un mammifère !] # correct
+    -> END
++ [Un poisson !]
+    -> END
++ [Drama !]
+    -> END
++ [jsp...]
+    -> END
 
-=== drama_j1q1 ===
-drama_j1q1: Hélàs, je suis goûteux. Pour qu'on puisse me bouloter en période de Carême, le Vatican décide que je suis un...
-+ Mammifère ?
+=== drama_j1_q1 ===
+~ question_2 = "Drama_Connaissance"
+Hélàs, je suis goûteux. Pour qu'on me boulote lors du Carême, le Vatican a dit que j'étais un...
++ [Mammifère] # correct
     -> END
-+ Poisson ?
++ [Poisson]
     -> END
-+ Rongeur ?
++ [Rongeur]
     -> END
-+ tu peux répéter ?
++ [Tu peux répéter ?]
     -> END
 
 === j1_q2 ===
-~ question_2 = "Tu l'auras compris bouffi, on m'a chassé pour"
-j1q2: Tu l'auras compris bouffi, on m'a chassé pour
-+ ma fourrure # correct
+~ question_3 = "Chasse"
+Tu l'auras compris, on m'a chassé pour...
++ [Ma fourrure] # correct
     -> END
-+ ma viande
++ [Ma viande] # correct
     -> END
-+ mon odeur sensuelle
++ [Mon odeur sensuelle] # correct
     -> END
-+ jsp
++ [Jsp...]
     -> END
 
 === j1_q3 ===
-~ question_3 = "Heureusement, aujourd'hui je suis protégé"
-j1q3: Heureusement, aujourd'hui je suis protégé
-+ contre la pluie
-    -> drama_j1q3
-+ par la loi
-    -> drama_j1q3
-+ Drama
-    -> drama_j1q3
+~ question_4 = "Protection"
+Aujourd'hui je suis protégé...
++ [Contre la pluie.]
+    -> END
++ [Par la loi.]   # correct
+    -> END
++ Drama !
+    -> END
 
-=== drama_j1q3 ===
-drama_j1q4: Mes barrages aussi sont protégés !
-+ Certains me copie par biomimétisme
+=== drama_j1_q3 ===
+~ question_5 = "Drama_Protection"
+Mes barrages aussi sont protégés !
++ [Certains les copient.]    # correct //par biomimétisme
     -> END
-+ Hors-la-loi, d'autres les détruisent
++ [D'autres les détruisent.] # correct //Hors-la-loi
     -> END
-+ Que fait Robin-des-Bois ?
-    -> END
-+ jsp
++ [Que fait Robin-des-Bois ?]
     -> END
 
 === j1_q4 ===
-~ question_4 = "On dit de moi que je suis une espèce \"clé de voute\" en créant..."
+~ question_6 = "CleDeVoute"
 On dit de moi que je suis une espèce "clé de voute" en créant...
-+ des habitats pour d'autres espèces # correct
++ [Des habitats pour d'autres.] # correct
     -> END
-+ de petits univers humides
++ [De petits univers humides.] # correct
     -> END
-+ en streamant en musique
++ [En streamant en musique.]
     -> END
 
 === j1_q5 ===
-~ question_5 = "En Europe, mon logis est plutôt ?"
-En Europe, mon logis est plutôt ?
-+ un terrier
-    -> drama_q5
-+ une hutte # correct
-    -> drama_q5
-+ Drama
-    -> drama_q5
+~ question_7 = "Logis"
+En Europe, mon logis est plutôt...
++ [Un terrier.] # correct
+    -> END
++ [Une hutte.]
+    -> END
++ [Drama !]
+    -> END
 
-=== drama_q5 ===
-Drama: Mes cousins d'Amérique préfèrent les huttes. Prendront-il ma place ?
-+ Jsp, mais les scientifiques veillent
+=== drama_j1_q5 ===
+~ question_8 = "DramaLogis"
+Mes cousins d'Amérique préfèrent les huttes. Prendront-il ma place ?
++ [Jsp, mais des observateurs veillent.] # correct
     -> END
-+ Cool, nous nous reproduirons
-    -> END
-+ Pffu, l'avenir le dira.
++ [Cool, nous nous reproduirons.] // pas de repro possible
     -> END
 
 // ============================================================
@@ -216,6 +215,8 @@ Question 6 jour 3 ?
     -> END
 + Réponse B
     -> END
+    
+    
 
 // ============================================================
 //  FIN COMMUNE
